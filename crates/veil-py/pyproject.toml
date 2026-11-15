@@ -1,0 +1,16 @@
+[build-system]
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "pii-veil"
+version = "0.1.0"
+description = "Ultrafast Rust-powered PII & Secret anonymizer and reversible vault for Python LLMs, FastAPI, and Data Pipelines."
+readme = "../../README.md"
+requires-python = ">=3.9"
+license = { text = "MIT OR Apache-2.0" }
+keywords = ["pii", "anonymization", "llm", "dlp", "presidio-alternative", "rust"]
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+module-name = "pii_veil"

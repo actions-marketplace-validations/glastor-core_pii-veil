@@ -1,0 +1,20 @@
+[package]
+name = "pii-veil-ffi"
+description = "C-ABI Foreign Function Interface (FFI) bindings for pii-veil-core (for Go cgo, C/C++, Zig, and .NET)."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+categories.workspace = true
+readme = "../../README.md"
+
+[lib]
+name = "pii_veil_ffi"
+crate-type = ["rlib", "cdylib", "staticlib"]
+
+[dependencies]
+pii-veil-core = { path = "../veil-core", version = "0.1.0" }
+serde_json = { workspace = true }

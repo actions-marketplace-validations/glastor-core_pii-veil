@@ -1,0 +1,35 @@
+# Rust / Cargo
+/target/
+**/*.rs.bk
+*.pdb
+
+# Node.js / napi-rs
+node_modules/
+crates/veil-node/*.node
+crates/veil-node/dist/
+npm-debug.log*
+
+# Python / PyO3 / Maturin
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Local Vaults & Temp files
+*.vault
+*.enc
+.DS_Store
+Thumbs.db

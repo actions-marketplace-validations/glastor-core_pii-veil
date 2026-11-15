@@ -1,0 +1,74 @@
+name: CI & Multi-Market Release (crates.io + PyPI + npm)
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+jobs:
+  rust-test:
+    name: Rust Core & CLI Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Run cargo test
+        run: cargo test --all-targets
+      - name: Run CLI Demo & Benchmark Smoke Test
+        run: |
+          cargo run --release -p pii-veil-cli -- demo
+          cargo run --release -p pii-veil-cli -- bench --iterations 5000
+
+  publish-crates:
+    name: Publish to crates.io
+    needs: rust-test
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Publish pii-veil-core & pii-veil-cli
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          cargo publish -p pii-veil-core
+          sleep 15
+          cargo publish -p pii-veil-cli
+
+  publish-pypi:
+    name: Publish Python Wheel to PyPI (Maturin)
+    needs: rust-test
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: PyO3/maturin-action@v1
+        with:
+          working-directory: crates/veil-py
+          command: upload
+          args: --release --out dist --find-interpreter
+        env:
+          MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+
+  publish-npm:
+    name: Publish Node.js Addon to npm (napi-rs)
+    needs: rust-test
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: "https://registry.npmjs.org"
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build and publish @pii-veil/node
+        working-directory: crates/veil-node
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm install
+          npm run build
+          npm publish --access public

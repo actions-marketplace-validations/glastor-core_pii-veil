@@ -1,0 +1,19 @@
+[package]
+name = "pii-veil-core"
+description = "Ultrafast, deterministic, and reversible PII & secret anonymization engine for LLMs, logs, and SQL streams."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+categories.workspace = true
+readme = "../../README.md"
+
+[dependencies]
+aho-corasick = "1.1"
+regex = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }

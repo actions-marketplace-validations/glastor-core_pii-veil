@@ -1,0 +1,20 @@
+[package]
+name = "pii-veil-cli"
+description = "CLI tool for ultrafast, deterministic, and reversible PII & secret anonymization."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[[bin]]
+name = "veil"
+path = "src/main.rs"
+
+[dependencies]
+pii-veil-core = { path = "../veil-core", version = "0.1.0" }
+clap = { workspace = true }
+serde_json = { workspace = true }
