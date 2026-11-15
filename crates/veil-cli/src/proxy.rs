@@ -105,6 +105,19 @@ pub fn handle_client(
         reader.read_exact(&mut body_bytes)?;
     }
 
+    // Handle GET / or GET /index.html (Interactive DLP Proxy Dashboard)
+    if method.eq_ignore_ascii_case("GET") && (path == "/" || path == "/index.html") {
+        let html = DASHBOARD_HTML;
+        let resp = format!(
+            "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+            html.len(),
+            html
+        );
+        client.write_all(resp.as_bytes())?;
+        client.flush()?;
+        return Ok(());
+    }
+
     // Handle GET /health
     if method.eq_ignore_ascii_case("GET") && path == "/health" {
         let entries_count = vault_mutex.lock().map(|v| v.len()).unwrap_or(0);
@@ -349,6 +362,196 @@ fn restore_sse_json_value(val: &mut Value, restorer: &mut pii_veil_core::Streami
         _ => {}
     }
 }
+
+const DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GLASTOR® pii-veil — Live DLP & SSE Proxy Dashboard</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card: #131b2e;
+      --border: #23304d;
+      --accent: #38bdf8;
+      --emerald: #34d399;
+      --amber: #fbbf24;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 32px 20px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .container { max-width: 1080px; margin: 0 auto; }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .title-group h1 { margin: 0; font-size: 1.65rem; display: flex; align-items: center; gap: 10px; }
+    .title-group p { margin: 4px 0 0; color: var(--muted); font-size: 0.95rem; }
+    .badge {
+      background: rgba(52, 211, 153, 0.12);
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      color: var(--emerald);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .card h2 { margin-top: 0; font-size: 1.05rem; color: var(--accent); }
+    textarea {
+      width: 100%;
+      min-height: 105px;
+      background: #080c14;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+    .actions { display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: opacity 0.15s;
+    }
+    button:hover { opacity: 0.9; }
+    .btn-primary { background: var(--accent); color: #08101d; }
+    .btn-sse { background: var(--emerald); color: #061812; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    pre {
+      margin: 0;
+      background: #080c14;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.86rem;
+      min-height: 150px;
+    }
+    .tag-lock { color: var(--amber); }
+    .tag-unlock { color: var(--emerald); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="title-group">
+        <h1>🛡️ GLASTOR® <code>pii-veil</code> — DLP & SSE Proxy</h1>
+        <p>Sub-millisecond Reversible PII & Secret Anonymizer (Luhn, Mod-97 IBAN, Mod-23 DNI, Mod-11 CUIT/RUT)</p>
+      </div>
+      <div class="badge" id="vaultStatus">🟢 Proxy Online • Vault: 0 entidades</div>
+    </header>
+
+    <div class="card">
+      <h2>1️⃣ Prompt de Entrada (con PII, Tarjetas, IBAN, Documentos y Credenciales)</h2>
+      <textarea id="promptInput">Hola soporte, soy Martín Gómez (martin.gomez@fintech.io, CUIT 20-12345678-6, DNI 00000000T). Necesito pagar con mi tarjeta 4532-0151-1283-0366 o IBAN DE89 3704 0044 0532 0130 00 desde mi servidor postgres://admin:SuperSecret99@db.fintech.io:5432/prod usando mi clave sk-proj-99a8b7c6d5e4f3g2h1i0jklmnopqrst.</textarea>
+      <div class="actions">
+        <button class="btn-primary" onclick="sendRequest(false)">⚡ Probar Roundtrip JSON (/v1/chat/completions)</button>
+        <button class="btn-sse" onclick="sendRequest(true)">🌊 Probar Stream SSE en Tiempo Real (stream: true)</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2 class="tag-lock">🔒 2️⃣ Lo que ve el LLM (Prompt Sanitizado por <code>veil proxy</code>)</h2>
+        <pre id="sanitizedOut">Haz clic en uno de los botones superiores para interceptar y sanitizar el prompt...</pre>
+      </div>
+      <div class="card">
+        <h2 class="tag-unlock">🔓 3️⃣ Lo que recibe el Usuario (Restaurado por <code>Vault</code> / <code>StreamingRestorer</code>)</h2>
+        <pre id="restoredOut">La respuesta restaurada con los valores reales aparecerá aquí...</pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function refreshHealth() {
+      try {
+        const res = await fetch('/health');
+        const data = await res.json();
+        document.getElementById('vaultStatus').textContent =
+          `🟢 Proxy Online • Vault: ${data.vault_entries} entidades en sesión`;
+      } catch (_) {}
+    }
+
+    async function sendRequest(streamMode) {
+      const prompt = document.getElementById('promptInput').value;
+      const sanitizedEl = document.getElementById('sanitizedOut');
+      const restoredEl = document.getElementById('restoredOut');
+      sanitizedEl.textContent = 'Sanitizando...';
+      restoredEl.textContent = 'Restaurando...';
+
+      const payload = {
+        model: 'gpt-4o',
+        stream: streamMode,
+        messages: [{ role: 'user', content: prompt }]
+      };
+
+      const res = await fetch('/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Veil-Echo': 'true' },
+        body: JSON.stringify(payload)
+      });
+
+      if (streamMode) {
+        const sanitizedHeader = res.headers.get('X-Veil-Sanitized-Request') || '(Ver stream)';
+        try {
+          sanitizedEl.textContent = JSON.stringify(JSON.parse(sanitizedHeader), null, 2);
+        } catch (_) {
+          sanitizedEl.textContent = sanitizedHeader;
+        }
+        const text = await res.text();
+        restoredEl.textContent = text;
+      } else {
+        const data = await res.json();
+        try {
+          sanitizedEl.textContent = JSON.stringify(JSON.parse(data.veil_sanitized_prompt), null, 2);
+        } catch (_) {
+          sanitizedEl.textContent = data.veil_sanitized_prompt;
+        }
+        restoredEl.textContent = data.choices[0].message.content;
+      }
+      await refreshHealth();
+    }
+
+    refreshHealth();
+  </script>
+</body>
+</html>
+"#;
 
 #[cfg(test)]
 mod tests {
