@@ -186,15 +186,19 @@ enum Commands {
         vault_pass: Option<String>,
     },
 
-    /// Audit/scan text or files for PII and secrets without modifying them (CI/CD DLP check)
+    /// Audit/scan text, files, or directories for PII and secrets without modifying them (CI/CD DLP check)
     Scan {
-        /// Input text to scan (or reads from --file / STDIN)
+        /// Input text to scan (or reads from --file / --path / STDIN)
         #[arg(short, long)]
         text: Option<String>,
 
-        /// Path to file to scan
-        #[arg(short, long)]
+        /// Path to a file or directory to scan recursively
+        #[arg(short, long, visible_alias = "path")]
         file: Option<PathBuf>,
+
+        /// Comma-separated path substrings to exclude when scanning a directory (e.g. "examples,tests")
+        #[arg(long, default_value = "")]
+        exclude: String,
 
         /// Optional path to a `veil.json` policy file
         #[arg(short, long)]
@@ -255,6 +259,44 @@ enum Commands {
         #[arg(short, long, default_value_t = 10_000)]
         iterations: usize,
     },
+}
+
+fn collect_scannable_files(
+    root: &std::path::Path,
+    excludes: &[String],
+    out: &mut Vec<PathBuf>,
+) -> io::Result<()> {
+    const IGNORED_DIRS: &[&str] = &[
+        ".git",
+        "target",
+        "node_modules",
+        ".venv",
+        "venv",
+        "dist",
+        "build",
+    ];
+    for entry in fs::read_dir(root)? {
+        let entry = entry?;
+        let path = entry.path();
+        let path_str = path.to_string_lossy();
+        if excludes
+            .iter()
+            .any(|ex| !ex.is_empty() && path_str.contains(ex.as_str()))
+        {
+            continue;
+        }
+        if path.is_dir() {
+            if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
+                if IGNORED_DIRS.contains(&name) {
+                    continue;
+                }
+            }
+            collect_scannable_files(&path, excludes, out)?;
+        } else if path.is_file() {
+            out.push(path);
+        }
+    }
+    Ok(())
 }
 
 fn read_input(text: Option<String>, file: Option<PathBuf>) -> io::Result<String> {
@@ -443,12 +485,78 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Commands::Scan {
             text,
             file,
+            exclude,
             policy,
             json,
             fail_on_detect,
         } => {
-            let input = read_input(text, file)?;
             let engine = build_engine(CliMode::Placeholder, None, policy)?;
+            let excludes: Vec<String> = exclude
+                .split(',')
+                .map(|s| s.trim().to_string())
+                .filter(|s| !s.is_empty())
+                .collect();
+
+            if let Some(ref target_path) = file {
+                if target_path.is_dir() {
+                    let mut files = Vec::new();
+                    collect_scannable_files(target_path, &excludes, &mut files)?;
+                    files.sort();
+
+                    let mut total_spans = 0usize;
+                    let mut by_kind: BTreeMap<String, usize> = BTreeMap::new();
+                    let mut file_findings = Vec::new();
+
+                    for f in files {
+                        if let Ok(content) = fs::read_to_string(&f) {
+                            let spans = engine.scan(&content);
+                            if !spans.is_empty() {
+                                total_spans += spans.len();
+                                for s in &spans {
+                                    *by_kind.entry(s.kind.label().to_string()).or_insert(0) += 1;
+                                }
+                                file_findings.push(serde_json::json!({
+                                    "file": f.display().to_string(),
+                                    "spans_count": spans.len(),
+                                    "spans": spans,
+                                }));
+                            }
+                        }
+                    }
+
+                    if json {
+                        println!(
+                            "{}",
+                            serde_json::to_string_pretty(&serde_json::json!({
+                                "total_spans": total_spans,
+                                "by_kind": by_kind,
+                                "files": file_findings,
+                            }))?
+                        );
+                    } else if total_spans == 0 {
+                        println!(
+                            "✅ Clean: No PII or secrets detected across directory '{}'.",
+                            target_path.display()
+                        );
+                    } else {
+                        println!(
+                            "⚠️  Detected {} sensitive entity span(s) across {} file(s):",
+                            total_spans,
+                            file_findings.len()
+                        );
+                        for (kind, count) in by_kind {
+                            println!("   • {:<18} : {}", kind, count);
+                        }
+                    }
+
+                    if fail_on_detect && total_spans > 0 {
+                        process::exit(1);
+                    }
+                    return Ok(());
+                }
+            }
+
+            let input = read_input(text, file)?;
             let spans = engine.scan(&input);
 
             if json {

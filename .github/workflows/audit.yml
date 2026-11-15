@@ -1,0 +1,61 @@
+name: Security, SemVer & Binary Audit (GLASTOR® Core)
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  specter-semver-audit:
+    name: Specter — API Contract & SemVer Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run GLASTOR® Specter API Contract Verification
+        uses: glastor-core/specter@v1
+        continue-on-error: true
+
+  byte-gauge-binary-audit:
+    name: Byte-Gauge — Release Binary Hardening & Size Gatekeeper
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build release artifacts (veil CLI & libpii_veil_ffi)
+        run: cargo build --release --workspace
+      - name: Run GLASTOR® Byte-Gauge on target/release/veil
+        uses: glastor-core/byte-gauge@v1
+        with:
+          binary-path: "target/release/veil"
+        continue-on-error: true
+
+  nemesis-and-veil-dogfooding:
+    name: Nemesis SAST & pii-veil Self-Dogfooding DLP Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Run GLASTOR® Nemesis DevSecOps Audit
+        uses: glastor-core/nemesis@v1
+        continue-on-error: true
+      - name: Build veil CLI for Self-Dogfooding
+        run: cargo build --release -p pii-veil-cli
+      - name: Self-Dogfooding — Verify governance & CI configs contain zero leaked secrets
+        run: |
+          ./target/release/veil scan --file .github --fail-on-detect
+          ./target/release/veil scan --file Cargo.toml --fail-on-detect

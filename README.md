@@ -78,6 +78,17 @@ cd sdks/go
 go test -v ./...
 ```
 
+### 6. GitHub Action (`glastor-core/pii-veil@v1`)
+Use `pii-veil` as a sub-millisecond DLP gatekeeper in any GitHub Actions workflow:
+```yaml
+- name: 🛡️ PII & Secret DLP Audit
+  uses: glastor-core/pii-veil@v1
+  with:
+    path: "."
+    exclude: "examples,tests"
+    fail-on-detect: "true"
+```
+
 ---
 
 ## 📂 Production Examples (`examples/`)

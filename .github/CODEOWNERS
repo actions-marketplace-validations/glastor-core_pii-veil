@@ -10,6 +10,7 @@
 
 # [ INFRAESTRUCTURA DE CI/CD & WORKFLOWS ]
 .github/ @glastor-core @glastor-dev
+action.yml @glastor-core @glastor-dev
 Cargo.toml @glastor-core @glastor-dev
 Cargo.lock @glastor-core @glastor-dev
 

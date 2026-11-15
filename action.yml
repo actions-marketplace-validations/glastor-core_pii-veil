@@ -1,0 +1,66 @@
+name: "GLASTOR® pii-veil — Ultrafast PII & Secret DLP Gatekeeper"
+author: "GLASTOR® Core (@glastor-core)"
+description: "Sub-millisecond Rust DLP scanner that detects 18 PII & secret types (Luhn cards, Mod-97 IBAN, Regional IDs, DB URIs, API keys) in CI/CD."
+branding:
+  icon: "shield"
+  color: "blue"
+
+inputs:
+  path:
+    description: "File or directory path to scan recursively for PII and secrets."
+    required: false
+    default: "."
+  exclude:
+    description: "Comma-separated path substrings to exclude from scanning (e.g. 'examples,tests,README.md')."
+    required: false
+    default: ""
+  policy:
+    description: "Optional path to a declarative veil.json policy file."
+    required: false
+    default: ""
+  fail-on-detect:
+    description: "Fail the workflow step with exit code 1 if any PII or secret is detected ('true' or 'false')."
+    required: false
+    default: "true"
+  json-output:
+    description: "Emit scan findings as machine-readable JSON ('true' or 'false')."
+    required: false
+    default: "false"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Rust Toolchain (if veil binary is not cached)
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Build pii-veil CLI (veil)
+      shell: bash
+      run: |
+        cargo build --release --manifest-path "${{ github.action_path }}/Cargo.toml" -p pii-veil-cli
+
+    - name: Run pii-veil DLP Scan
+      shell: bash
+      env:
+        INPUT_PATH: ${{ inputs.path }}
+        INPUT_EXCLUDE: ${{ inputs.exclude }}
+        INPUT_POLICY: ${{ inputs.policy }}
+        INPUT_FAIL_ON_DETECT: ${{ inputs.fail-on-detect }}
+        INPUT_JSON_OUTPUT: ${{ inputs.json-output }}
+      run: |
+        VEIL_BIN="${{ github.action_path }}/target/release/veil"
+        ARGS=("scan" "--file" "${INPUT_PATH}")
+
+        if [ -n "${INPUT_EXCLUDE}" ]; then
+          ARGS+=("--exclude" "${INPUT_EXCLUDE}")
+        fi
+        if [ -n "${INPUT_POLICY}" ]; then
+          ARGS+=("--policy" "${INPUT_POLICY}")
+        fi
+        if [ "${INPUT_FAIL_ON_DETECT}" = "true" ]; then
+          ARGS+=("--fail-on-detect")
+        fi
+        if [ "${INPUT_JSON_OUTPUT}" = "true" ]; then
+          ARGS+=("--json")
+        fi
+
+        "${VEIL_BIN}" "${ARGS[@]}"

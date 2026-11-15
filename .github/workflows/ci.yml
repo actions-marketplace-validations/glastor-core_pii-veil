@@ -13,8 +13,19 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  vortex-orchestrator:
+    name: Vortex — Predictive CI & Benchmark Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run GLASTOR® Vortex Predictive Orchestrator
+        uses: glastor-core/vortex@v1
+        continue-on-error: true
+
   rust-ci:
-    name: Rust (Fmt, Clippy & Tests)
+    name: Rust (Fmt, Clippy, Tests & Bench Smoke)
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -25,12 +36,18 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
       - name: Check formatting
         run: cargo fmt --all -- --check
-      - name: Run Clippy
+      - name: Run Clippy (zero warnings enforced)
         run: cargo clippy --workspace --all-targets -- -D warnings
-      - name: Run Rust test suite
+      - name: Run Rust workspace test suite (veil-core, veil-cli, veil-ffi)
         run: cargo test --workspace
+      - name: Run CLI Demo & Benchmark Smoke Test
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cargo run --release -p pii-veil-cli -- demo
+          cargo run --release -p pii-veil-cli -- bench --iterations 5000
 
   go-sdk-ci:
     name: Go SDK & Rust MCP Bridge Integration
@@ -38,10 +55,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
       - uses: actions/setup-go@v5
         with:
           go-version: "1.22"
-      - name: Build veil CLI debug binary for MCP integration tests
+      - name: Build veil CLI binary for MCP integration tests
         run: cargo build -p pii-veil-cli
       - name: Run Go SDK unit & integration tests
         working-directory: sdks/go
