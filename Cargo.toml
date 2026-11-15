@@ -8,9 +8,9 @@ exclude = ["crates/veil-py", "crates/veil-node"]
 version = "0.1.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
-authors = ["Glastor <glastor.info@gmail.com>"]
-repository = "https://github.com/glastor-dev/pii-veil"
-homepage = "https://github.com/glastor-dev/pii-veil"
+authors = ["Andrés Antonio Cardoso <engineering@glastor.io>"]
+repository = "https://github.com/glastor-core/pii-veil"
+homepage = "https://github.com/glastor-core/pii-veil"
 keywords = ["pii", "anonymization", "dlp", "llm", "mcp"]
 categories = ["command-line-utilities", "text-processing", "cryptography"]
 

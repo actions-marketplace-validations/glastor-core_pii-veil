@@ -1,0 +1,44 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# GLASTOR® PII-VEIL - CODEOWNERS CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════════
+# Propósito: Definir la propiedad del código y protocolos de revisión.
+# Referencia: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+# ═══════════════════════════════════════════════════════════════════════════
+
+# [ GLOBAL MAINTAINERS ]
+* @glastor-core @glastor-dev
+
+# [ INFRAESTRUCTURA DE CI/CD & WORKFLOWS ]
+.github/ @glastor-core @glastor-dev
+Cargo.toml @glastor-core @glastor-dev
+Cargo.lock @glastor-core @glastor-dev
+
+# [ MOTOR CORE DLP, DETECTORES, VAULT CIFRADO & STREAMING ]
+crates/veil-core/ @glastor-core @glastor-dev
+crates/veil-core/src/detector.rs @glastor-core @glastor-dev
+crates/veil-core/src/strategy.rs @glastor-core @glastor-dev
+crates/veil-core/src/vault.rs @glastor-core @glastor-dev
+crates/veil-core/src/stream.rs @glastor-core @glastor-dev
+crates/veil-core/src/policy.rs @glastor-core @glastor-dev
+crates/veil-core/src/lib.rs @glastor-core @glastor-dev
+
+# [ CLI, SERVIDOR MCP & PROXY HTTP/SSE ]
+crates/veil-cli/ @glastor-core @glastor-dev
+crates/veil-cli/src/main.rs @glastor-core @glastor-dev
+crates/veil-cli/src/mcp.rs @glastor-core @glastor-dev
+crates/veil-cli/src/proxy.rs @glastor-core @glastor-dev
+
+# [ BINDINGS MULTI-MERCADO (C-ABI FFI, PYTHON, NODE.JS & GO SDK) ]
+crates/veil-ffi/ @glastor-core @glastor-dev
+crates/veil-py/ @glastor-core @glastor-dev
+crates/veil-node/ @glastor-core @glastor-dev
+sdks/go/ @glastor-core @glastor-dev
+examples/ @glastor-core @glastor-dev
+
+# [ GOBERNANZA & COMPLIANCE ]
+README.md @glastor-core @glastor-dev
+CHANGELOG.md @glastor-core @glastor-dev
+CONTRIBUTORS.md @glastor-core @glastor-dev
+CITATION.cff @glastor-core @glastor-dev
+LICENSE-MIT @glastor-core @glastor-dev
+LICENSE-APACHE @glastor-core @glastor-dev

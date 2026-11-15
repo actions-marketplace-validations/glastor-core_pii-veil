@@ -1,3 +1,3 @@
-module github.com/glastor-dev/pii-veil/sdks/go
+module github.com/glastor-core/pii-veil/sdks/go
 
 go 1.22

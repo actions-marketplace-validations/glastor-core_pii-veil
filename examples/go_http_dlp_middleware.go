@@ -11,7 +11,7 @@ import (
 	"net/http/httptest"
 	"strings"
 
-	piiveil "github.com/glastor-dev/pii-veil/sdks/go"
+	piiveil "github.com/glastor-core/pii-veil/sdks/go"
 )
 
 func main() {
