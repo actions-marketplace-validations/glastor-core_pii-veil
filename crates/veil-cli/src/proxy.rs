@@ -105,6 +105,19 @@ pub fn handle_client(
         reader.read_exact(&mut body_bytes)?;
     }
 
+    // Handle GET /favicon.svg or GET /favicon.ico
+    if method.eq_ignore_ascii_case("GET") && (path == "/favicon.svg" || path == "/favicon.ico") {
+        let svg = FAVICON_SVG;
+        let resp = format!(
+            "HTTP/1.1 200 OK\r\nContent-Type: image/svg+xml\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+            svg.len(),
+            svg
+        );
+        client.write_all(resp.as_bytes())?;
+        client.flush()?;
+        return Ok(());
+    }
+
     // Handle GET / or GET /index.html (Interactive DLP Proxy Dashboard)
     if method.eq_ignore_ascii_case("GET") && (path == "/" || path == "/index.html") {
         let html = DASHBOARD_HTML;
@@ -363,12 +376,15 @@ fn restore_sse_json_value(val: &mut Value, restorer: &mut pii_veil_core::Streami
     }
 }
 
+const FAVICON_SVG: &str = include_str!("../../../assets/favicon.svg");
+
 const DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GLASTOR® pii-veil — Live DLP & SSE Proxy Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <style>
     :root {
       --bg: #0b0f19;

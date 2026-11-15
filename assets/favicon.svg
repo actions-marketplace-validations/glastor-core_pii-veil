@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="veilBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b0f19" />
+      <stop offset="100%" stop-color="#131b2e" />
+    </linearGradient>
+    <linearGradient id="veilAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#34d399" />
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#veilBg)" stroke="url(#veilAccent)" stroke-width="2.5" />
+  <path d="M32 10 L50 17 V31 C50 43.5 42.2 51.8 32 55 C21.8 51.8 14 43.5 14 31 V17 Z" fill="none" stroke="url(#veilAccent)" stroke-width="3" stroke-linejoin="round" />
+  <path d="M23 26 H41 M23 33 H37 M23 40 H33" stroke="#38bdf8" stroke-width="2.8" stroke-linecap="round" />
+  <circle cx="39" cy="40" r="3" fill="#34d399" />
+</svg>

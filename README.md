@@ -1,5 +1,9 @@
 # 🛡️ `pii-veil`: Ultrafast Reversible PII & Secret Anonymizer
 
+<p align="center">
+  <img src="assets/banner.svg" alt="GLASTOR® pii-veil Banner" width="100%" />
+</p>
+
 **`pii-veil`** is a sub-millisecond, zero-bloat Rust engine for detecting, anonymizing, and restoring PII and secrets across **LLM prompts, MCP agents, HTTP/SSE proxies, JSON/NDJSON logs, CSVs, and multi-gigabyte SQL dumps**.
 
 Designed with the **6-in-1 Multi-Market Architecture**:

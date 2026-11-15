@@ -36,7 +36,9 @@ crates/veil-node/ @glastor-core @glastor-dev
 sdks/go/ @glastor-core @glastor-dev
 examples/ @glastor-core @glastor-dev
 
-# [ GOBERNANZA & COMPLIANCE ]
+# [ GOBERNANZA, ACTIVOS DE MARCA & COMPLIANCE ]
+assets/ @glastor-core @glastor-dev
+public/favicon/ @glastor-core @glastor-dev
 README.md @glastor-core @glastor-dev
 CHANGELOG.md @glastor-core @glastor-dev
 CONTRIBUTORS.md @glastor-core @glastor-dev
