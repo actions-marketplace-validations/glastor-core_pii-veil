@@ -237,14 +237,19 @@ pub fn handle_client(
     // Read upstream response headers & body, restoring tokens via StreamingRestorer
     let mut up_reader = BufReader::new(upstream);
     let mut resp_header_block = String::new();
+    let mut is_event_stream = false;
     loop {
         let mut line = String::new();
         if up_reader.read_line(&mut line)? == 0 {
             break;
         }
-        if line.to_ascii_lowercase().starts_with("content-length:") {
+        let lower = line.to_ascii_lowercase();
+        if lower.starts_with("content-length:") {
             // Omit fixed Content-Length since restored PII may differ in byte length
             continue;
+        }
+        if lower.starts_with("content-type:") && lower.contains("text/event-stream") {
+            is_event_stream = true;
         }
         resp_header_block.push_str(&line);
         if line == "\r\n" || line == "\n" {
@@ -258,17 +263,58 @@ pub fn handle_client(
         .map_err(|_| io::Error::other("vault lock poisoned"))?
         .clone();
     let mut restorer = vault_snapshot.streaming_restorer();
-    let mut buf = [0u8; 4096];
-    loop {
-        let n = up_reader.read(&mut buf)?;
-        if n == 0 {
-            break;
+
+    if is_event_stream {
+        let mut line = String::new();
+        loop {
+            line.clear();
+            if up_reader.read_line(&mut line)? == 0 {
+                break;
+            }
+            let trimmed = line.trim_end_matches(&['\r', '\n'][..]);
+            if trimmed.is_empty() {
+                client.write_all(line.as_bytes())?;
+                client.flush()?;
+                continue;
+            }
+            if trimmed == "data: [DONE]" {
+                let flushed = restorer.finish();
+                if !flushed.is_empty() {
+                    let tail_event = format!("data: {}\n\n", json!({ "delta": flushed }));
+                    client.write_all(tail_event.as_bytes())?;
+                }
+                client.write_all(line.as_bytes())?;
+                client.flush()?;
+                continue;
+            }
+            if let Some(json_part) = trimmed.strip_prefix("data: ") {
+                if let Ok(mut val) = serde_json::from_str::<Value>(json_part) {
+                    restore_sse_json_value(&mut val, &mut restorer);
+                    let out_line = format!("data: {}\n", val);
+                    client.write_all(out_line.as_bytes())?;
+                    client.flush()?;
+                    continue;
+                }
+            }
+            let restored_line = restorer.push_chunk(&line);
+            if !restored_line.is_empty() {
+                client.write_all(restored_line.as_bytes())?;
+                client.flush()?;
+            }
         }
-        let chunk_str = String::from_utf8_lossy(&buf[..n]);
-        let restored_chunk = restorer.push_chunk(&chunk_str);
-        if !restored_chunk.is_empty() {
-            client.write_all(restored_chunk.as_bytes())?;
-            client.flush()?;
+    } else {
+        let mut buf = [0u8; 4096];
+        loop {
+            let n = up_reader.read(&mut buf)?;
+            if n == 0 {
+                break;
+            }
+            let chunk_str = String::from_utf8_lossy(&buf[..n]);
+            let restored_chunk = restorer.push_chunk(&chunk_str);
+            if !restored_chunk.is_empty() {
+                client.write_all(restored_chunk.as_bytes())?;
+                client.flush()?;
+            }
         }
     }
     let tail = restorer.finish();
@@ -277,6 +323,31 @@ pub fn handle_client(
     }
     client.flush()?;
     Ok(())
+}
+
+fn restore_sse_json_value(val: &mut Value, restorer: &mut pii_veil_core::StreamingRestorer) {
+    match val {
+        Value::String(s) => {
+            *s = restorer.push_chunk(s);
+        }
+        Value::Array(arr) => {
+            for item in arr {
+                restore_sse_json_value(item, restorer);
+            }
+        }
+        Value::Object(map) => {
+            for (k, v) in map.iter_mut() {
+                if matches!(
+                    k.as_str(),
+                    "id" | "object" | "model" | "role" | "finish_reason"
+                ) {
+                    continue;
+                }
+                restore_sse_json_value(v, restorer);
+            }
+        }
+        _ => {}
+    }
 }
 
 #[cfg(test)]
@@ -325,5 +396,97 @@ mod tests {
         assert!(resp.contains("laura@fintech.es"));
         assert!(resp.contains("00000000T"));
         assert!(resp.contains("4532-0151-1283-0366"));
+    }
+
+    #[test]
+    fn test_http_proxy_upstream_sse_stream_roundtrip() {
+        // 1. Start a mock upstream LLM server that verifies it NEVER receives raw PII
+        //    and responds with SSE chunks where `[EMAIL_1]` and `[CREDIT_CARD_1]` are split mid-token!
+        let upstream_listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let upstream_addr = upstream_listener.local_addr().unwrap();
+
+        let upstream_handle = thread::spawn(move || {
+            if let Ok((mut up_stream, _)) = upstream_listener.accept() {
+                let mut reader = BufReader::new(up_stream.try_clone().unwrap());
+                let mut content_len = 0usize;
+                loop {
+                    let mut line = String::new();
+                    reader.read_line(&mut line).unwrap();
+                    if line.trim().is_empty() {
+                        break;
+                    }
+                    if let Some((k, v)) = line.split_once(':') {
+                        if k.trim().eq_ignore_ascii_case("content-length") {
+                            content_len = v.trim().parse().unwrap_or(0);
+                        }
+                    }
+                }
+                let mut req_body = vec![0u8; content_len];
+                reader.read_exact(&mut req_body).unwrap();
+                let req_str = String::from_utf8(req_body).unwrap();
+
+                // Upstream LLM must ONLY see placeholders, never raw PII!
+                assert!(!req_str.contains("diego@fintech.ar"));
+                assert!(!req_str.contains("4532-0151-1283-0366"));
+                assert!(req_str.contains("[EMAIL_1]"));
+                assert!(req_str.contains("[CREDIT_CARD_1]"));
+
+                // Stream back SSE chunks with placeholders split mid-token
+                let sse_headers =
+                    "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nConnection: close\r\n\r\n";
+                up_stream.write_all(sse_headers.as_bytes()).unwrap();
+                let chunks = [
+                    "data: {\"delta\":\"Recibo enviado a [EMA\"}\n\n",
+                    "data: {\"delta\":\"IL_1] con cargo a [CRED\"}\n\n",
+                    "data: {\"delta\":\"IT_CARD_1].\"}\n\n",
+                    "data: [DONE]\n\n",
+                ];
+                for chunk in chunks {
+                    up_stream.write_all(chunk.as_bytes()).unwrap();
+                    up_stream.flush().unwrap();
+                }
+            }
+        });
+
+        // 2. Start `veil proxy` pointing to `upstream_addr`
+        let proxy_listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let proxy_addr = proxy_listener.local_addr().unwrap();
+
+        let engine = VeilEngine::new(RedactionMode::Placeholder);
+        let vault = Arc::new(Mutex::new(Vault::new()));
+        let config = ProxyConfig {
+            listen_addr: proxy_addr.to_string(),
+            upstream_addr: Some(upstream_addr.to_string()),
+            echo_mode: false,
+        };
+
+        let proxy_handle = thread::spawn(move || {
+            if let Ok((stream, _)) = proxy_listener.accept() {
+                handle_client(stream, &engine, &vault, &config).unwrap();
+            }
+        });
+
+        // 3. Client sends raw PII prompt to `veil proxy`
+        let mut client = TcpStream::connect(proxy_addr).unwrap();
+        let body = r#"{"model":"gpt-4o","stream":true,"messages":[{"role":"user","content":"Cobrar a diego@fintech.ar en 4532-0151-1283-0366"}]}"#;
+        let req = format!(
+            "POST /v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}",
+            body.len(),
+            body
+        );
+        client.write_all(req.as_bytes()).unwrap();
+        client.flush().unwrap();
+
+        let mut restored_sse = String::new();
+        client.read_to_string(&mut restored_sse).unwrap();
+
+        proxy_handle.join().unwrap();
+        upstream_handle.join().unwrap();
+
+        // 4. Verify client received the restored PII across the split SSE chunks!
+        assert!(restored_sse.contains("diego@fintech.ar"));
+        assert!(restored_sse.contains("4532-0151-1283-0366"));
+        assert!(!restored_sse.contains("[EMAIL_1]"));
+        assert!(!restored_sse.contains("[CREDIT_CARD_1]"));
     }
 }

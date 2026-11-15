@@ -84,4 +84,5 @@ go test -v ./...
 
 - [`examples/python_fastapi_llm_streaming.py`](examples/python_fastapi_llm_streaming.py) — FastAPI + OpenAI/Anthropic SSE streaming with `StreamingRestorer` and encrypted Vaults.
 - [`examples/typescript_nextjs_ai_sdk.ts`](examples/typescript_nextjs_ai_sdk.ts) — Next.js / Vercel AI SDK `TransformStream` with `VeilStreamingRestorer`.
+- [`examples/go_http_dlp_middleware.go`](examples/go_http_dlp_middleware.go) — Go `net/http` DLP middleware (`piiveil.NewDlpMiddleware`) & SSE restorer.
 - [`examples/git_pre_commit_hook.sh`](examples/git_pre_commit_hook.sh) — Git pre-commit DLP hook powered by `veil scan --fail-on-detect`.
