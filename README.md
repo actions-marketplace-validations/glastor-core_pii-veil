@@ -25,8 +25,13 @@
   <a href="BENCHMARKS.md">Benchmarks</a> •
   <a href="docs/">Compliance (GDPR / HIPAA / PCI-DSS / LGPD)</a> •
   <a href="deploy/kubernetes/README.md">Kubernetes Sidecar</a> •
+  <a href="#-enterprise--commercial-support">Enterprise Support</a> •
   <a href="#-production-examples-examples">Examples</a>
 </p>
+
+> [!IMPORTANT]
+> **Need Enterprise On-Premise deployment, SOC2/HIPAA compliance logs, or custom rules?**  
+> Contact our enterprise engineering team at **[enterprise@glastor.es](mailto:enterprise@glastor.es)** for on-premise air-gapped VPCs, custom compliance rules, and SLAs.
 
 **`pii-veil`** is a sub-millisecond, zero-bloat Rust engine for detecting, anonymizing, and restoring PII and secrets across **LLM prompts, MCP agents, HTTP/SSE proxies, JSON/NDJSON logs, CSVs, and multi-gigabyte SQL dumps**.
 
