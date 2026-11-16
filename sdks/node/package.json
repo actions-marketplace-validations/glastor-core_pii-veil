@@ -1,6 +1,6 @@
 {
   "name": "@glastor/pii-veil",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Sub-millisecond Reversible PII & Secret Anonymizer for Node.js, Next.js, Express & Vercel AI SDK (Luhn, Mod-97 IBAN, DNI, CUIT, API keys)",
   "main": "index.js",
   "types": "index.d.ts",

@@ -72,7 +72,7 @@ jobs:
   github-release:
     name: Publish GitHub Release
     needs: build-binaries
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -90,7 +90,7 @@ jobs:
   publish-crates:
     name: Publish to crates.io (core, ffi, cli)
     needs: build-binaries
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -104,16 +104,39 @@ jobs:
             echo "CARGO_REGISTRY_TOKEN not set, skipping crates.io publish"
             exit 0
           fi
-          cargo publish -p pii-veil-core
-          sleep 15
-          cargo publish -p pii-veil-ffi
-          sleep 15
+          echo "--> Publishing pii-veil-core..."
+          cargo publish -p pii-veil-core || true
+
+          echo "--> Waiting for pii-veil-core to appear in crates.io index..."
+          for i in $(seq 1 24); do
+            if cargo search pii-veil-core 2>/dev/null | grep -q "pii-veil-core"; then
+              echo "pii-veil-core is available in crates.io!"
+              break
+            fi
+            echo "Waiting for crates.io index ($i/24)..."
+            sleep 10
+          done
+
+          echo "--> Publishing pii-veil-ffi..."
+          cargo publish -p pii-veil-ffi || true
+
+          echo "--> Waiting for pii-veil-ffi to appear in crates.io index..."
+          for i in $(seq 1 24); do
+            if cargo search pii-veil-ffi 2>/dev/null | grep -q "pii-veil-ffi"; then
+              echo "pii-veil-ffi is available in crates.io!"
+              break
+            fi
+            echo "Waiting for crates.io index ($i/24)..."
+            sleep 10
+          done
+
+          echo "--> Publishing pii-veil-cli..."
           cargo publish -p pii-veil-cli
 
   publish-pypi:
     name: Publish Python Wheel to PyPI (Maturin)
     needs: build-binaries
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -130,7 +153,7 @@ jobs:
   publish-npm:
     name: Publish Node.js Addon to npm (napi-rs)
     needs: build-binaries
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

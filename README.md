@@ -1,7 +1,31 @@
 # 🛡️ `pii-veil`: Ultrafast Reversible PII & Secret Anonymizer
 
 <p align="center">
-  <img src="assets/banner.svg" alt="GLASTOR® pii-veil Banner" width="100%" />
+  <img src="https://res.cloudinary.com/dzualplqi/image/upload/v1794800094/Velo_de_Privacidad_con_IA_Neon_e9k9iw.png" alt="GLASTOR® pii-veil Banner" width="100%" />
+</p>
+
+<p align="center">
+  <a href="https://github.com/glastor-core/pii-veil/actions/workflows/ci.yml"><img src="https://github.com/glastor-core/pii-veil/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
+  <a href="https://github.com/glastor-core/pii-veil/actions/workflows/audit.yml"><img src="https://github.com/glastor-core/pii-veil/actions/workflows/audit.yml/badge.svg" alt="Security & SemVer Audit" /></a>
+  <a href="https://github.com/glastor-core/pii-veil/releases"><img src="https://img.shields.io/github/v/release/glastor-core/pii-veil?logo=github&label=release&color=00c896" alt="GitHub Release" /></a>
+  <a href="https://crates.io/crates/pii-veil-core"><img src="https://img.shields.io/crates/v/pii-veil-core.svg?logo=rust&color=dea584" alt="Crates.io" /></a>
+  <a href="https://pkg.go.dev/github.com/glastor-core/pii-veil/sdks/go"><img src="https://pkg.go.dev/badge/github.com/glastor-core/pii-veil/sdks/go.svg" alt="Go Reference" /></a>
+  <a href="sdks/python"><img src="https://img.shields.io/badge/Python-3.9%2B%20%7C%20LangChain%20%7C%20CrewAI-3776AB?logo=python&logoColor=white" alt="Python SDK" /></a>
+  <a href="sdks/node"><img src="https://img.shields.io/badge/Node.js-18%2B%20%7C%20Next.js%20%7C%20Vercel%20AI-339933?logo=nodedotjs&logoColor=white" alt="Node.js SDK" /></a>
+  <a href="Dockerfile"><img src="https://img.shields.io/badge/Docker-Distroless%20%3C15MB-2496ED?logo=docker&logoColor=white" alt="Docker Distroless" /></a>
+  <a href="deploy/kubernetes"><img src="https://img.shields.io/badge/Kubernetes-Sidecar%20Ready-326CE5?logo=kubernetes&logoColor=white" alt="Kubernetes Sidecar" /></a>
+  <a href="BENCHMARKS.md"><img src="https://img.shields.io/badge/Latency-165%20%C2%B5s%20(200x%20vs%20Presidio)-ff6b00?logo=speedtest&logoColor=white" alt="Benchmarks" /></a>
+  <a href="docs/"><img src="https://img.shields.io/badge/Compliance-GDPR%20%7C%20HIPAA%20%7C%20PCI--DSS%20%7C%20LGPD-00c896?logo=shield&logoColor=white" alt="Compliance" /></a>
+  <a href="LICENSE-MIT"><img src="https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg" alt="License: MIT OR Apache-2.0" /></a>
+</p>
+
+<p align="center">
+  <a href="#-key-capabilities">Key Capabilities</a> •
+  <a href="#-quickstart">Quickstart</a> •
+  <a href="BENCHMARKS.md">Benchmarks</a> •
+  <a href="docs/">Compliance (GDPR / HIPAA / PCI-DSS / LGPD)</a> •
+  <a href="deploy/kubernetes/README.md">Kubernetes Sidecar</a> •
+  <a href="#-production-examples-examples">Examples</a>
 </p>
 
 **`pii-veil`** is a sub-millisecond, zero-bloat Rust engine for detecting, anonymizing, and restoring PII and secrets across **LLM prompts, MCP agents, HTTP/SSE proxies, JSON/NDJSON logs, CSVs, and multi-gigabyte SQL dumps**.

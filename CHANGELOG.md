@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-16
+
+### Added
+- Official High-Resolution Neon Banner Artwork (`https://res.cloudinary.com/...`).
+- Project Badges in `README.md`: CI Status, Security & SemVer Audit, Crates.io, Go Reference, Python/Node.js SDKs, Distroless Docker `<15MB`, Kubernetes Sidecar, Criterion Benchmarks (165 µs), and Legal Compliance (GDPR, HIPAA, PCI-DSS, LGPD).
+- Resilient crates.io index propagation wait loop in `.github/workflows/release.yml` with `workflow_dispatch` support.
+
 ## [0.1.0] - 2026-11-15
 
 ### Added

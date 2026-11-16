@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: "GLASTOR® pii-veil: Ultrafast Deterministic & Reversible PII/Secret Anonymization Engine, MCP Server, and HTTP/SSE Proxy"
 type: software
-version: "0.1.0"
-date-released: "2026-11-15"
+version: "0.1.1"
+date-released: "2026-11-16"
 authors:
   - family-names: "Cardoso"
     given-names: "Andrés Antonio"

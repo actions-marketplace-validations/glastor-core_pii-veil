@@ -1,6 +1,6 @@
 [package]
 name = "pii-veil-py"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "Python bindings (PyO3/Maturin) for pii-veil-core"
@@ -10,5 +10,5 @@ name = "pii_veil"
 crate-type = ["cdylib"]
 
 [dependencies]
-pii-veil-core = { path = "../veil-core", version = "0.1.0" }
+pii-veil-core = { path = "../veil-core", version = "0.1.1" }
 pyo3 = { version = "0.22", features = ["extension-module"] }

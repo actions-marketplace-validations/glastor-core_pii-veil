@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pii-veil"
-version = "0.1.0"
+version = "0.1.1"
 description = "Sub-millisecond Reversible PII & Secret Anonymizer for LLMs (Luhn, Mod-97 IBAN, DNI, CUIT, API keys) with LangChain, LlamaIndex & CrewAI support."
 readme = "README.md"
 requires-python = ">=3.8"

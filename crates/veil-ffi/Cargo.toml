@@ -16,5 +16,5 @@ name = "pii_veil_ffi"
 crate-type = ["rlib", "cdylib", "staticlib"]
 
 [dependencies]
-pii-veil-core = { path = "../veil-core", version = "0.1.0" }
+pii-veil-core = { path = "../veil-core", version = "0.1.1" }
 serde_json = { workspace = true }
