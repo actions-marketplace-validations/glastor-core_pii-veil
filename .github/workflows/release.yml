@@ -142,13 +142,16 @@ jobs:
       MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
       - name: Build & Upload to PyPI (if PYPI_API_TOKEN is configured)
         if: env.MATURIN_PYPI_TOKEN != ''
         uses: PyO3/maturin-action@v1
         with:
           working-directory: crates/veil-py
-          command: upload
-          args: --release --out dist --find-interpreter
+          command: publish
+          args: --find-interpreter --skip-existing
 
   publish-npm:
     name: Publish Node.js Addon to npm (napi-rs)
