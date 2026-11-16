@@ -5,6 +5,12 @@
   "main": "index.js",
   "types": "index.d.ts",
   "license": "MIT OR Apache-2.0",
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "*.node",
+    "README.md"
+  ],
   "napi": {
     "binaryName": "pii-veil-node",
     "targets": [
