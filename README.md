@@ -34,8 +34,8 @@ Designed with the **6-in-1 Multi-Market Architecture**:
 1. **`crates/veil-core`** (`crates.io` library: `pii-veil-core`)
 2. **`crates/veil-cli`** (`crates.io` / Homebrew CLI binary + built-in **MCP Server** & **HTTP/SSE Proxy**: `veil`)
 3. **`crates/veil-ffi`** (`crates.io` C-ABI `cdylib`/`staticlib` + `pii_veil.h`: `pii-veil-ffi`)
-4. **`crates/veil-py`** (`PyPI` package via `PyO3` & `maturin`: `pii-veil`)
-5. **`crates/veil-node`** (`npm` package via `napi-rs`: `@pii-veil/node`)
+4. **`crates/veil-py`** (`PyPI` package via `PyO3` & `maturin`: `glastor-pii-veil`)
+5. **`crates/veil-node`** (`npm` package via `napi-rs`: `pii-veil-node`)
 6. **`sdks/go`** (Go SDK + `net/http` DLP middleware + Rust `veil mcp` bridge: `github.com/glastor-core/pii-veil/sdks/go`)
 
 ---

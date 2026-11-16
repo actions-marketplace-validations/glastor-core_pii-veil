@@ -168,7 +168,7 @@ jobs:
           node-version: 20
           registry-url: "https://registry.npmjs.org"
       - uses: dtolnay/rust-toolchain@stable
-      - name: Build and publish @pii-veil/node (if NPM_TOKEN is configured)
+      - name: Build and publish pii-veil-node (if NPM_TOKEN is configured)
         working-directory: crates/veil-node
         run: |
           if [ -z "${NODE_AUTH_TOKEN}" ]; then
