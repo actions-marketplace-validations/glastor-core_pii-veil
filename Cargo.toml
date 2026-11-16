@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/veil-core", "crates/veil-cli", "crates/veil-ffi"]
+members = ["crates/veil-core", "crates/veil-cli", "crates/veil-ffi", "crates/veil-wasm"]
 # Optional language bindings (built via maturin / napi-rs CLI when publishing to PyPI / NPM)
 exclude = ["crates/veil-py", "crates/veil-node"]
 

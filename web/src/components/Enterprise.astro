@@ -1,0 +1,80 @@
+---
+// Enterprise.astro - Commercial & Enterprise Offerings
+---
+
+<section id="enterprise" class="py-20 px-4 max-w-6xl mx-auto">
+  <div class="relative bg-gradient-to-b from-slate-900/90 to-cyber-dark/95 border border-cyber-border rounded-3xl p-8 sm:p-12 shadow-2xl overflow-hidden backdrop-blur-xl">
+    <!-- Glow -->
+    <div class="absolute -top-24 -right-24 w-80 h-80 bg-cyber-purple/20 blur-[100px] pointer-events-none rounded-full"></div>
+
+    <div class="text-center max-w-3xl mx-auto mb-12">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyber-purple/20 border border-cyber-purple/40 text-cyber-purple text-xs font-mono font-semibold uppercase mb-3">
+        🏢 GLASTOR® ENTERPRISE & COMPLIANCE
+      </div>
+      <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight mb-4">
+        Deploy `pii-veil` in Your <br />
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyber-neon via-cyber-cyan to-cyber-purple">
+          Air-Gapped Private Infrastructure
+        </span>
+      </h2>
+      <p class="text-cyber-muted text-base leading-relaxed">
+        Guarantee 100% compliance with <strong class="text-slate-200">GDPR, HIPAA, PCI-DSS, SOC 2, and LGPD</strong> while accelerating LLM prompts and agent workflows.
+      </p>
+    </div>
+
+    <!-- Feature Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      <!-- Feature 1 -->
+      <div class="bg-black/40 border border-cyber-border/70 rounded-2xl p-6 hover:border-cyber-neon/50 transition">
+        <div class="w-10 h-10 rounded-xl bg-cyber-neon/10 border border-cyber-neon/30 flex items-center justify-center text-cyber-neon text-lg mb-4 font-mono font-bold">
+          01
+        </div>
+        <h3 class="text-lg font-bold text-white mb-2">Air-Gapped & VPC Sidecars</h3>
+        <p class="text-sm text-cyber-muted leading-relaxed">
+          Pre-hardened Kubernetes Helm charts and Distroless Docker containers (&lt;15 MB) with strict zero-external-egress enforcement for banks and healthcare.
+        </p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="bg-black/40 border border-cyber-border/70 rounded-2xl p-6 hover:border-cyber-cyan/50 transition">
+        <div class="w-10 h-10 rounded-xl bg-cyber-cyan/10 border border-cyber-cyan/30 flex items-center justify-center text-cyber-cyan text-lg mb-4 font-mono font-bold">
+          02
+        </div>
+        <h3 class="text-lg font-bold text-white mb-2">Enterprise SIEM Streaming</h3>
+        <p class="text-sm text-cyber-muted leading-relaxed">
+          Structured audit log telemetry directly streaming to Datadog, Splunk, AWS CloudWatch, and OpenTelemetry collector endpoints.
+        </p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="bg-black/40 border border-cyber-border/70 rounded-2xl p-6 hover:border-cyber-purple/50 transition">
+        <div class="w-10 h-10 rounded-xl bg-cyber-purple/10 border border-cyber-purple/30 flex items-center justify-center text-cyber-purple text-lg mb-4 font-mono font-bold">
+          03
+        </div>
+        <h3 class="text-lg font-bold text-white mb-2">Custom Rules & 24/7 SLA</h3>
+        <p class="text-sm text-cyber-muted leading-relaxed">
+          Dedicated engineering support, custom domain checksum algorithms (e.g. proprietary patient IDs), and guaranteed response time SLAs.
+        </p>
+      </div>
+    </div>
+
+    <!-- Call to Action Card -->
+    <div class="bg-cyber-dark/80 border border-cyber-neon/40 rounded-2xl p-8 text-center max-w-2xl mx-auto shadow-[0_0_30px_rgba(0,255,157,0.15)]">
+      <h3 class="text-xl sm:text-2xl font-black text-white mb-3">
+        Need Enterprise On-Premise deployment, SOC2/HIPAA compliance logs, or custom rules?
+      </h3>
+      <p class="text-cyber-muted text-sm mb-6">
+        Speak directly with our core engineering team to initiate an on-premise pilot or request enterprise licensing.
+      </p>
+      <a
+        href="mailto:enterprise@glastor.es?subject=Inquiry%3A%20pii-veil%20Enterprise%20Deployment"
+        class="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-cyber-neon hover:bg-cyber-neonHover text-cyber-dark font-black text-base tracking-wide transition shadow-[0_0_20px_rgba(0,255,157,0.4)]"
+      >
+        ✉️ Contact us at enterprise@glastor.es
+      </a>
+      <span class="block text-xs font-mono text-slate-500 mt-3">
+        Guaranteed direct engineer response within 24 hours.
+      </span>
+    </div>
+  </div>
+</section>

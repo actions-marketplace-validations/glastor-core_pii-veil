@@ -1,0 +1,124 @@
+---
+// Playground.astro - In-browser WebAssembly PII & Secret Redactor
+---
+
+<section id="demo" class="py-16 px-4 max-w-7xl mx-auto">
+  <div class="text-center mb-10">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyber-neon/10 border border-cyber-neon/30 text-cyber-neon text-xs font-mono font-semibold tracking-wider uppercase mb-3">
+      <span class="w-2 h-2 rounded-full bg-cyber-neon animate-pulse"></span>
+      100% Client-Side WebAssembly • Zero Cloud Egress
+    </div>
+    <h2 class="text-3xl md:text-5xl font-black text-white tracking-tight mb-3">
+      Live Interactive <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyber-neon via-cyber-cyan to-cyber-purple">Playground</span>
+    </h2>
+    <p class="text-cyber-muted text-base max-w-2xl mx-auto">
+      Paste your own text with credit cards, passwords, or emails. Sanitized locally on your machine in <span class="text-cyber-neon font-mono font-bold">sub-milliseconds</span> without leaving your browser.
+    </p>
+  </div>
+
+  <!-- Playground Console -->
+  <div class="bg-cyber-card border border-cyber-border rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl">
+    <!-- Top Bar Controls -->
+    <div class="bg-cyber-dark/80 border-b border-cyber-border px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <!-- Presets -->
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <span class="text-xs text-cyber-muted font-mono mr-1">PRESETS:</span>
+        <button id="preset-fintech" class="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-cyber-neon transition flex items-center gap-1">
+          💳 Fintech & Cards
+        </button>
+        <button id="preset-secrets" class="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-cyber-cyan transition flex items-center gap-1">
+          🔑 API Keys & DB
+        </button>
+        <button id="preset-hipaa" class="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-cyber-purple transition flex items-center gap-1">
+          🏥 HIPAA Medical
+        </button>
+        <button id="preset-contact" class="px-2.5 py-1 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-cyber-neon transition flex items-center gap-1">
+          📧 Emails & DNI
+        </button>
+      </div>
+
+      <!-- Mode Selector -->
+      <div class="flex items-center gap-1 bg-cyber-dark p-1 rounded-xl border border-cyber-border text-xs font-mono">
+        <span class="text-cyber-muted px-2">MODE:</span>
+        <button id="mode-placeholder" class="mode-btn px-3 py-1 rounded-lg bg-cyber-neon text-cyber-dark font-bold transition shadow-sm" data-mode="placeholder">
+          Placeholder
+        </button>
+        <button id="mode-synthetic" class="mode-btn px-3 py-1 rounded-lg text-slate-300 hover:text-white transition" data-mode="synthetic">
+          Synthetic
+        </button>
+        <button id="mode-mask" class="mode-btn px-3 py-1 rounded-lg text-slate-300 hover:text-white transition" data-mode="mask">
+          Mask
+        </button>
+      </div>
+    </div>
+
+    <!-- Split Editor Area -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-cyber-border">
+      <!-- Input Column -->
+      <div class="p-4 flex flex-col">
+        <div class="flex items-center justify-between mb-2">
+          <label for="input-text" class="text-xs font-mono font-semibold text-cyber-muted flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            RAW SENSITIVE INPUT
+          </label>
+          <span id="char-count" class="text-xs font-mono text-slate-500">0 characters</span>
+        </div>
+        <textarea
+          id="input-text"
+          class="w-full h-72 lg:h-96 bg-cyber-dark/50 border border-cyber-border/60 rounded-xl p-4 font-mono text-sm text-slate-200 focus:outline-none focus:border-cyber-neon focus:ring-1 focus:ring-cyber-neon transition resize-none leading-relaxed placeholder-slate-600"
+          placeholder="Paste text containing emails, credit cards, DNI/CUIT, API keys, JWTs or SQL dumps..."
+        ></textarea>
+      </div>
+
+      <!-- Output Column -->
+      <div class="p-4 flex flex-col bg-cyber-dark/30">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-cyber-neon"></span>
+            <span class="text-xs font-mono font-semibold text-cyber-neon">SANITIZED LLM PROMPT</span>
+          </div>
+          <!-- Live Latency Meter -->
+          <div class="flex items-center gap-2">
+            <span id="latency-badge" class="px-2 py-0.5 rounded-full bg-cyber-neon/15 border border-cyber-neon/40 text-cyber-neon font-mono font-bold text-xs flex items-center gap-1 shadow-[0_0_12px_rgba(0,255,157,0.2)]">
+              ⚡ <span id="latency-value">84 µs</span>
+            </span>
+            <span id="detected-count-badge" class="px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-mono text-xs border border-slate-700">
+              <span id="detected-count">0</span> detected
+            </span>
+          </div>
+        </div>
+
+        <div
+          id="output-text"
+          class="w-full h-72 lg:h-96 bg-cyber-dark/60 border border-cyber-border/60 rounded-xl p-4 font-mono text-sm text-cyber-neon/90 overflow-y-auto leading-relaxed select-text whitespace-pre-wrap break-words"
+        ></div>
+      </div>
+    </div>
+
+    <!-- Reversible Vault Section (Accordion) -->
+    <div class="border-t border-cyber-border bg-cyber-dark/70 p-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <button id="toggle-vault-btn" class="flex items-center gap-2 text-xs font-mono text-slate-300 hover:text-white transition">
+            <span id="vault-arrow">▶</span>
+            <span class="font-bold">REVERSIBLE JSON VAULT (MAPPING DICTIONARY)</span>
+            <span id="vault-badge" class="px-2 py-0.5 rounded bg-slate-800 text-slate-400 text-xs">0 entries</span>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="restore-btn" class="px-3 py-1.5 rounded-lg bg-cyber-cyan/10 hover:bg-cyber-cyan/20 border border-cyber-cyan/40 text-cyber-cyan text-xs font-mono font-semibold transition flex items-center gap-1.5">
+            🔄 Test Roundtrip Restore
+          </button>
+          <button id="copy-sanitized-btn" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-mono transition">
+            📋 Copy Output
+          </button>
+        </div>
+      </div>
+
+      <div id="vault-content" class="hidden mt-3 pt-3 border-t border-cyber-border/50">
+        <pre id="vault-json-viewer" class="bg-black/60 p-3 rounded-lg font-mono text-xs text-cyber-cyan overflow-x-auto max-h-48 border border-cyber-border/50"></pre>
+      </div>
+    </div>
+  </div>
+</section>

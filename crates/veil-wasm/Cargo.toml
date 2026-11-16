@@ -1,0 +1,18 @@
+[package]
+name = "pii-veil-wasm"
+version = "0.1.3"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+authors = ["Andrés Antonio Cardoso <engineering@glastor.io>"]
+repository = "https://github.com/glastor-core/pii-veil"
+description = "WebAssembly bindings for pii-veil: ultrafast in-browser PII anonymization and reversible vault"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+pii-veil-core = { path = "../veil-core" }
+wasm-bindgen = "0.2"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde-wasm-bindgen = "0.6"

@@ -1,0 +1,72 @@
+name: Deploy pii-veil Landing & WASM Playground
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'web/**'
+      - 'crates/veil-wasm/**'
+      - 'crates/veil-core/**'
+      - '.github/workflows/deploy-web.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: Setup Rust Toolchain with wasm32 target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Install wasm-bindgen-cli
+        run: |
+          cargo install wasm-bindgen-cli --version 0.2.130
+
+      - name: Build WebAssembly Core
+        run: |
+          cargo build --release --target wasm32-unknown-unknown -p pii-veil-wasm
+          wasm-bindgen --target web --out-dir web/public/wasm target/wasm32-unknown-unknown/release/pii_veil_wasm.wasm
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install Web Dependencies & Build Static Site
+        working-directory: web
+        env:
+          ASTRO_TELEMETRY_DISABLED: "1"
+        run: |
+          npm install
+          npm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
