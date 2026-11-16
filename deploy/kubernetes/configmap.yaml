@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pii-veil-policy
+  labels:
+    app.kubernetes.io/name: pii-veil
+    app.kubernetes.io/part-of: glastor-core
+data:
+  veil.json: |
+    {
+      "mode": "placeholder",
+      "secret_key": "enterprise-vault-seed-key",
+      "allowlist_domains": [
+        "glastor.io",
+        "company.com",
+        "internal.corp"
+      ],
+      "allowlist_ips": [
+        "127.0.0.1",
+        "10.0.0.0/8"
+      ],
+      "custom_rules": [
+        {
+          "name": "INTERNAL_EMPLOYEE_ID",
+          "pattern": "EMP-[0-9]{6}",
+          "placeholder": "[EMPLOYEE_ID]"
+        }
+      ]
+    }

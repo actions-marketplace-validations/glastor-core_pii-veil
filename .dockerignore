@@ -1,0 +1,11 @@
+target/
+.git/
+sdks/
+node_modules/
+dist/
+dist-pkg/
+.github/
+.vscode/
+.idea/
+*.log
+*.tmp

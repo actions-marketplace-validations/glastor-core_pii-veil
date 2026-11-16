@@ -1,0 +1,24 @@
+services:
+  # GLASTOR® pii-veil Reverse DLP & SSE Proxy
+  pii-veil:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: glastor-core/pii-veil:local
+    container_name: pii-veil-proxy
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - VEIL_LISTEN=0.0.0.0:8080
+      - VEIL_ECHO=true # Runs built-in SSE / LLM simulator
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp

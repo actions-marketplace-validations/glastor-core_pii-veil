@@ -223,19 +223,19 @@ enum Commands {
     /// Start a local HTTP/SSE DLP reverse proxy that redacts outgoing LLM prompts and restores incoming SSE/JSON responses
     Proxy {
         /// Local address to bind the HTTP proxy to
-        #[arg(short, long, default_value = "127.0.0.1:8080")]
+        #[arg(short, long, default_value = "127.0.0.1:8080", env = "VEIL_LISTEN")]
         listen: String,
 
         /// Upstream HTTP server address (`host:port`, e.g. `127.0.0.1:11434` for Ollama or local gateway)
-        #[arg(short, long)]
+        #[arg(short, long, env = "VEIL_UPSTREAM")]
         upstream: Option<String>,
 
         /// Enable built-in local LLM echo / SSE simulator mode for testing without an upstream server
-        #[arg(long)]
+        #[arg(long, env = "VEIL_ECHO")]
         echo: bool,
 
         /// Optional path to a `veil.json` policy file
-        #[arg(short, long)]
+        #[arg(short, long, env = "VEIL_POLICY")]
         policy: Option<PathBuf>,
     },
 
