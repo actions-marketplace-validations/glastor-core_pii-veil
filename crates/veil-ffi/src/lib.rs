@@ -150,7 +150,7 @@ pub unsafe extern "C" fn veil_vault_len(handle: *const VeilHandle) -> usize {
 #[no_mangle]
 pub unsafe extern "C" fn veil_vault_clear(handle: *mut VeilHandle) {
     if let Some(h) = handle.as_mut() {
-        h.vault = Vault::new();
+        h.vault.clear();
     }
 }
 
