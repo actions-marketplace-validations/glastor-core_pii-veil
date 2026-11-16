@@ -31,7 +31,7 @@
 
 > [!IMPORTANT]
 > **Need Enterprise On-Premise deployment, SOC2/HIPAA compliance logs, or custom rules?**  
-> Contact our enterprise engineering team at **[enterprise@glastor.es](mailto:enterprise@glastor.es)** for on-premise air-gapped VPCs, custom compliance rules, and SLAs.
+> Contact our founder and enterprise team at **[founder@glastor.es](mailto:founder@glastor.es)** for on-premise air-gapped VPCs, custom compliance rules, and SLAs.
 
 **`pii-veil`** is a sub-millisecond, zero-bloat Rust engine for detecting, anonymizing, and restoring PII and secrets across **LLM prompts, MCP agents, HTTP/SSE proxies, JSON/NDJSON logs, CSVs, and multi-gigabyte SQL dumps**.
 
@@ -144,5 +144,5 @@ We offer enterprise licenses and dedicated infrastructure solutions:
 - **24/7 SLA & Architecture Review**: Priority engineering support, guaranteed response times, and LLM streaming pipeline benchmarking.
 
 📩 **Need Enterprise On-Premise deployment, SOC 2 / HIPAA compliance logs, or custom rules?**  
-Contact us directly at: **[enterprise@glastor.es](mailto:enterprise@glastor.es)**
+Contact us directly at: **[founder@glastor.es](mailto:founder@glastor.es)**
 

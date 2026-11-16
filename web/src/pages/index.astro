@@ -10,11 +10,12 @@ import Enterprise from '../components/Enterprise.astro';
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=1" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=1" />
+    <link rel="shortcut icon" href="/favicon.ico?v=1" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=1" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=1" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=1" />
     <link rel="manifest" href="/site.webmanifest" />
     <title>pii-veil — Ultrafast In-Browser & Backend PII Anonymizer</title>
     <meta name="description" content="Sub-millisecond reversible PII and secrets anonymization engine for LLMs and AI agents. Compiles to WebAssembly, Rust, Python, Node.js, and CLI." />
@@ -29,8 +30,8 @@ import Enterprise from '../components/Enterprise.astro';
     <nav class="sticky top-0 z-50 bg-cyber-dark/80 backdrop-blur-md border-b border-cyber-border/70">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <!-- Logo -->
-        <a href="/" class="flex items-center gap-2 group">
-          <span class="text-xl">🛡️</span>
+        <a href="/" class="flex items-center gap-2.5 group">
+          <img src="/favicon.svg" alt="pii-veil logo" class="w-8 h-8 rounded-lg shadow-sm border border-cyber-border/80 group-hover:border-cyber-neon/80 transition" />
           <span class="font-black text-xl tracking-tight text-white group-hover:text-cyber-neon transition">
             pii<span class="text-cyber-neon">-veil</span>
           </span>
@@ -52,7 +53,7 @@ import Enterprise from '../components/Enterprise.astro';
         <!-- Action Button -->
         <div class="flex items-center gap-3">
           <a
-            href="mailto:enterprise@glastor.es"
+            href="mailto:founder@glastor.es"
             class="px-4 py-2 text-xs font-mono font-bold rounded-lg bg-cyber-neon hover:bg-cyber-neonHover text-cyber-dark transition shadow-[0_0_15px_rgba(0,255,157,0.3)]"
           >
             Get Enterprise SLA
@@ -80,7 +81,7 @@ import Enterprise from '../components/Enterprise.astro';
           <a href="https://crates.io/crates/pii-veil-core" target="_blank" class="hover:text-white transition">crates.io</a>
           <a href="https://pypi.org/project/glastor-pii-veil/" target="_blank" class="hover:text-white transition">PyPI</a>
           <a href="https://www.npmjs.com/package/pii-veil-node" target="_blank" class="hover:text-white transition">npm</a>
-          <a href="mailto:enterprise@glastor.es" class="text-cyber-neon hover:underline">enterprise@glastor.es</a>
+          <a href="mailto:founder@glastor.es" class="text-cyber-neon hover:underline">founder@glastor.es</a>
         </div>
       </div>
     </footer>
