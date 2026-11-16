@@ -172,9 +172,10 @@ jobs:
         working-directory: crates/veil-node
         run: |
           if [ -z "${NODE_AUTH_TOKEN}" ]; then
-            echo "NPM_TOKEN not set, skipping npm publish"
-            exit 0
+            echo "::error::El secret NPM_TOKEN no está configurado en GitHub Secrets. Agrega NPM_TOKEN (token Automation de npm) para publicar pii-veil-node."
+            exit 1
           fi
+          echo "NPM_TOKEN detectado (${#NODE_AUTH_TOKEN} caracteres). Procediendo a compilar y publicar..."
           npm install
           npm run build
           npm publish --access public
