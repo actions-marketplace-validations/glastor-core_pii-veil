@@ -140,6 +140,77 @@ pub unsafe extern "C" fn veil_string_free(ptr: *mut c_char) {
     }
 }
 
+/// Returns the number of redacted entity mappings currently stored in `handle`'s vault.
+#[no_mangle]
+pub unsafe extern "C" fn veil_vault_len(handle: *const VeilHandle) -> usize {
+    handle.as_ref().map(|h| h.vault.len()).unwrap_or(0)
+}
+
+/// Clears all stored entity mappings in `handle`'s vault.
+#[no_mangle]
+pub unsafe extern "C" fn veil_vault_clear(handle: *mut VeilHandle) {
+    if let Some(h) = handle.as_mut() {
+        h.vault = Vault::new();
+    }
+}
+
+/// Opaque handle for an active [`StreamingRestorer`].
+pub struct VeilStreamingRestorer {
+    restorer: pii_veil_core::StreamingRestorer,
+}
+
+/// Creates a new [`VeilStreamingRestorer`] bound to the current snapshot of `handle`'s vault.
+#[no_mangle]
+pub unsafe extern "C" fn veil_streaming_restorer_new(
+    handle: *const VeilHandle,
+) -> *mut VeilStreamingRestorer {
+    let Some(h) = handle.as_ref() else {
+        return ptr::null_mut();
+    };
+    Box::into_raw(Box::new(VeilStreamingRestorer {
+        restorer: h.vault.streaming_restorer(),
+    }))
+}
+
+/// Pushes a streaming token chunk through the restorer.
+/// Returns restored text (or empty string if a placeholder is currently incomplete).
+/// The returned string must be freed with [`veil_string_free`].
+#[no_mangle]
+pub unsafe extern "C" fn veil_streaming_restorer_push(
+    restorer: *mut VeilStreamingRestorer,
+    chunk_utf8: *const c_char,
+) -> *mut c_char {
+    let Some(r) = restorer.as_mut() else {
+        return ptr::null_mut();
+    };
+    let Some(chunk) = cstr_to_str(chunk_utf8) else {
+        return ptr::null_mut();
+    };
+    let restored = r.restorer.push_chunk(chunk);
+    string_to_c_char(restored)
+}
+
+/// Flushes any pending buffered tokens at the end of an LLM stream.
+/// The returned string must be freed with [`veil_string_free`].
+#[no_mangle]
+pub unsafe extern "C" fn veil_streaming_restorer_finish(
+    restorer: *mut VeilStreamingRestorer,
+) -> *mut c_char {
+    let Some(r) = restorer.as_mut() else {
+        return ptr::null_mut();
+    };
+    let tail = r.restorer.finish();
+    string_to_c_char(tail)
+}
+
+/// Frees a [`VeilStreamingRestorer`] allocated with [`veil_streaming_restorer_new`].
+#[no_mangle]
+pub unsafe extern "C" fn veil_streaming_restorer_free(restorer: *mut VeilStreamingRestorer) {
+    if !restorer.is_null() {
+        drop(Box::from_raw(restorer));
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -171,6 +242,42 @@ mod tests {
 
             veil_string_free(restored_ptr);
             veil_free(handle);
+        }
+    }
+
+    #[test]
+    fn test_c_abi_streaming_roundtrip() {
+        unsafe {
+            let handle = veil_new(0, ptr::null());
+            let prompt = CString::new("Mi mail es dev@acme.org y mi pin es 1234").unwrap();
+            let redacted_ptr = veil_redact(handle, prompt.as_ptr());
+            veil_string_free(redacted_ptr);
+
+            assert_eq!(veil_vault_len(handle), 1);
+
+            let restorer = veil_streaming_restorer_new(handle);
+            assert!(!restorer.is_null());
+
+            // Simulate split token: "[EMA" then "IL_1] verificado"
+            let chunk1 = CString::new("Confirmado para [EMA").unwrap();
+            let out1_ptr = veil_streaming_restorer_push(restorer, chunk1.as_ptr());
+            let out1 = CStr::from_ptr(out1_ptr).to_str().unwrap().to_string();
+            veil_string_free(out1_ptr);
+
+            let chunk2 = CString::new("IL_1] ahora mismo.").unwrap();
+            let out2_ptr = veil_streaming_restorer_push(restorer, chunk2.as_ptr());
+            let out2 = CStr::from_ptr(out2_ptr).to_str().unwrap().to_string();
+            veil_string_free(out2_ptr);
+
+            let finish_ptr = veil_streaming_restorer_finish(restorer);
+            let finish_tail = CStr::from_ptr(finish_ptr).to_str().unwrap().to_string();
+            veil_string_free(finish_ptr);
+
+            veil_streaming_restorer_free(restorer);
+            veil_free(handle);
+
+            let full_out = format!("{}{}{}", out1, out2, finish_tail);
+            assert_eq!(full_out, "Confirmado para dev@acme.org ahora mismo.");
         }
     }
 }

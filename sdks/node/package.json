@@ -1,0 +1,50 @@
+{
+  "name": "@glastor/pii-veil",
+  "version": "0.1.0",
+  "description": "Sub-millisecond Reversible PII & Secret Anonymizer for Node.js, Next.js, Express & Vercel AI SDK (Luhn, Mod-97 IBAN, DNI, CUIT, API keys)",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./express": {
+      "types": "./lib/middlewares/express.d.ts",
+      "default": "./lib/middlewares/express.js"
+    },
+    "./nextjs": {
+      "types": "./lib/middlewares/nextjs.d.ts",
+      "default": "./lib/middlewares/nextjs.js"
+    },
+    "./vercel-ai": {
+      "types": "./lib/middlewares/vercel-ai.d.ts",
+      "default": "./lib/middlewares/vercel-ai.js"
+    }
+  },
+  "scripts": {
+    "test": "node --test tests/index.test.js"
+  },
+  "keywords": [
+    "pii",
+    "anonymization",
+    "privacy",
+    "dlp",
+    "llm",
+    "nextjs",
+    "express",
+    "vercel-ai",
+    "openai",
+    "security"
+  ],
+  "author": "GLASTOR Core Team <engineering@glastor.io>",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/glastor-core/pii-veil.git"
+  },
+  "bugs": {
+    "url": "https://github.com/glastor-core/pii-veil/issues"
+  },
+  "homepage": "https://github.com/glastor-core/pii-veil#readme"
+}

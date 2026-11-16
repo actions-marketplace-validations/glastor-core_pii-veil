@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pii-veil"
+version = "0.1.0"
+description = "Sub-millisecond Reversible PII & Secret Anonymizer for LLMs (Luhn, Mod-97 IBAN, DNI, CUIT, API keys) with LangChain, LlamaIndex & CrewAI support."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT OR Apache-2.0" }
+authors = [
+  { name = "GLASTOR Core Team", email = "engineering@glastor.io" }
+]
+keywords = [
+  "pii", "anonymization", "privacy", "dlp", "llm", "langchain", "llamaindex", "crewai", "openai", "claude", "security"
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Topic :: Security",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "License :: OSI Approved :: MIT License",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/glastor-core/pii-veil"
+Documentation = "https://github.com/glastor-core/pii-veil#readme"
+Repository = "https://github.com/glastor-core/pii-veil"
+Issues = "https://github.com/glastor-core/pii-veil/issues"
+
+[project.optional-dependencies]
+langchain = ["langchain-core>=0.1.0"]
+llamaindex = ["llama-index-core>=0.10.0"]
+crewai = ["crewai>=0.28.0"]
+all = [
+  "langchain-core>=0.1.0",
+  "llama-index-core>=0.10.0",
+  "crewai>=0.28.0"
+]
+test = [
+  "pytest>=7.0.0"
+]
+
+[tool.setuptools.packages.find]
+where = ["python"]

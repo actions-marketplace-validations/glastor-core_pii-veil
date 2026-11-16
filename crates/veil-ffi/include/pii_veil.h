@@ -44,6 +44,40 @@ char* veil_redact_json(VeilHandle* handle, const char* json_utf8);
  */
 void veil_string_free(char* ptr);
 
+/**
+ * Returns the number of entity mappings currently stored in the handle's vault.
+ */
+size_t veil_vault_len(const VeilHandle* handle);
+
+/**
+ * Clears all entity mappings currently stored in the handle's vault.
+ */
+void veil_vault_clear(VeilHandle* handle);
+
+typedef struct VeilStreamingRestorer VeilStreamingRestorer;
+
+/**
+ * Creates a new streaming restorer bound to the handle's current vault snapshot.
+ */
+VeilStreamingRestorer* veil_streaming_restorer_new(const VeilHandle* handle);
+
+/**
+ * Pushes a token chunk into the streaming restorer.
+ * Returns newly restored text (or empty string). Must be freed with `veil_string_free`.
+ */
+char* veil_streaming_restorer_push(VeilStreamingRestorer* restorer, const char* chunk_utf8);
+
+/**
+ * Flushes any pending buffered tokens at the end of the stream.
+ * Must be freed with `veil_string_free`.
+ */
+char* veil_streaming_restorer_finish(VeilStreamingRestorer* restorer);
+
+/**
+ * Frees a streaming restorer created with `veil_streaming_restorer_new`.
+ */
+void veil_streaming_restorer_free(VeilStreamingRestorer* restorer);
+
 #ifdef __cplusplus
 }
 #endif
