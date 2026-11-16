@@ -419,15 +419,15 @@ fn restore_sse_json_value(val: &mut Value, restorer: &mut pii_veil_core::Streami
     }
 }
 
-const FAVICON_SVG: &str = include_str!("../../../public/favicon/favicon.svg");
-const FAVICON_ICO: &[u8] = include_bytes!("../../../public/favicon/favicon.ico");
-const FAVICON_16: &[u8] = include_bytes!("../../../public/favicon/favicon-16x16.png");
-const FAVICON_32: &[u8] = include_bytes!("../../../public/favicon/favicon-32x32.png");
-const FAVICON_48: &[u8] = include_bytes!("../../../public/favicon/favicon-48x48.png");
-const APPLE_TOUCH_ICON: &[u8] = include_bytes!("../../../public/favicon/apple-touch-icon.png");
-const ANDROID_192: &[u8] = include_bytes!("../../../public/favicon/android-chrome-192x192.png");
-const ANDROID_512: &[u8] = include_bytes!("../../../public/favicon/android-chrome-512x512.png");
-const WEBMANIFEST: &str = include_str!("../../../public/favicon/site.webmanifest");
+const FAVICON_SVG: &str = include_str!("../assets/favicon/favicon.svg");
+const FAVICON_ICO: &[u8] = include_bytes!("../assets/favicon/favicon.ico");
+const FAVICON_16: &[u8] = include_bytes!("../assets/favicon/favicon-16x16.png");
+const FAVICON_32: &[u8] = include_bytes!("../assets/favicon/favicon-32x32.png");
+const FAVICON_48: &[u8] = include_bytes!("../assets/favicon/favicon-48x48.png");
+const APPLE_TOUCH_ICON: &[u8] = include_bytes!("../assets/favicon/apple-touch-icon.png");
+const ANDROID_192: &[u8] = include_bytes!("../assets/favicon/android-chrome-192x192.png");
+const ANDROID_512: &[u8] = include_bytes!("../assets/favicon/android-chrome-512x512.png");
+const WEBMANIFEST: &str = include_str!("../assets/favicon/site.webmanifest");
 
 const DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
 <html lang="es">
