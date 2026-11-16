@@ -1,6 +1,6 @@
 name: "GLASTOR® pii-veil — Ultrafast PII & Secret DLP Gatekeeper"
 author: "GLASTOR® Core (@glastor-core)"
-description: "Sub-millisecond Rust DLP scanner that detects 18 PII & secret types (Luhn cards, Mod-97 IBAN, Regional IDs, DB URIs, API keys) in CI/CD."
+description: "Ultrafast Rust DLP engine to detect and redact 18 PII & secret types across CI/CD workflows and LLMs."
 branding:
   icon: "shield"
   color: "blue"
