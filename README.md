@@ -125,3 +125,19 @@ Use `pii-veil` as a sub-millisecond DLP gatekeeper in any GitHub Actions workflo
 - [`examples/typescript_nextjs_ai_sdk.ts`](examples/typescript_nextjs_ai_sdk.ts) — Next.js / Vercel AI SDK `TransformStream` with `VeilStreamingRestorer`.
 - [`examples/go_http_dlp_middleware.go`](examples/go_http_dlp_middleware.go) — Go `net/http` DLP middleware (`piiveil.NewDlpMiddleware`) & SSE restorer.
 - [`examples/git_pre_commit_hook.sh`](examples/git_pre_commit_hook.sh) — Git pre-commit DLP hook powered by `veil scan --fail-on-detect`.
+
+---
+
+## 🏢 Enterprise & Commercial Support
+
+Are you deploying LLMs or AI agents in production and need guaranteed compliance with **GDPR, HIPAA, PCI-DSS, or SOC 2**?
+
+We offer enterprise licenses and dedicated infrastructure solutions:
+- **On-Premise & Air-Gapped Deployments**: Hardened Kubernetes Helm charts, high-availability sidecars, and zero-external-egress setups for banks, healthcare, and fintech.
+- **Enterprise SIEM & Telemetry**: Live audit streaming to Datadog, Splunk, AWS CloudWatch, and OpenTelemetry collector endpoints.
+- **Custom DLP Detectors & Proprietary Rules**: Tailored regex patterns, custom checksum algorithms, and domain-specific sensitive data classifications.
+- **24/7 SLA & Architecture Review**: Priority engineering support, guaranteed response times, and LLM streaming pipeline benchmarking.
+
+📩 **Need Enterprise On-Premise deployment, SOC 2 / HIPAA compliance logs, or custom rules?**  
+Contact us directly at: **[enterprise@glastor.es](mailto:enterprise@glastor.es)**
+
