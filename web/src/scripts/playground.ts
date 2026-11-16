@@ -244,11 +244,11 @@ export function initPlayground() {
 
 async function loadWasm() {
   try {
-    const wasm = await import(/* @vite-ignore */ '/wasm/pii_veil_wasm.js');
-    await wasm.default('/wasm/pii_veil_wasm_bg.wasm');
+    const wasm = await import('../wasm/pii_veil_wasm.js');
+    await wasm.default();
     wasmModule = wasm;
     console.info('⚡ pii-veil WebAssembly Core Loaded Successfully!');
   } catch (err) {
-    // Falls back gracefully to high-speed inline engine
+    console.info('Using high-speed inline engine (WASM deferred):', err);
   }
 }

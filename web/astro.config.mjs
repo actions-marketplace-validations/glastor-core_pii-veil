@@ -5,11 +5,6 @@ import tailwind from '@astrojs/tailwind';
 export default defineConfig({
   integrations: [tailwind()],
   vite: {
-    build: {
-      rollupOptions: {
-        external: ['/wasm/pii_veil_wasm.js']
-      }
-    },
     server: {
       fs: {
         allow: ['..']
