@@ -1,6 +1,6 @@
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
-use std::hint::black_box;
 use pii_veil_core::{RedactionMode, Vault, VeilEngine};
+use std::hint::black_box;
 
 fn bench_short_prompt_redaction(c: &mut Criterion) {
     let engine = VeilEngine::new(RedactionMode::Placeholder);
