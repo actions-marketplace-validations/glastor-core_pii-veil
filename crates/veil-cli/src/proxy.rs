@@ -105,21 +105,55 @@ pub fn handle_client(
         reader.read_exact(&mut body_bytes)?;
     }
 
-    // Handle GET /favicon.svg or GET /favicon.ico
-    if method.eq_ignore_ascii_case("GET") && (path == "/favicon.svg" || path == "/favicon.ico") {
-        let svg = FAVICON_SVG;
-        let resp = format!(
-            "HTTP/1.1 200 OK\r\nContent-Type: image/svg+xml\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
-            svg.len(),
-            svg
-        );
-        client.write_all(resp.as_bytes())?;
-        client.flush()?;
-        return Ok(());
+    // Strip query string (e.g. ?v=2) for static asset matching
+    let clean_path = path.split('?').next().unwrap_or(path);
+
+    // Handle static favicon & webmanifest routes
+    if method.eq_ignore_ascii_case("GET") {
+        let static_asset: Option<(&str, &[u8])> = match clean_path {
+            "/favicon.svg" | "/public/favicon/favicon.svg" => {
+                Some(("image/svg+xml", FAVICON_SVG.as_bytes()))
+            }
+            "/favicon.ico" | "/public/favicon/favicon.ico" => Some(("image/x-icon", FAVICON_ICO)),
+            "/favicon-16x16.png" | "/public/favicon/favicon-16x16.png" => {
+                Some(("image/png", FAVICON_16))
+            }
+            "/favicon-32x32.png" | "/public/favicon/favicon-32x32.png" => {
+                Some(("image/png", FAVICON_32))
+            }
+            "/favicon-48x48.png" | "/public/favicon/favicon-48x48.png" => {
+                Some(("image/png", FAVICON_48))
+            }
+            "/apple-touch-icon.png" | "/public/favicon/apple-touch-icon.png" => {
+                Some(("image/png", APPLE_TOUCH_ICON))
+            }
+            "/android-chrome-192x192.png" | "/public/favicon/android-chrome-192x192.png" => {
+                Some(("image/png", ANDROID_192))
+            }
+            "/android-chrome-512x512.png" | "/public/favicon/android-chrome-512x512.png" => {
+                Some(("image/png", ANDROID_512))
+            }
+            "/site.webmanifest" | "/public/favicon/site.webmanifest" => {
+                Some(("application/manifest+json", WEBMANIFEST.as_bytes()))
+            }
+            _ => None,
+        };
+
+        if let Some((content_type, bytes)) = static_asset {
+            let header = format!(
+                "HTTP/1.1 200 OK\r\nContent-Type: {}\r\nContent-Length: {}\r\nCache-Control: no-cache\r\nConnection: close\r\n\r\n",
+                content_type,
+                bytes.len()
+            );
+            client.write_all(header.as_bytes())?;
+            client.write_all(bytes)?;
+            client.flush()?;
+            return Ok(());
+        }
     }
 
     // Handle GET / or GET /index.html (Interactive DLP Proxy Dashboard)
-    if method.eq_ignore_ascii_case("GET") && (path == "/" || path == "/index.html") {
+    if method.eq_ignore_ascii_case("GET") && (clean_path == "/" || clean_path == "/index.html") {
         let html = DASHBOARD_HTML;
         let resp = format!(
             "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
@@ -376,7 +410,15 @@ fn restore_sse_json_value(val: &mut Value, restorer: &mut pii_veil_core::Streami
     }
 }
 
-const FAVICON_SVG: &str = include_str!("../../../assets/favicon.svg");
+const FAVICON_SVG: &str = include_str!("../../../public/favicon/favicon.svg");
+const FAVICON_ICO: &[u8] = include_bytes!("../../../public/favicon/favicon.ico");
+const FAVICON_16: &[u8] = include_bytes!("../../../public/favicon/favicon-16x16.png");
+const FAVICON_32: &[u8] = include_bytes!("../../../public/favicon/favicon-32x32.png");
+const FAVICON_48: &[u8] = include_bytes!("../../../public/favicon/favicon-48x48.png");
+const APPLE_TOUCH_ICON: &[u8] = include_bytes!("../../../public/favicon/apple-touch-icon.png");
+const ANDROID_192: &[u8] = include_bytes!("../../../public/favicon/android-chrome-192x192.png");
+const ANDROID_512: &[u8] = include_bytes!("../../../public/favicon/android-chrome-512x512.png");
+const WEBMANIFEST: &str = include_str!("../../../public/favicon/site.webmanifest");
 
 const DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
 <html lang="es">
@@ -384,7 +426,13 @@ const DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GLASTOR® pii-veil — Live DLP & SSE Proxy Dashboard</title>
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/svg+xml" href="/public/favicon/favicon.svg?v=2" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/public/favicon/favicon-48x48.png?v=2" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/public/favicon/favicon-32x32.png?v=2" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/public/favicon/favicon-16x16.png?v=2" />
+  <link rel="shortcut icon" href="/favicon.ico?v=2" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/public/favicon/apple-touch-icon.png?v=2" />
+  <link rel="manifest" href="/public/favicon/site.webmanifest?v=2" />
   <style>
     :root {
       --bg: #0b0f19;
@@ -486,7 +534,7 @@ const DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
   <div class="container">
     <header>
       <div class="title-group">
-        <h1>🛡️ GLASTOR® <code>pii-veil</code> — DLP & SSE Proxy</h1>
+        <h1><img src="/public/favicon/android-chrome-192x192.png?v=2" width="38" height="38" alt="GLASTOR® icon" style="border-radius:8px;" /> GLASTOR® <code>pii-veil</code> — DLP & SSE Proxy</h1>
         <p>Sub-millisecond Reversible PII & Secret Anonymizer (Luhn, Mod-97 IBAN, Mod-23 DNI, Mod-11 CUIT/RUT)</p>
       </div>
       <div class="badge" id="vaultStatus">🟢 Proxy Online • Vault: 0 entidades</div>
