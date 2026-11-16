@@ -41,7 +41,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         uses: glastor-core/byte-gauge@v1
         with:
-          binary-path: "target/${{ matrix.target }}/release/veil"
+          path: "target/${{ matrix.target }}/release/veil"
         continue-on-error: true
       - name: Package Unix Archive (tar.gz)
         if: matrix.os != 'windows-latest'

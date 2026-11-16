@@ -40,7 +40,7 @@ jobs:
       - name: Run GLASTOR® Byte-Gauge on target/release/veil
         uses: glastor-core/byte-gauge@v1
         with:
-          binary-path: "target/release/veil"
+          path: "target/release/veil"
         continue-on-error: true
 
   nemesis-and-veil-dogfooding:
