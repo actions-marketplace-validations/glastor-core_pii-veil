@@ -66,15 +66,69 @@
       <p class="text-cyber-muted text-sm mb-6">
         Speak directly with our core engineering team to initiate an on-premise pilot or request enterprise licensing.
       </p>
-      <a
-        href="mailto:founder@glastor.es?subject=Inquiry%3A%20pii-veil%20Enterprise%20Deployment"
-        class="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-cyber-neon hover:bg-cyber-neonHover text-cyber-dark font-black text-base tracking-wide transition shadow-[0_0_20px_rgba(0,255,157,0.4)]"
-      >
-        ✉️ Contact us at founder@glastor.es
-      </a>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+        <a
+          id="email-contact-btn"
+          href="mailto:founder@glastor.es?subject=Inquiry%3A%20pii-veil%20Enterprise%20Deployment"
+          class="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-cyber-neon hover:bg-cyber-neonHover text-cyber-dark font-black text-base tracking-wide transition shadow-[0_0_20px_rgba(0,255,157,0.4)] w-full sm:w-auto"
+        >
+          ✉️ Contact us at founder@glastor.es
+        </a>
+        <button
+          id="copy-email-btn"
+          type="button"
+          class="px-5 py-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 hover:border-slate-500 font-mono text-sm transition flex items-center justify-center gap-2 w-full sm:w-auto"
+        >
+          📋 Copy Email
+        </button>
+      </div>
+      <div id="copy-status" class="hidden text-xs font-mono text-cyber-neon mt-3 font-semibold">
+        ✅ Email copied to clipboard: founder@glastor.es
+      </div>
       <span class="block text-xs font-mono text-slate-500 mt-3">
         Guaranteed direct engineer response within 24 hours.
       </span>
     </div>
   </div>
 </section>
+
+<script>
+  function setupEnterpriseButtons() {
+    const email = 'founder@glastor.es';
+    const copyBtn = document.getElementById('copy-email-btn');
+    const contactBtn = document.getElementById('email-contact-btn');
+    const statusMsg = document.getElementById('copy-status');
+
+    function notifyCopied() {
+      navigator.clipboard.writeText(email).then(() => {
+        if (statusMsg) {
+          statusMsg.classList.remove('hidden');
+          setTimeout(() => {
+            statusMsg.classList.add('hidden');
+          }, 3500);
+        }
+      });
+    }
+
+    copyBtn?.addEventListener('click', () => {
+      notifyCopied();
+      if (copyBtn) {
+        copyBtn.textContent = '✅ Copied!';
+        setTimeout(() => {
+          copyBtn.innerHTML = '📋 Copy Email';
+        }, 2000);
+      }
+    });
+
+    contactBtn?.addEventListener('click', () => {
+      // Also copy to clipboard in case user uses webmail/Gmail and mailto does not open app
+      navigator.clipboard.writeText(email);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupEnterpriseButtons);
+  } else {
+    setupEnterpriseButtons();
+  }
+</script>
