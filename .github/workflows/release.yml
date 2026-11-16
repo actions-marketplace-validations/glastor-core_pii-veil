@@ -140,6 +140,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+      PYO3_USE_ABI3_FORWARD_COMPATIBILITY: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
