@@ -1,0 +1,169 @@
+---
+// CodeTabs.astro - Multi-language SDK Integration tabs
+---
+
+<section id="sdks" class="py-16 px-4 max-w-6xl mx-auto">
+  <div class="text-center mb-10">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyber-purple/10 border border-cyber-purple/30 text-cyber-purple text-xs font-mono font-semibold uppercase mb-3">
+      📦 NATIVE MULTI-LANGUAGE BINDINGS
+    </div>
+    <h2 class="text-3xl md:text-5xl font-black text-white tracking-tight mb-3">
+      Integrates in 3 Lines of Code. <br />
+      <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyber-neon to-cyber-cyan">
+        Across Every Layer of Your Stack.
+      </span>
+    </h2>
+    <p class="text-cyber-muted text-base max-w-2xl mx-auto">
+      Zero foreign dependencies. Official packages on crates.io, PyPI, npm, and Homebrew.
+    </p>
+  </div>
+
+  <!-- Code Container -->
+  <div class="bg-cyber-card border border-cyber-border rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl">
+    <!-- Tab Headers -->
+    <div class="bg-cyber-dark/90 border-b border-cyber-border px-4 py-2.5 flex items-center justify-between gap-2 overflow-x-auto">
+      <div class="flex items-center gap-1 font-mono text-xs" id="code-tabs-header">
+        <button class="code-tab-btn px-3 py-1.5 rounded-lg bg-cyber-neon text-cyber-dark font-bold transition flex items-center gap-1.5" data-tab="rust">
+          <span>🦀</span> Rust
+        </button>
+        <button class="code-tab-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5" data-tab="python">
+          <span>🐍</span> Python
+        </button>
+        <button class="code-tab-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5" data-tab="typescript">
+          <span>🟢</span> TypeScript
+        </button>
+        <button class="code-tab-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5" data-tab="go">
+          <span>🐹</span> Go
+        </button>
+        <button class="code-tab-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5" data-tab="cli">
+          <span>⚡</span> CLI / MCP
+        </button>
+      </div>
+
+      <button id="copy-code-btn" class="px-3 py-1 text-xs font-mono text-cyber-muted hover:text-white bg-slate-800 hover:bg-slate-700 rounded-md border border-slate-700 transition shrink-0 flex items-center gap-1">
+        📋 Copy Snippet
+      </button>
+    </div>
+
+    <!-- Code Panels -->
+    <div class="p-4 sm:p-6 bg-black/60 font-mono text-xs sm:text-sm overflow-x-auto leading-relaxed">
+      <!-- Rust -->
+      <pre id="code-rust" class="code-panel text-slate-200"><code><span class="text-cyber-purple">use</span> <span class="text-cyber-cyan">pii_veil_core</span>::&#123;<span class="text-cyber-neon">VeilEngine</span>, <span class="text-cyber-neon">RedactionMode</span>&#125;;
+
+<span class="text-cyber-muted">// 1. Initialize sub-millisecond anonymization engine</span>
+<span class="text-cyber-purple">let</span> engine = <span class="text-cyber-neon">VeilEngine</span>::<span class="text-cyber-cyan">new</span>(<span class="text-cyber-neon">RedactionMode</span>::<span class="text-cyber-cyan">Placeholder</span>);
+
+<span class="text-cyber-muted">// 2. Anonymize user prompt before sending to OpenAI/Claude</span>
+<span class="text-cyber-purple">let</span> result = engine.<span class="text-cyber-cyan">redact</span>(<span class="text-amber-300">"Customer Juan, card 4532-8921-0023-1192, email juan@corp.com"</span>);
+<span class="text-cyber-cyan">println!</span>(<span class="text-amber-300">"Safe Prompt: &#123;&#125;"</span>, result.text);
+<span class="text-cyber-muted">// &gt;&gt; "Customer Juan, card &lt;CREDIT_CARD_1&gt;, email &lt;EMAIL_1&gt;"</span>
+
+<span class="text-cyber-muted">// 3. Reversibly restore real PII when the LLM stream returns</span>
+<span class="text-cyber-purple">let</span> restored = result.vault.<span class="text-cyber-cyan">restore</span>(<span class="text-amber-300">"Charged &lt;CREDIT_CARD_1&gt; successfully."</span>);
+<span class="text-cyber-cyan">println!</span>(<span class="text-amber-300">"Final Response: &#123;&#125;"</span>, restored);</code></pre>
+
+      <!-- Python -->
+      <pre id="code-python" class="code-panel hidden text-slate-200"><code><span class="text-cyber-purple">from</span> <span class="text-cyber-cyan">glastor_pii_veil</span> <span class="text-cyber-purple">import</span> <span class="text-cyber-neon">VeilEngine</span>
+
+<span class="text-cyber-muted"># 1. Initialize native C-accelerated engine</span>
+engine = <span class="text-cyber-neon">VeilEngine</span>(mode=<span class="text-amber-300">"placeholder"</span>)
+
+<span class="text-cyber-muted"># 2. Sanitize prompt for LangChain / CrewAI agent</span>
+prompt = <span class="text-amber-300">"Patient SSN 000-12-3456, diagnosed with stage 2 hypertension"</span>
+sanitized, count, vault = engine.<span class="text-cyber-cyan">redact</span>(prompt)
+<span class="text-cyber-cyan">print</span>(sanitized)
+<span class="text-cyber-muted"># &gt;&gt; "Patient SSN &lt;US_SSN_1&gt;, diagnosed with stage 2 hypertension"</span>
+
+<span class="text-cyber-muted"># 3. Restore stream output in O(N) linear time</span>
+ai_response = <span class="text-amber-300">"Prescribed Lisinopril for &lt;US_SSN_1&gt;"</span>
+original_note = vault.<span class="text-cyber-cyan">restore</span>(ai_response)</code></pre>
+
+      <!-- TypeScript -->
+      <pre id="code-typescript" class="code-panel hidden text-slate-200"><code><span class="text-cyber-purple">import</span> &#123; <span class="text-cyber-neon">VeilEngine</span> &#125; <span class="text-cyber-purple">from</span> <span class="text-amber-300">'pii-veil-node'</span>;
+
+<span class="text-cyber-muted">// 1. Native N-API Rust binding for Next.js and Vercel AI SDK</span>
+<span class="text-cyber-purple">const</span> engine = <span class="text-cyber-purple">new</span> <span class="text-cyber-neon">VeilEngine</span>(<span class="text-amber-300">'placeholder'</span>);
+
+<span class="text-cyber-muted">// 2. Sanitize incoming client message in API route</span>
+<span class="text-cyber-purple">const</span> &#123; text: safePrompt, vault &#125; = engine.<span class="text-cyber-cyan">redact</span>(userMessage);
+
+<span class="text-cyber-muted">// 3. Pipe through LLM stream and restore tokens on the fly</span>
+<span class="text-cyber-purple">const</span> clientStream = llmStream.<span class="text-cyber-cyan">pipeThrough</span>(
+  engine.<span class="text-cyber-cyan">createRestorationStream</span>(vault)
+);</code></pre>
+
+      <!-- Go -->
+      <pre id="code-go" class="code-panel hidden text-slate-200"><code><span class="text-cyber-purple">package</span> main
+
+<span class="text-cyber-purple">import</span> (
+    <span class="text-amber-300">"net/http"</span>
+    piiveil <span class="text-amber-300">"github.com/glastor-core/pii-veil/sdks/go"</span>
+)
+
+<span class="text-cyber-purple">func</span> <span class="text-cyber-cyan">main</span>() &#123;
+    <span class="text-cyber-muted">// 1. Zero-latency HTTP DLP Reverse Proxy Middleware</span>
+    dlp := piiveil.<span class="text-cyber-cyan">NewDlpMiddleware</span>(piiveil.ModePlaceholder)
+
+    <span class="text-cyber-muted">// 2. Wrap your OpenAI / Anthropic proxy handler</span>
+    http.<span class="text-cyber-cyan">Handle</span>(<span class="text-amber-300">"/v1/chat/completions"</span>, dlp.<span class="text-cyber-cyan">Wrap</span>(llmProxyHandler))
+    http.<span class="text-cyber-cyan">ListenAndServe</span>(<span class="text-amber-300">":8080"</span>, nil)
+&#125;</code></pre>
+
+      <!-- CLI / MCP -->
+      <pre id="code-cli" class="code-panel hidden text-slate-200"><code><span class="text-cyber-muted"># 1. Start Model Context Protocol (MCP) Server for Claude Desktop / Cursor</span>
+$ <span class="text-cyber-neon">veil mcp</span>
+
+<span class="text-cyber-muted"># 2. Start local DLP Reverse Proxy on port 8080</span>
+$ <span class="text-cyber-neon">veil proxy</span> --upstream https://api.openai.com/v1 --port 8080
+
+<span class="text-cyber-muted"># 3. Scan Git commits or SQL dumps in CI/CD pipeline</span>
+$ <span class="text-cyber-neon">veil scan</span> dump.sql --fail-on-detect --format json &gt; audit.json</code></pre>
+    </div>
+  </div>
+</section>
+
+<script>
+  function setupCodeTabs() {
+    const tabs = document.querySelectorAll('.code-tab-btn');
+    const panels = document.querySelectorAll('.code-panel');
+    const copyBtn = document.getElementById('copy-code-btn');
+
+    tabs.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.getAttribute('data-tab');
+
+        tabs.forEach(b => {
+          b.classList.remove('bg-cyber-neon', 'text-cyber-dark', 'font-bold');
+          b.classList.add('text-slate-400');
+        });
+        btn.classList.add('bg-cyber-neon', 'text-cyber-dark', 'font-bold');
+        btn.classList.remove('text-slate-400');
+
+        panels.forEach(p => {
+          if (p.id === `code-${target}`) {
+            p.classList.remove('hidden');
+          } else {
+            p.classList.add('hidden');
+          }
+        });
+      });
+    });
+
+    copyBtn?.addEventListener('click', async () => {
+      const activePanel = document.querySelector('.code-panel:not(.hidden)');
+      if (activePanel) {
+        await navigator.clipboard.writeText(activePanel.textContent || '');
+        copyBtn.textContent = '✅ Copied!';
+        setTimeout(() => {
+          copyBtn.textContent = '📋 Copy Snippet';
+        }, 2000);
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupCodeTabs);
+  } else {
+    setupCodeTabs();
+  }
+</script>

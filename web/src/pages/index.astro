@@ -1,8 +1,12 @@
 ---
 import Hero from '../components/Hero.astro';
+import ArchitectureFlow from '../components/ArchitectureFlow.astro';
 import Playground from '../components/Playground.astro';
+import DetectorsBento from '../components/DetectorsBento.astro';
+import CodeTabs from '../components/CodeTabs.astro';
 import Benchmarks from '../components/Benchmarks.astro';
 import Enterprise from '../components/Enterprise.astro';
+import Faq from '../components/Faq.astro';
 ---
 
 <!doctype html>
@@ -42,11 +46,14 @@ import Enterprise from '../components/Enterprise.astro';
           </span>
         </a>
 
-        <!-- Links (Visible on lg: >= 1024px screens to guarantee ample breathing room) -->
-        <div class="hidden lg:flex items-center gap-6 xl:gap-8 text-sm font-medium text-cyber-muted shrink-0">
-          <a href="#demo" class="hover:text-cyber-neon transition whitespace-nowrap">Live Demo</a>
+        <!-- Links (Visible on xl: >= 1280px or lg: >= 1024px with compact gap) -->
+        <div class="hidden lg:flex items-center gap-4 xl:gap-6 text-xs xl:text-sm font-medium text-cyber-muted shrink-0">
+          <a href="#architecture" class="hover:text-cyber-cyan transition whitespace-nowrap">Flujo LLM</a>
+          <a href="#demo" class="hover:text-cyber-neon transition whitespace-nowrap">Demo WASM</a>
+          <a href="#detectors" class="hover:text-amber-400 transition whitespace-nowrap">18 Detectores</a>
+          <a href="#sdks" class="hover:text-cyber-purple transition whitespace-nowrap">SDKs</a>
           <a href="#benchmarks" class="hover:text-cyber-cyan transition whitespace-nowrap">Benchmarks</a>
-          <a href="#enterprise" class="hover:text-cyber-purple transition whitespace-nowrap">Enterprise</a>
+          <a href="#faq" class="hover:text-white transition whitespace-nowrap">FAQ</a>
           <a href="https://github.com/glastor-core/pii-veil" target="_blank" class="hover:text-white transition flex items-center gap-1 whitespace-nowrap">
             GitHub
           </a>
@@ -67,9 +74,13 @@ import Enterprise from '../components/Enterprise.astro';
     <!-- Main Content -->
     <main class="flex-grow">
       <Hero />
+      <ArchitectureFlow />
       <Playground />
+      <DetectorsBento />
+      <CodeTabs />
       <Benchmarks />
       <Enterprise />
+      <Faq />
     </main>
 
     <!-- Footer -->
