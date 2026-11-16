@@ -5,7 +5,7 @@ members = ["crates/veil-core", "crates/veil-cli", "crates/veil-ffi"]
 exclude = ["crates/veil-py", "crates/veil-node"]
 
 [workspace.package]
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 authors = ["Andrés Antonio Cardoso <engineering@glastor.io>"]

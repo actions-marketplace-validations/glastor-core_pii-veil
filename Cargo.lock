@@ -379,7 +379,7 @@ dependencies = [
 
 [[package]]
 name = "pii-veil-cli"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "clap",
  "pii-veil-core",
@@ -388,7 +388,7 @@ dependencies = [
 
 [[package]]
 name = "pii-veil-core"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "aho-corasick",
  "criterion",
@@ -400,7 +400,7 @@ dependencies = [
 
 [[package]]
 name = "pii-veil-ffi"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "pii-veil-core",
  "serde_json",
