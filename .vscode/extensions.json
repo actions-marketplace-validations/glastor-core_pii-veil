@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "rust-lang.rust-analyzer",
+    "tamasfe.even-better-toml",
+    "golang.go",
+    "charliermarsh.ruff",
+    "biomejs.biome",
+    "editorconfig.editorconfig"
+  ]
+}

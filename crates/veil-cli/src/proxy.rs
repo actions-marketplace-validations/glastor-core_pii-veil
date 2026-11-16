@@ -152,11 +152,19 @@ pub fn handle_client(
         }
     }
 
+    // Handle OPTIONS CORS preflight
+    if method.eq_ignore_ascii_case("OPTIONS") {
+        let resp = "HTTP/1.1 204 No Content\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Methods: GET, POST, OPTIONS\r\nAccess-Control-Allow-Headers: Content-Type, Authorization, X-Veil-Echo, X-Veil-Sanitized-Request\r\nAccess-Control-Max-Age: 86400\r\nConnection: close\r\n\r\n";
+        client.write_all(resp.as_bytes())?;
+        client.flush()?;
+        return Ok(());
+    }
+
     // Handle GET / or GET /index.html (Interactive DLP Proxy Dashboard)
     if method.eq_ignore_ascii_case("GET") && (clean_path == "/" || clean_path == "/index.html") {
         let html = DASHBOARD_HTML;
         let resp = format!(
-            "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+            "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\nX-Content-Type-Options: nosniff\r\nX-Frame-Options: SAMEORIGIN\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
             html.len(),
             html
         );
@@ -175,7 +183,7 @@ pub fn handle_client(
         })
         .to_string();
         let resp = format!(
-            "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+            "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
             payload.len(),
             payload
         );
@@ -231,7 +239,7 @@ pub fn handle_client(
             restored_sse.push_str(&restorer.finish());
 
             let resp = format!(
-                "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nCache-Control: no-cache\r\nX-Veil-Sanitized-Request: {}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+                "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nCache-Control: no-cache\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Expose-Headers: X-Veil-Sanitized-Request\r\nX-Veil-Sanitized-Request: {}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
                 sanitized_body.replace(['\r', '\n'], " "),
                 restored_sse.len(),
                 restored_sse
@@ -266,7 +274,8 @@ pub fn handle_client(
             let final_body = serde_json::to_string_pretty(&resp_val).unwrap();
 
             let resp = format!(
-                "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+                "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Expose-Headers: X-Veil-Sanitized-Request\r\nX-Veil-Sanitized-Request: {}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+                sanitized_body.replace(['\r', '\n'], " "),
                 final_body.len(),
                 final_body
             );
@@ -755,5 +764,38 @@ mod tests {
         assert!(restored_sse.contains("4532-0151-1283-0366"));
         assert!(!restored_sse.contains("[EMAIL_1]"));
         assert!(!restored_sse.contains("[CREDIT_CARD_1]"));
+    }
+
+    #[test]
+    fn test_http_proxy_cors_options_preflight() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let addr = listener.local_addr().unwrap();
+
+        let engine = VeilEngine::new(RedactionMode::Placeholder);
+        let vault = Arc::new(Mutex::new(Vault::new()));
+        let config = ProxyConfig {
+            listen_addr: addr.to_string(),
+            upstream_addr: None,
+            echo_mode: true,
+        };
+
+        let server_handle = thread::spawn(move || {
+            if let Ok((stream, _)) = listener.accept() {
+                handle_client(stream, &engine, &vault, &config).unwrap();
+            }
+        });
+
+        let mut client = TcpStream::connect(addr).unwrap();
+        let req = "OPTIONS /v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nOrigin: http://localhost:3000\r\nAccess-Control-Request-Method: POST\r\n\r\n";
+        client.write_all(req.as_bytes()).unwrap();
+        client.flush().unwrap();
+
+        let mut response = String::new();
+        client.read_to_string(&mut response).unwrap();
+        server_handle.join().unwrap();
+
+        assert!(response.starts_with("HTTP/1.1 204 No Content"));
+        assert!(response.contains("Access-Control-Allow-Origin: *"));
+        assert!(response.contains("Access-Control-Allow-Methods: GET, POST, OPTIONS"));
     }
 }
