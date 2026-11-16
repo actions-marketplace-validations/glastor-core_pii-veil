@@ -152,7 +152,7 @@ jobs:
         with:
           working-directory: crates/veil-py
           command: publish
-          args: --find-interpreter --skip-existing
+          args: -i python3.9 -i python3.10 -i python3.11 -i python3.12 -i python3.13 --skip-existing
 
   publish-npm:
     name: Publish Node.js Addon to npm (napi-rs)
