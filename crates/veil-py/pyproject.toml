@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "glastor-pii-veil"
-version = "0.1.2"
+version = "0.1.3"
 description = "Ultrafast Rust-powered PII & Secret anonymizer and reversible vault for Python LLMs, FastAPI, and Data Pipelines."
 readme = "README.md"
 requires-python = ">=3.9"
