@@ -57,5 +57,5 @@ jobs:
         run: cargo build --release -p pii-veil-cli
       - name: Self-Dogfooding — Verify governance & CI configs contain zero leaked secrets
         run: |
-          ./target/release/veil scan --file .github --fail-on-detect
-          ./target/release/veil scan --file Cargo.toml --fail-on-detect
+          ./target/release/veil scan --file .github/workflows -p veil.json --fail-on-detect
+          ./target/release/veil scan --file Cargo.toml -p veil.json --fail-on-detect

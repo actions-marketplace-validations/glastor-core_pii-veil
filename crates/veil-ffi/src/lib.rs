@@ -141,12 +141,18 @@ pub unsafe extern "C" fn veil_string_free(ptr: *mut c_char) {
 }
 
 /// Returns the number of redacted entity mappings currently stored in `handle`'s vault.
+///
+/// # Safety
+/// `handle` must be either `NULL` or a valid pointer to a [`VeilHandle`].
 #[no_mangle]
 pub unsafe extern "C" fn veil_vault_len(handle: *const VeilHandle) -> usize {
     handle.as_ref().map(|h| h.vault.len()).unwrap_or(0)
 }
 
 /// Clears all stored entity mappings in `handle`'s vault.
+///
+/// # Safety
+/// `handle` must be either `NULL` or a valid pointer to a [`VeilHandle`].
 #[no_mangle]
 pub unsafe extern "C" fn veil_vault_clear(handle: *mut VeilHandle) {
     if let Some(h) = handle.as_mut() {
@@ -160,6 +166,9 @@ pub struct VeilStreamingRestorer {
 }
 
 /// Creates a new [`VeilStreamingRestorer`] bound to the current snapshot of `handle`'s vault.
+///
+/// # Safety
+/// `handle` must be either `NULL` or a valid pointer to a [`VeilHandle`].
 #[no_mangle]
 pub unsafe extern "C" fn veil_streaming_restorer_new(
     handle: *const VeilHandle,
@@ -175,6 +184,10 @@ pub unsafe extern "C" fn veil_streaming_restorer_new(
 /// Pushes a streaming token chunk through the restorer.
 /// Returns restored text (or empty string if a placeholder is currently incomplete).
 /// The returned string must be freed with [`veil_string_free`].
+///
+/// # Safety
+/// `restorer` must be a valid pointer to a [`VeilStreamingRestorer`].
+/// `chunk_utf8` must be either `NULL` or a valid null-terminated UTF-8 C string.
 #[no_mangle]
 pub unsafe extern "C" fn veil_streaming_restorer_push(
     restorer: *mut VeilStreamingRestorer,
@@ -192,6 +205,9 @@ pub unsafe extern "C" fn veil_streaming_restorer_push(
 
 /// Flushes any pending buffered tokens at the end of an LLM stream.
 /// The returned string must be freed with [`veil_string_free`].
+///
+/// # Safety
+/// `restorer` must be a valid pointer to a [`VeilStreamingRestorer`].
 #[no_mangle]
 pub unsafe extern "C" fn veil_streaming_restorer_finish(
     restorer: *mut VeilStreamingRestorer,
@@ -204,6 +220,9 @@ pub unsafe extern "C" fn veil_streaming_restorer_finish(
 }
 
 /// Frees a [`VeilStreamingRestorer`] allocated with [`veil_streaming_restorer_new`].
+///
+/// # Safety
+/// `restorer` must be either `NULL` or a pointer returned by [`veil_streaming_restorer_new`].
 #[no_mangle]
 pub unsafe extern "C" fn veil_streaming_restorer_free(restorer: *mut VeilStreamingRestorer) {
     if !restorer.is_null() {
