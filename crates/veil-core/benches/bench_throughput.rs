@@ -1,4 +1,5 @@
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
+use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
+use std::hint::black_box;
 use pii_veil_core::{RedactionMode, Vault, VeilEngine};
 
 fn bench_short_prompt_redaction(c: &mut Criterion) {
