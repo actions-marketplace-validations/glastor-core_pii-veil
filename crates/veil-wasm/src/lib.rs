@@ -3,9 +3,7 @@
 //! High-performance WebAssembly bindings for `pii-veil-core`.
 //! Runs 100% in-browser on client CPU with zero network calls and sub-millisecond execution.
 
-use pii_veil_core::{
-    DetectedSpan, RedactionMode, Vault, VaultEntry, VeilEngine,
-};
+use pii_veil_core::{DetectedSpan, RedactionMode, Vault, VaultEntry, VeilEngine};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
