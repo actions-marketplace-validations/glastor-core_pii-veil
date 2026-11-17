@@ -84,17 +84,35 @@ import Faq from '../components/Faq.astro';
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-cyber-border bg-black/60 py-10 px-4 text-center text-xs font-mono text-cyber-muted">
-      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div>
-          <p>© 2026 <strong class="text-white">GLASTOR® Core</strong>. Open Source under Apache-2.0 & MIT License.</p>
+    <footer class="border-t border-cyber-border/80 bg-black/70 py-10 px-4 sm:px-6 lg:px-8 text-xs font-mono text-cyber-muted">
+      <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-6 text-center lg:text-left">
+        <!-- Brand & License Info -->
+        <div class="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 text-slate-300">
+          <div class="flex items-center gap-2">
+            <img src="/favicon.svg" alt="GLASTOR" class="w-5 h-5 rounded" />
+            <span>© 2026 <strong class="text-white font-bold tracking-tight">GLASTOR® Core</strong></span>
+          </div>
+          <span class="hidden sm:inline text-cyber-border">•</span>
+          <span class="text-slate-400">Open Source under Apache-2.0 & MIT</span>
         </div>
-        <div class="flex items-center gap-6">
-          <a href="https://github.com/glastor-core/pii-veil" target="_blank" class="hover:text-white transition">GitHub Repo</a>
-          <a href="https://crates.io/crates/pii-veil-core" target="_blank" class="hover:text-white transition">crates.io</a>
-          <a href="https://pypi.org/project/glastor-pii-veil/" target="_blank" class="hover:text-white transition">PyPI</a>
-          <a href="https://www.npmjs.com/package/pii-veil-node" target="_blank" class="hover:text-white transition">npm</a>
-          <a href="mailto:founder@glastor.es" class="text-cyber-neon hover:underline">founder@glastor.es</a>
+
+        <!-- Ecosystem Links (Responsive with flex-wrap and whitespace-nowrap) -->
+        <div class="flex flex-wrap items-center justify-center lg:justify-end gap-x-5 gap-y-2.5">
+          <a href="https://github.com/glastor-core/pii-veil" target="_blank" class="hover:text-white transition whitespace-nowrap flex items-center gap-1.5">
+            <span>🐙</span> GitHub Repo
+          </a>
+          <a href="https://crates.io/crates/pii-veil-core" target="_blank" class="hover:text-orange-400 transition whitespace-nowrap flex items-center gap-1.5">
+            <span>🦀</span> crates.io
+          </a>
+          <a href="https://pypi.org/project/glastor-pii-veil/" target="_blank" class="hover:text-cyber-cyan transition whitespace-nowrap flex items-center gap-1.5">
+            <span>🐍</span> PyPI
+          </a>
+          <a href="https://www.npmjs.com/package/pii-veil-node" target="_blank" class="hover:text-red-400 transition whitespace-nowrap flex items-center gap-1.5">
+            <span>📦</span> npm
+          </a>
+          <a href="mailto:founder@glastor.es" class="px-2.5 py-1 rounded-lg bg-cyber-neon/10 border border-cyber-neon/30 text-cyber-neon hover:bg-cyber-neon/20 hover:border-cyber-neon transition whitespace-nowrap font-medium flex items-center gap-1.5">
+            <span>✉️</span> founder@glastor.es
+          </a>
         </div>
       </div>
     </footer>
