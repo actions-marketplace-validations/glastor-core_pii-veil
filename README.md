@@ -9,6 +9,7 @@
   <a href="https://github.com/glastor-core/pii-veil/actions/workflows/audit.yml"><img src="https://github.com/glastor-core/pii-veil/actions/workflows/audit.yml/badge.svg" alt="Security & SemVer Audit" /></a>
   <a href="https://github.com/glastor-core/pii-veil/releases"><img src="https://img.shields.io/github/v/release/glastor-core/pii-veil?logo=github&label=release&color=00c896" alt="GitHub Release" /></a>
   <a href="https://crates.io/crates/pii-veil-core"><img src="https://img.shields.io/crates/v/pii-veil-core.svg?logo=rust&color=dea584" alt="Crates.io" /></a>
+  <a href="https://crates.io/crates/pii-veil-core"><img src="https://img.shields.io/crates/d/pii-veil-core?logo=rust&color=dea584&label=crates.io%20downloads" alt="Crates.io Downloads" /></a>
   <a href="https://pkg.go.dev/github.com/glastor-core/pii-veil/sdks/go"><img src="https://pkg.go.dev/badge/github.com/glastor-core/pii-veil/sdks/go.svg" alt="Go Reference" /></a>
   <a href="sdks/python"><img src="https://img.shields.io/badge/Python-3.9%2B%20%7C%20LangChain%20%7C%20CrewAI-3776AB?logo=python&logoColor=white" alt="Python SDK" /></a>
   <a href="sdks/node"><img src="https://img.shields.io/badge/Node.js-18%2B%20%7C%20Next.js%20%7C%20Vercel%20AI-339933?logo=nodedotjs&logoColor=white" alt="Node.js SDK" /></a>
