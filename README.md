@@ -131,6 +131,8 @@ Use `pii-veil` as a sub-millisecond DLP gatekeeper in any GitHub Actions workflo
 ### 7. MCP Server Setup (Claude Desktop, Cursor & Windsurf)
 `pii-veil` ships with a zero-dependency **Model Context Protocol (MCP)** server (`veil mcp`) over `stdio` exposing four tools: `veil_redact`, `veil_restore`, `veil_redact_json`, and `veil_scan`.
 
+Official MCP Registry identifier: `mcp-name: io.github.glastor-core/pii-veil`
+
 Add to your `claude_desktop_config.json`, Cursor (`~/.cursor/mcp.json`), or Windsurf MCP config:
 
 **Using the native Rust binary (`cargo install pii-veil-cli`):**
