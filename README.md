@@ -57,6 +57,7 @@ Designed with the **6-in-1 Multi-Market Architecture**:
   Replaces sensitive data with semantic tokens (`[EMAIL_1]`, `[CREDIT_CARD_1]`, `[IBAN_1]`), restores full responses in $O(N)$ via `aho-corasick`, or restores live token streams chunk-by-chunk (`[EMA` + `IL_1]`) via `StreamingRestorer`.
 - **Built-in Model Context Protocol (`veil mcp`) & HTTP/SSE Proxy (`veil proxy`)**:
   - `veil mcp`: Zero-dependency JSON-RPC 2.0 MCP server over `stdio` exposing `veil_redact`, `veil_restore`, `veil_redact_json`, and `veil_scan` directly to Claude Desktop, Cursor, and Windsurf.
+  - Official MCP Registry Name: `mcp-name: io.github.glastor-core/pii-veil`
   - `veil proxy`: Local HTTP/SSE reverse proxy (`127.0.0.1:8080`) that redacts outgoing LLM JSON prompts and restores incoming `text/event-stream` SSE or JSON responses in real time.
 - **18 Built-in Detectors with Mathematical Checksum Verification**:
   - **Financial**: Credit Cards (**Luhn** checksum) and IBANs (**ISO 13616 Mod-97** checksum).
