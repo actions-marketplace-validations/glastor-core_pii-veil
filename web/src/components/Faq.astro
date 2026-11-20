@@ -124,6 +124,28 @@
       <summary class="flex items-center justify-between cursor-pointer list-none select-none font-bold text-white text-base sm:text-lg group-hover:text-cyber-neon transition">
         <span class="flex items-center gap-3">
           <span class="text-cyber-neon font-mono text-sm">06.</span>
+          ¿Cómo se audita la cadena de suministro y la seguridad de los binarios (Supply Chain)?
+        </span>
+        <span class="text-cyber-muted group-open:rotate-180 group-open:text-cyber-neon transition-transform duration-200">
+          ▼
+        </span>
+      </summary>
+      <div class="mt-4 pt-4 border-t border-cyber-border/60 text-sm text-slate-300 leading-relaxed font-sans space-y-2">
+        <p>
+          <code class="text-cyber-neon font-mono text-xs">pii-veil</code> cuenta con una certificación continua de cadena de suministro (Zero-Trust DevSecOps) respaldada por el ecosistema <strong class="text-white">GLASTOR® Core</strong>:
+        </p>
+        <ul class="list-disc pl-5 space-y-1.5 text-slate-300">
+          <li><strong class="text-purple-400">GLASTOR® Specter:</strong> Verifica el AST de la API pública en &lt; 5 ms en cada PR, previniendo <em>Trojan Breaking Changes</em> y asegurando que las firmas de métodos jamás se rompan sin previo aviso en un patch release.</li>
+          <li><strong class="text-cyan-400">GLASTOR® Byte-Gauge:</strong> Audita con SIMD los binarios compilados (<code class="text-xs font-mono">veil</code> CLI y WebAssembly), certificando protecciones de memoria (<code class="text-xs font-mono">checksec</code>: ASLR/PIE, Stack Canaries, NX/DEP), analizando la entropía de Shannon para garantizar cero secretos embebidos, y generando reportes <strong class="text-white">SARIF 2.1.0</strong> y <strong class="text-white">SBOM CycloneDX 1.5</strong>.</li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- Item 7 -->
+    <details class="group bg-cyber-card border border-cyber-border rounded-xl p-5 open:border-cyber-neon/60 transition shadow-lg">
+      <summary class="flex items-center justify-between cursor-pointer list-none select-none font-bold text-white text-base sm:text-lg group-hover:text-cyber-neon transition">
+        <span class="flex items-center gap-3">
+          <span class="text-cyber-neon font-mono text-sm">07.</span>
           ¿Cómo se adquiere soporte comercial, auditoría y SLAs de respuesta?
         </span>
         <span class="text-cyber-muted group-open:rotate-180 group-open:text-cyber-neon transition-transform duration-200">
