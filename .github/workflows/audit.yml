@@ -12,6 +12,7 @@ on:
 permissions:
   contents: read
   security-events: write
+  pull-requests: write
 
 env:
   CARGO_TERM_COLOR: always
@@ -26,6 +27,12 @@ jobs:
           fetch-depth: 0
       - name: Run GLASTOR® Specter API Contract Verification
         uses: glastor-core/specter@v1
+        with:
+          base-ref: "origin/main"
+          fail-on-trojan: "true"
+          output-sarif: "specter.sarif"
+          output-sbom: "specter-sbom.cdx.json"
+          post-pr-comment: "true"
         continue-on-error: true
 
   byte-gauge-binary-audit:
@@ -34,14 +41,30 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@v2
-      - name: Build release artifacts (veil CLI & libpii_veil_ffi)
-        run: cargo build --release --workspace
-      - name: Run GLASTOR® Byte-Gauge on target/release/veil
+      - name: Build release artifacts (veil CLI & WebAssembly core)
+        run: |
+          cargo build --release -p pii-veil-cli
+          cargo build --release --target wasm32-unknown-unknown -p pii-veil-wasm
+      - name: Run GLASTOR® Byte-Gauge Audit
         uses: glastor-core/byte-gauge@v1
         with:
-          path: "target/release/veil"
+          file-path: "target/release/veil,target/wasm32-unknown-unknown/release/pii_veil_wasm.wasm"
+          scan-entropy-secrets: "true"
+          max-size-mb: "15"
+          max-entropy: "7.4"
+          output-sarif: "byte-gauge.sarif"
+          output-sbom: "byte-gauge-sbom.cdx.json"
+          post-pr-comment: "true"
         continue-on-error: true
+      - name: Upload Byte-Gauge SARIF report to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        continue-on-error: true
+        with:
+          sarif_file: "byte-gauge.sarif"
 
   nemesis-and-veil-dogfooding:
     name: Nemesis SAST & pii-veil Self-Dogfooding DLP Scan

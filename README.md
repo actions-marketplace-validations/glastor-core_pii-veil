@@ -7,6 +7,8 @@
 <p align="center">
   <a href="https://github.com/glastor-core/pii-veil/actions/workflows/ci.yml"><img src="https://github.com/glastor-core/pii-veil/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
   <a href="https://github.com/glastor-core/pii-veil/actions/workflows/audit.yml"><img src="https://github.com/glastor-core/pii-veil/actions/workflows/audit.yml/badge.svg" alt="Security & SemVer Audit" /></a>
+  <a href="https://github.com/glastor-core/specter"><img src="https://img.shields.io/badge/API%20Contract-Specter%20AST-8b5cf6?logo=git-pull-request" alt="Specter API Contract Guard" /></a>
+  <a href="https://github.com/glastor-core/byte-gauge"><img src="https://img.shields.io/badge/Security-Byte--Gauge%20SIMD-00C7B7?logo=shield" alt="Byte-Gauge Binary Hardened" /></a>
   <a href="https://github.com/glastor-core/pii-veil/releases"><img src="https://img.shields.io/github/v/release/glastor-core/pii-veil?logo=github&label=release&color=00c896" alt="GitHub Release" /></a>
   <a href="https://crates.io/crates/pii-veil-core"><img src="https://img.shields.io/crates/v/pii-veil-core.svg?logo=rust&color=dea584" alt="Crates.io" /></a>
   <a href="https://crates.io/crates/pii-veil-core"><img src="https://img.shields.io/crates/d/pii-veil-core?logo=rust&color=dea584&label=crates.io%20downloads" alt="Crates.io Downloads" /></a>
