@@ -171,6 +171,16 @@ Add to your `claude_desktop_config.json`, Cursor (`~/.cursor/mcp.json`), or Wind
 
 ---
 
+## ⚖️ Trade-offs & Limitations
+
+`pii-veil` is intentionally engineered for **deterministic, sub-millisecond protection** rather than probabilistic NLP:
+
+- **Structured PII & Secrets (Best Fit):** Emails, payment cards (Luhn), IBANs (Mod-97), regional national IDs (SSN, DNI/NIE, CUIT/CUIL, RUT), API keys, JWTs, PEM keys, and database URIs achieve near-zero false positives at `~165 µs` latency and `< 15 MB` RAM.
+- **Unstructured Free-Text Names / Addresses (Not a Transformer NER Replacement):** Because `pii-veil` avoids loading a 400+ MB ML model, it does not perform contextual Named Entity Recognition for ambiguous proper nouns (e.g., distinguishing *"Jordan"* the person from *"Jordan"* the country). For workloads that require semantic NER alongside deterministic DLP, run `pii-veil` as the fast first-pass gatekeeper before an async or selective NLP pass.
+- **Encrypted Vaults & Stateless Scaling:** Reversible restoration requires passing or persisting the encrypted `.vault` (e.g., in Redis or request-scoped memory) across distributed workers.
+
+---
+
 ## 🏢 Enterprise & Commercial Support
 
 Are you deploying LLMs or AI agents in production and need guaranteed compliance with **GDPR, HIPAA, PCI-DSS, or SOC 2**?
