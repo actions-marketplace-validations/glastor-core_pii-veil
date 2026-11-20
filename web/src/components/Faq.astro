@@ -5,13 +5,13 @@
 <section id="faq" class="py-16 px-4 max-w-4xl mx-auto">
   <div class="text-center mb-12">
     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyber-cyan/10 border border-cyber-cyan/30 text-cyber-cyan text-xs font-mono font-semibold uppercase mb-3">
-      ❓ PREGUNTAS FRECUENTES TÉCNICAS
+      ❓ TECHNICAL & ARCHITECTURE FAQ
     </div>
     <h2 class="text-3xl md:text-5xl font-black text-white tracking-tight mb-3">
-      Arquitectura, Rendimiento y Cumplimiento
+      Architecture, Performance & Compliance
     </h2>
     <p class="text-cyber-muted text-base max-w-2xl mx-auto">
-      Todo lo que los arquitectos de seguridad, CTOs y equipos de ingeniería necesitan saber sobre `pii-veil`.
+      Everything security architects, CTOs, and engineering teams need to know about `pii-veil`.
     </p>
   </div>
 
@@ -22,7 +22,7 @@
       <summary class="flex items-center justify-between cursor-pointer list-none select-none font-bold text-white text-base sm:text-lg group-hover:text-cyber-neon transition">
         <span class="flex items-center gap-3">
           <span class="text-cyber-neon font-mono text-sm">01.</span>
-          ¿Cómo funciona el Reversible Roundtrip sin persistir datos?
+          How does the Reversible Roundtrip work without persisting data?
         </span>
         <span class="text-cyber-muted group-open:rotate-180 group-open:text-cyber-neon transition-transform duration-200">
           ▼
@@ -30,10 +30,10 @@
       </summary>
       <div class="mt-4 pt-4 border-t border-cyber-border/60 text-sm text-slate-300 leading-relaxed font-sans space-y-2">
         <p>
-          Cuando llamas a <code class="text-cyber-neon font-mono text-xs bg-slate-900 px-1.5 py-0.5 rounded">engine.redact()</code>, el motor ejecuta un escaneo multi-patrón en tiempo lineal <strong class="text-white">$O(N)$</strong> mediante autómatas de Aho-Corasick.
+          When you call <code class="text-cyber-neon font-mono text-xs bg-slate-900 px-1.5 py-0.5 rounded">engine.redact()</code>, the engine performs a linear-time <strong class="text-white">$O(N)$</strong> multi-pattern scan powered by Aho-Corasick automata.
         </p>
         <p>
-          Los valores identificados (como tarjetas, emails o DNIs) se aíslan en una estructura <strong class="text-cyber-cyan">Vault en memoria RAM volátil</strong> dentro del proceso de tu aplicación, reemplazándolos con placeholders unívocos (ej. <code class="text-cyber-neon font-mono text-xs">&lt;CREDIT_CARD_1&gt;</code>). El LLM externo procesa únicamente el texto sanitizado. Al recibir la respuesta o stream del LLM, el método <code class="text-cyber-cyan font-mono text-xs">vault.restore()</code> reinyecta los valores reales. Al destruirse el objeto en memoria, los datos sensibles desaparecen de RAM.
+          Identified sensitive values (such as credit cards, emails, or government IDs) are isolated in an ephemeral, <strong class="text-cyber-cyan">in-memory volatile Vault</strong> inside your application process, replacing them with unique cryptographic placeholders (e.g. <code class="text-cyber-neon font-mono text-xs">&lt;CREDIT_CARD_1&gt;</code>). The external LLM processes only the sanitized text. When receiving the response or token stream from the LLM, calling <code class="text-cyber-cyan font-mono text-xs">vault.restore()</code> deterministically re-injects the original plaintext values. Once the Vault object is dropped or goes out of scope, all sensitive data is immediately cleared from RAM.
         </p>
       </div>
     </details>
@@ -43,7 +43,7 @@
       <summary class="flex items-center justify-between cursor-pointer list-none select-none font-bold text-white text-base sm:text-lg group-hover:text-cyber-cyan transition">
         <span class="flex items-center gap-3">
           <span class="text-cyber-cyan font-mono text-sm">02.</span>
-          ¿Algún dato sale de mi infraestructura o navegador (Zero-Egress)?
+          Does any data ever leave my infrastructure or browser (Zero-Egress)?
         </span>
         <span class="text-cyber-muted group-open:rotate-180 group-open:text-cyber-cyan transition-transform duration-200">
           ▼
@@ -51,10 +51,10 @@
       </summary>
       <div class="mt-4 pt-4 border-t border-cyber-border/60 text-sm text-slate-300 leading-relaxed font-sans space-y-2">
         <p>
-          <strong class="text-white">Absolutamente ningún dato sale jamás.</strong> <code class="text-cyber-cyan font-mono text-xs">pii-veil</code> no posee servidores de backend, no hace llamadas remotas, no incluye telemetría oculta ni requiere conexión a internet para operar.
+          <strong class="text-white">Absolutely zero data ever leaves.</strong> <code class="text-cyber-cyan font-mono text-xs">pii-veil</code> has no backend servers, makes zero external network calls, includes no hidden telemetry, and requires no internet connection to operate.
         </p>
         <p>
-          El motor se ejecuta 100% <em>in-process</em> como librería nativa compilada en Rust, a través de C-ABI/PyO3 en Python, N-API en Node.js, binario estático en CLI, o compilado a WebAssembly (WASM) directamente en el navegador del usuario.
+          The engine runs 100% <em>in-process</em> as a native compiled Rust library, via C-ABI / PyO3 in Python, N-API in Node.js, static binaries via the CLI, or compiled directly to WebAssembly (WASM) inside the client's browser.
         </p>
       </div>
     </details>
@@ -64,7 +64,7 @@
       <summary class="flex items-center justify-between cursor-pointer list-none select-none font-bold text-white text-base sm:text-lg group-hover:text-cyber-neon transition">
         <span class="flex items-center gap-3">
           <span class="text-cyber-neon font-mono text-sm">03.</span>
-          ¿Por qué es hasta 200 veces más rápido que Microsoft Presidio?
+          Why is it up to 200x faster than Microsoft Presidio?
         </span>
         <span class="text-cyber-muted group-open:rotate-180 group-open:text-cyber-neon transition-transform duration-200">
           ▼
@@ -72,10 +72,10 @@
       </summary>
       <div class="mt-4 pt-4 border-t border-cyber-border/60 text-sm text-slate-300 leading-relaxed font-sans space-y-2">
         <p>
-          Las soluciones tradicionales de DLP basadas en Python (como Presidio) dependen de modelos de lenguaje pesados (spaCy / transformers) y múltiples expresiones regulares secuenciales con backtracking (NFA), lo que genera latencias de <strong>15 a 50 ms por llamada</strong> y cuellos de botella por el Global Interpreter Lock (GIL).
+          Traditional Python-based DLP solutions (such as Presidio) rely on heavy NLP models (spaCy / transformers) and sequential regular expressions with exponential backtracking (NFA), introducing <strong>15 to 50 ms of overhead per request</strong> and creating severe bottlenecks due to the Python Global Interpreter Lock (GIL).
         </p>
         <p>
-          <code class="text-cyber-neon font-mono text-xs">pii-veil</code> compila directamente a código máquina nativo. Utiliza un único autómata determinista finito (DFA) combinado con chequeos matemáticos directos en registros de CPU (Luhn, Mod-11, Mod-23, Mod-97), procesando payloads estándar en <strong>sub-100 microsegundos</strong> y manteniendo un throughput superior a <strong>250,000 req/sec por core</strong>.
+          <code class="text-cyber-neon font-mono text-xs">pii-veil</code> compiles directly to bare-metal machine code. It leverages a single deterministic finite automaton (DFA) coupled with direct CPU register arithmetic checks (Luhn, Mod-11, Mod-23, Mod-97), processing typical LLM payloads in <strong>sub-100 microseconds</strong> while sustaining over <strong>250,000 req/sec per core</strong>.
         </p>
       </div>
     </details>
@@ -85,7 +85,7 @@
       <summary class="flex items-center justify-between cursor-pointer list-none select-none font-bold text-white text-base sm:text-lg group-hover:text-cyber-purple transition">
         <span class="flex items-center gap-3">
           <span class="text-cyber-purple font-mono text-sm">04.</span>
-          ¿Qué normativas y estándares de cumplimiento cubre?
+          Which compliance frameworks and regulatory standards are covered?
         </span>
         <span class="text-cyber-muted group-open:rotate-180 group-open:text-cyber-purple transition-transform duration-200">
           ▼
@@ -93,10 +93,10 @@
       </summary>
       <div class="mt-4 pt-4 border-t border-cyber-border/60 text-sm text-slate-300 leading-relaxed font-sans space-y-2">
         <ul class="list-disc pl-5 space-y-1.5 text-slate-300">
-          <li><strong class="text-white">GDPR / RGPD (Unión Europea):</strong> Art. 32 para la seudonimización efectiva de datos de carácter personal antes del procesamiento por terceros.</li>
-          <li><strong class="text-white">PCI-DSS v4.0:</strong> Requisito 3.4 relativo a la no exposición de PANs legibles de tarjetas de crédito en registros, analíticas o prompts de LLM.</li>
-          <li><strong class="text-white">HIPAA (EE.UU.):</strong> Método Safe Harbor para la remoción de los 18 identificadores protegidos de salud (PHI).</li>
-          <li><strong class="text-white">SOC 2 Tipo II:</strong> Control de confidencialidad y prevención de fugas accidentales de secretos y claves de infraestructura (AWS, GitHub, JWT, OpenAI).</li>
+          <li><strong class="text-white">GDPR / RGPD (European Union):</strong> Art. 32 effective pseudonymization of personal data before processing by third-party model providers.</li>
+          <li><strong class="text-white">PCI-DSS v4.0:</strong> Requirement 3.4 regarding zero exposure of readable cardholder PANs in logs, analytics, or LLM prompt traces.</li>
+          <li><strong class="text-white">HIPAA (United States):</strong> Safe Harbor de-identification method removing all 18 protected health information (PHI) identifiers.</li>
+          <li><strong class="text-white">SOC 2 Type II:</strong> Confidentiality controls and accident-prevention mechanisms for infrastructure secrets and API keys (AWS, GitHub, JWT, OpenAI).</li>
         </ul>
       </div>
     </details>
@@ -106,7 +106,7 @@
       <summary class="flex items-center justify-between cursor-pointer list-none select-none font-bold text-white text-base sm:text-lg group-hover:text-amber-400 transition">
         <span class="flex items-center gap-3">
           <span class="text-amber-400 font-mono text-sm">05.</span>
-          ¿Puedo definir detectores custom o patrones propietarios?
+          Can I define custom detectors or proprietary pattern rules?
         </span>
         <span class="text-cyber-muted group-open:rotate-180 group-open:text-amber-400 transition-transform duration-200">
           ▼
@@ -114,7 +114,7 @@
       </summary>
       <div class="mt-4 pt-4 border-t border-cyber-border/60 text-sm text-slate-300 leading-relaxed font-sans space-y-2">
         <p>
-          Sí. Además de los 18 detectores nativos con verificación matemática, puedes registrar expresiones regulares personalizadas, listas de palabras clave contextuales o algoritmos de validación específicos para tu industria (ej. números de póliza de seguro, historias clínicas o IDs de cliente internos).
+          Yes. In addition to the 18 built-in detectors backed by mathematical checksums, you can register custom regular expressions, contextual keyword dictionaries, or domain-specific validation algorithms tailored to your industry (e.g., internal insurance policy numbers, proprietary patient record IDs, or employee identifiers).
         </p>
       </div>
     </details>
@@ -124,7 +124,7 @@
       <summary class="flex items-center justify-between cursor-pointer list-none select-none font-bold text-white text-base sm:text-lg group-hover:text-cyber-neon transition">
         <span class="flex items-center gap-3">
           <span class="text-cyber-neon font-mono text-sm">06.</span>
-          ¿Cómo se audita la cadena de suministro y la seguridad de los binarios (Supply Chain)?
+          How are supply-chain integrity and binary security audited?
         </span>
         <span class="text-cyber-muted group-open:rotate-180 group-open:text-cyber-neon transition-transform duration-200">
           ▼
@@ -132,11 +132,11 @@
       </summary>
       <div class="mt-4 pt-4 border-t border-cyber-border/60 text-sm text-slate-300 leading-relaxed font-sans space-y-2">
         <p>
-          <code class="text-cyber-neon font-mono text-xs">pii-veil</code> cuenta con una certificación continua de cadena de suministro (Zero-Trust DevSecOps) respaldada por el ecosistema <strong class="text-white">GLASTOR® Core</strong>:
+          <code class="text-cyber-neon font-mono text-xs">pii-veil</code> features continuous Zero-Trust DevSecOps supply-chain certification backed by the <strong class="text-white">GLASTOR® Core</strong> ecosystem:
         </p>
         <ul class="list-disc pl-5 space-y-1.5 text-slate-300">
-          <li><strong class="text-purple-400">GLASTOR® Specter:</strong> Verifica el AST de la API pública en &lt; 5 ms en cada PR, previniendo <em>Trojan Breaking Changes</em> y asegurando que las firmas de métodos jamás se rompan sin previo aviso en un patch release.</li>
-          <li><strong class="text-cyan-400">GLASTOR® Byte-Gauge:</strong> Audita con SIMD los binarios compilados (<code class="text-xs font-mono">veil</code> CLI y WebAssembly), certificando protecciones de memoria (<code class="text-xs font-mono">checksec</code>: ASLR/PIE, Stack Canaries, NX/DEP), analizando la entropía de Shannon para garantizar cero secretos embebidos, y generando reportes <strong class="text-white">SARIF 2.1.0</strong> y <strong class="text-white">SBOM CycloneDX 1.5</strong>.</li>
+          <li><strong class="text-purple-400">GLASTOR® Specter:</strong> Verifies the public API AST in &lt; 5 ms on every pull request, preventing <em>Trojan Breaking Changes</em> and ensuring public method signatures never break unexpectedly in patch releases.</li>
+          <li><strong class="text-cyan-400">GLASTOR® Byte-Gauge:</strong> Audits compiled binaries (<code class="text-xs font-mono">veil</code> CLI and WebAssembly) with SIMD-accelerated binary inspection, certifying memory exploit mitigations (<code class="text-xs font-mono">checksec</code>: ASLR/PIE, Stack Canaries, NX/DEP), analyzing Shannon entropy to guarantee zero embedded secrets, and producing <strong class="text-white">SARIF 2.1.0</strong> security scans and <strong class="text-white">CycloneDX 1.5 SBOMs</strong>.</li>
         </ul>
       </div>
     </details>
@@ -146,7 +146,7 @@
       <summary class="flex items-center justify-between cursor-pointer list-none select-none font-bold text-white text-base sm:text-lg group-hover:text-cyber-neon transition">
         <span class="flex items-center gap-3">
           <span class="text-cyber-neon font-mono text-sm">07.</span>
-          ¿Cómo se adquiere soporte comercial, auditoría y SLAs de respuesta?
+          How do I obtain commercial enterprise support, audits, and guaranteed SLAs?
         </span>
         <span class="text-cyber-muted group-open:rotate-180 group-open:text-cyber-neon transition-transform duration-200">
           ▼
@@ -154,7 +154,7 @@
       </summary>
       <div class="mt-4 pt-4 border-t border-cyber-border/60 text-sm text-slate-300 leading-relaxed font-sans space-y-2">
         <p>
-          El núcleo de <code class="text-cyber-neon font-mono text-xs">pii-veil</code> es de código abierto bajo licencia Apache-2.0 / MIT. Para empresas e instituciones con requisitos críticos de seguridad, <strong class="text-white">GLASTOR® Core</strong> provee contratos de soporte con SLA de 24h a 4h, auditorías de integración de LLMs, detectores a medida y acuerdos de indemnización legal. Contáctanos directamente en <a href="mailto:founder@glastor.es" class="text-cyber-neon font-mono hover:underline">founder@glastor.es</a>.
+          The core of <code class="text-cyber-neon font-mono text-xs">pii-veil</code> is open-source under dual Apache-2.0 / MIT licenses. For enterprise organizations with critical security requirements, <strong class="text-white">GLASTOR® Core</strong> provides commercial support contracts with 24h down to 4h response SLAs, LLM architecture integration reviews, custom detector engineering, and legal indemnification. Contact us directly at <a href="mailto:founder@glastor.es" class="text-cyber-neon font-mono hover:underline">founder@glastor.es</a>.
         </p>
       </div>
     </details>
