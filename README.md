@@ -21,11 +21,11 @@
 </p>
 
 <p align="center">
-  <a href="https://pii-veil.pages.dev"><img src="https://img.shields.io/badge/Live%20WASM%20Demo-pii--veil.pages.dev-00ff9d?style=for-the-badge&logo=cloudflarepages&logoColor=black" alt="Live Demo" /></a>
+  <a href="https://pii-veil.glastor.es"><img src="https://img.shields.io/badge/Live%20WASM%20Demo-pii--veil.glastor.es-00ff9d?style=for-the-badge&logo=cloudflarepages&logoColor=black" alt="Live Demo" /></a>
 </p>
 
 <p align="center">
-  <a href="https://pii-veil.pages.dev">⚡ Live WASM Demo</a> •
+  <a href="https://pii-veil.glastor.es">⚡ Live WASM Demo</a> •
   <a href="#-key-capabilities">Key Capabilities</a> •
   <a href="#-quickstart">Quickstart</a> •
   <a href="BENCHMARKS.md">Benchmarks</a> •

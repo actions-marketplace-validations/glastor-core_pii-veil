@@ -3,7 +3,7 @@
   "name": "io.github.glastor-core/pii-veil",
   "title": "GLASTOR pii-veil",
   "description": "Sub-millisecond reversible PII & secret anonymizer in Rust for LLMs, agents, and MCP",
-  "websiteUrl": "https://pii-veil.pages.dev",
+  "websiteUrl": "https://pii-veil.glastor.es",
   "repository": {
     "url": "https://github.com/glastor-core/pii-veil",
     "source": "github"
