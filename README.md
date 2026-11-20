@@ -21,11 +21,11 @@
 </p>
 
 <p align="center">
-  <a href="https://pii-veil.pages.dev"><img src="https://img.shields.io/badge/Live%20WASM%20Demo-pii--veil.pages.dev-00ff9d?style=for-the-badge&logo=cloudflarepages&logoColor=black" alt="Live Demo" /></a>
+  <a href="https://pii-veil.glastor.es"><img src="https://img.shields.io/badge/Live%20WASM%20Demo-pii--veil.glastor.es-00ff9d?style=for-the-badge&logo=cloudflarepages&logoColor=black" alt="Live Demo" /></a>
 </p>
 
 <p align="center">
-  <a href="https://pii-veil.pages.dev">⚡ Live WASM Demo</a> •
+  <a href="https://pii-veil.glastor.es">⚡ Live WASM Demo</a> •
   <a href="#-key-capabilities">Key Capabilities</a> •
   <a href="#-quickstart">Quickstart</a> •
   <a href="BENCHMARKS.md">Benchmarks</a> •
@@ -57,6 +57,7 @@ Designed with the **6-in-1 Multi-Market Architecture**:
   Replaces sensitive data with semantic tokens (`[EMAIL_1]`, `[CREDIT_CARD_1]`, `[IBAN_1]`), restores full responses in $O(N)$ via `aho-corasick`, or restores live token streams chunk-by-chunk (`[EMA` + `IL_1]`) via `StreamingRestorer`.
 - **Built-in Model Context Protocol (`veil mcp`) & HTTP/SSE Proxy (`veil proxy`)**:
   - `veil mcp`: Zero-dependency JSON-RPC 2.0 MCP server over `stdio` exposing `veil_redact`, `veil_restore`, `veil_redact_json`, and `veil_scan` directly to Claude Desktop, Cursor, and Windsurf.
+  - Official MCP Registry Name: `mcp-name: io.github.glastor-core/pii-veil`
   - `veil proxy`: Local HTTP/SSE reverse proxy (`127.0.0.1:8080`) that redacts outgoing LLM JSON prompts and restores incoming `text/event-stream` SSE or JSON responses in real time.
 - **18 Built-in Detectors with Mathematical Checksum Verification**:
   - **Financial**: Credit Cards (**Luhn** checksum) and IBANs (**ISO 13616 Mod-97** checksum).
@@ -128,6 +129,37 @@ Use `pii-veil` as a sub-millisecond DLP gatekeeper in any GitHub Actions workflo
     fail-on-detect: "true"
 ```
 
+### 7. MCP Server Setup (Claude Desktop, Cursor & Windsurf)
+`pii-veil` ships with a zero-dependency **Model Context Protocol (MCP)** server (`veil mcp`) over `stdio` exposing four tools: `veil_redact`, `veil_restore`, `veil_redact_json`, and `veil_scan`.
+
+Official MCP Registry identifier: `mcp-name: io.github.glastor-core/pii-veil`
+
+Add to your `claude_desktop_config.json`, Cursor (`~/.cursor/mcp.json`), or Windsurf MCP config:
+
+**Using the native Rust binary (`cargo install pii-veil-cli`):**
+```json
+{
+  "mcpServers": {
+    "pii-veil": {
+      "command": "veil",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+**Using Docker (`< 15 MB` Distroless image):**
+```json
+{
+  "mcpServers": {
+    "pii-veil": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "ghcr.io/glastor-core/pii-veil:latest", "mcp"]
+    }
+  }
+}
+```
+
 ---
 
 ## 📂 Production Examples (`examples/`)
@@ -136,6 +168,16 @@ Use `pii-veil` as a sub-millisecond DLP gatekeeper in any GitHub Actions workflo
 - [`examples/typescript_nextjs_ai_sdk.ts`](examples/typescript_nextjs_ai_sdk.ts) — Next.js / Vercel AI SDK `TransformStream` with `VeilStreamingRestorer`.
 - [`examples/go_http_dlp_middleware.go`](examples/go_http_dlp_middleware.go) — Go `net/http` DLP middleware (`piiveil.NewDlpMiddleware`) & SSE restorer.
 - [`examples/git_pre_commit_hook.sh`](examples/git_pre_commit_hook.sh) — Git pre-commit DLP hook powered by `veil scan --fail-on-detect`.
+
+---
+
+## ⚖️ Trade-offs & Limitations
+
+`pii-veil` is intentionally engineered for **deterministic, sub-millisecond protection** rather than probabilistic NLP:
+
+- **Structured PII & Secrets (Best Fit):** Emails, payment cards (Luhn), IBANs (Mod-97), regional national IDs (SSN, DNI/NIE, CUIT/CUIL, RUT), API keys, JWTs, PEM keys, and database URIs achieve near-zero false positives at `~165 µs` latency and `< 15 MB` RAM.
+- **Unstructured Free-Text Names / Addresses (Not a Transformer NER Replacement):** Because `pii-veil` avoids loading a 400+ MB ML model, it does not perform contextual Named Entity Recognition for ambiguous proper nouns (e.g., distinguishing *"Jordan"* the person from *"Jordan"* the country). For workloads that require semantic NER alongside deterministic DLP, run `pii-veil` as the fast first-pass gatekeeper before an async or selective NLP pass.
+- **Encrypted Vaults & Stateless Scaling:** Reversible restoration requires passing or persisting the encrypted `.vault` (e.g., in Redis or request-scoped memory) across distributed workers.
 
 ---
 
