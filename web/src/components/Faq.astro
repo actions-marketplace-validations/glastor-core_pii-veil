@@ -5,13 +5,14 @@
 <section id="faq" class="py-16 px-4 max-w-4xl mx-auto">
   <div class="text-center mb-12">
     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyber-cyan/10 border border-cyber-cyan/30 text-cyber-cyan text-xs font-mono font-semibold uppercase mb-3">
-      ❓ TECHNICAL & ARCHITECTURE FAQ
+      <span class="material-symbols-outlined text-sm">help</span>
+      TECHNICAL & ARCHITECTURE FAQ
     </div>
     <h2 class="text-3xl md:text-5xl font-black text-white tracking-tight mb-3">
       Architecture, Performance & Compliance
     </h2>
     <p class="text-cyber-muted text-base max-w-2xl mx-auto">
-      Everything security architects, CTOs, and engineering teams need to know about `pii-veil`.
+      Everything security architects, CTOs, and engineering teams need to know about <code class="font-mono text-cyber-neon text-sm">pii-veil</code>.
     </p>
   </div>
 
@@ -30,7 +31,7 @@
       </summary>
       <div class="mt-4 pt-4 border-t border-cyber-border/60 text-sm text-slate-300 leading-relaxed font-sans space-y-2">
         <p>
-          When you call <code class="text-cyber-neon font-mono text-xs bg-slate-900 px-1.5 py-0.5 rounded">engine.redact()</code>, the engine performs a linear-time <strong class="text-white">$O(N)$</strong> multi-pattern scan powered by Aho-Corasick automata.
+          When you call <code class="text-cyber-neon font-mono text-xs bg-slate-900 px-1.5 py-0.5 rounded">engine.redact()</code>, the engine performs a linear-time <code class="text-white font-mono font-bold text-xs">O(N)</code> multi-pattern scan powered by Aho-Corasick automata.
         </p>
         <p>
           Identified sensitive values (such as credit cards, emails, or government IDs) are isolated in an ephemeral, <strong class="text-cyber-cyan">in-memory volatile Vault</strong> inside your application process, replacing them with unique cryptographic placeholders (e.g. <code class="text-cyber-neon font-mono text-xs">&lt;CREDIT_CARD_1&gt;</code>). The external LLM processes only the sanitized text. When receiving the response or token stream from the LLM, calling <code class="text-cyber-cyan font-mono text-xs">vault.restore()</code> deterministically re-injects the original plaintext values. Once the Vault object is dropped or goes out of scope, all sensitive data is immediately cleared from RAM.

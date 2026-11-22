@@ -11,12 +11,14 @@ export default {
           neon: '#00ff9d',
           neonHover: '#00df89',
           cyan: '#00e5ff',
-          purple: '#8a2be2',
+          purple: '#a855f7',
           muted: '#94a3b8'
         }
       },
       fontFamily: {
-        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+        sans: ['"Red Hat Text"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['"Red Hat Display"', '"Red Hat Text"', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        mono: ['"Red Hat Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
       }
     },
   },

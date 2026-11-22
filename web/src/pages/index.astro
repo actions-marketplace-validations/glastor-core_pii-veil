@@ -21,6 +21,19 @@ import Faq from '../components/Faq.astro';
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=1" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=1" />
     <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Red Hat Typography Family & Material Symbols Outlined -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@700;800;900&family=Red+Hat+Mono:wght@400;500;600;700&family=Red+Hat+Text:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..24,400,0,0&display=swap"
+      rel="stylesheet"
+    />
+
     <title>GLASTOR® — pii-veil v0.1.4 | Ultrafast In-Browser & Backend PII Anonymizer</title>
     <meta name="description" content="Sub-millisecond reversible PII and secrets anonymization engine for LLMs and AI agents. Compiles to WebAssembly, Rust, Python, Node.js, and CLI." />
     <link rel="canonical" href="https://pii-veil.glastor.es/" />
@@ -29,15 +42,28 @@ import Faq from '../components/Faq.astro';
     <meta property="og:description" content="Sanitize credit cards, emails, and secrets locally in 100 µs with zero cloud egress." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://pii-veil.glastor.es" />
+
+    <style is:global>
+      h1, h2, h3 {
+        font-family: "Red Hat Display", "Red Hat Text", ui-sans-serif, system-ui, sans-serif;
+      }
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+        font-size: 1.125rem;
+        line-height: 1;
+        vertical-align: middle;
+        user-select: none;
+      }
+    </style>
   </head>
-  <body class="min-h-screen flex flex-col justify-between overflow-x-hidden">
+  <body class="min-h-screen flex flex-col justify-between overflow-x-hidden font-sans">
     <!-- Navbar -->
     <nav class="sticky top-0 z-50 bg-cyber-dark/90 backdrop-blur-md border-b border-cyber-border/70">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
         <!-- Logo -->
         <a href="/" class="flex items-center gap-2 sm:gap-2.5 group shrink-0">
           <img src="/favicon.svg" alt="GLASTOR pii-veil logo" class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg shadow-sm border border-cyber-border/80 group-hover:border-cyber-neon/80 transition" />
-          <span class="font-black text-sm sm:text-lg lg:text-xl tracking-tight text-white flex items-center gap-1 sm:gap-1.5 whitespace-nowrap">
+          <span class="font-display font-black text-sm sm:text-lg lg:text-xl tracking-tight text-white flex items-center gap-1 sm:gap-1.5 whitespace-nowrap">
             <span class="tracking-wider text-slate-100">GLASTOR®</span>
             <span class="text-cyber-muted font-normal">-</span>
             <span class="group-hover:text-cyber-neon transition">pii<span class="text-cyber-neon">-veil</span></span>
@@ -47,7 +73,7 @@ import Faq from '../components/Faq.astro';
           </span>
         </a>
 
-        <!-- Links (Visible on xl: >= 1280px or lg: >= 1024px with compact gap) -->
+        <!-- Desktop Links -->
         <div class="hidden lg:flex items-center gap-4 xl:gap-6 text-xs xl:text-sm font-medium text-cyber-muted shrink-0">
           <a href="#architecture" class="hover:text-cyber-cyan transition whitespace-nowrap">LLM Flow</a>
           <a href="#demo" class="hover:text-cyber-neon transition whitespace-nowrap">Live Demo</a>
@@ -55,19 +81,42 @@ import Faq from '../components/Faq.astro';
           <a href="#sdks" class="hover:text-cyber-purple transition whitespace-nowrap">SDKs</a>
           <a href="#benchmarks" class="hover:text-cyber-cyan transition whitespace-nowrap">Benchmarks</a>
           <a href="#faq" class="hover:text-white transition whitespace-nowrap">FAQ</a>
-          <a href="https://github.com/glastor-core/pii-veil" target="_blank" class="hover:text-white transition flex items-center gap-1 whitespace-nowrap">
+          <a href="https://github.com/glastor-core/pii-veil" target="_blank" rel="noopener noreferrer" class="hover:text-white transition flex items-center gap-1.5 whitespace-nowrap">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
             GitHub
           </a>
         </div>
 
-        <!-- Action Button (Always single line, shrink-proof) -->
-        <div class="flex items-center gap-3 shrink-0">
+        <!-- Action Button & Mobile Toggle -->
+        <div class="flex items-center gap-2.5 shrink-0">
           <a
             href="#enterprise"
             class="px-3.5 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-mono font-bold rounded-xl bg-cyber-neon hover:bg-cyber-neonHover text-cyber-dark transition shadow-[0_0_15px_rgba(0,255,157,0.3)] whitespace-nowrap"
           >
             Get Enterprise SLA
           </a>
+          <button
+            id="mobile-menu-btn"
+            type="button"
+            aria-label="Toggle navigation menu"
+            aria-expanded="false"
+            class="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl bg-slate-900 border border-cyber-border text-slate-300 hover:text-white hover:border-cyber-neon/60 transition"
+          >
+            <span id="mobile-menu-icon" class="material-symbols-outlined">menu</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Navigation Drawer -->
+      <div id="mobile-menu" class="hidden lg:hidden border-t border-cyber-border/70 bg-cyber-dark/95 backdrop-blur-xl px-4 py-4">
+        <div class="flex flex-col gap-2 text-sm font-medium text-slate-300">
+          <a href="#architecture" class="mobile-nav-link px-3 py-2 rounded-lg hover:bg-slate-800/70 hover:text-cyber-cyan transition">LLM Flow</a>
+          <a href="#demo" class="mobile-nav-link px-3 py-2 rounded-lg hover:bg-slate-800/70 hover:text-cyber-neon transition">Live Demo (WASM)</a>
+          <a href="#detectors" class="mobile-nav-link px-3 py-2 rounded-lg hover:bg-slate-800/70 hover:text-amber-400 transition">18 Detectors</a>
+          <a href="#sdks" class="mobile-nav-link px-3 py-2 rounded-lg hover:bg-slate-800/70 hover:text-cyber-purple transition">SDKs & Bindings</a>
+          <a href="#benchmarks" class="mobile-nav-link px-3 py-2 rounded-lg hover:bg-slate-800/70 hover:text-cyber-cyan transition">Benchmarks</a>
+          <a href="#faq" class="mobile-nav-link px-3 py-2 rounded-lg hover:bg-slate-800/70 hover:text-white transition">Technical FAQ</a>
+          <a href="https://github.com/glastor-core/pii-veil" target="_blank" rel="noopener noreferrer" class="mobile-nav-link px-3 py-2 rounded-lg hover:bg-slate-800/70 hover:text-white transition">GitHub Repository</a>
         </div>
       </div>
     </nav>
@@ -97,34 +146,56 @@ import Faq from '../components/Faq.astro';
           <span class="text-slate-400">Open Source under Apache-2.0 & MIT</span>
         </div>
 
-        <!-- Ecosystem Links (Responsive with flex-wrap and whitespace-nowrap) -->
+        <!-- Ecosystem Links -->
         <div class="flex flex-wrap items-center justify-center lg:justify-end gap-x-5 gap-y-2.5">
-          <a href="https://github.com/glastor-core/pii-veil" target="_blank" class="hover:text-white transition whitespace-nowrap flex items-center gap-1.5">
-            <span>🐙</span> GitHub Repo
+          <a href="https://github.com/glastor-core/pii-veil" target="_blank" rel="noopener noreferrer" class="hover:text-white transition whitespace-nowrap flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+            GitHub
           </a>
-          <a href="https://crates.io/crates/pii-veil-core" target="_blank" class="hover:text-orange-400 transition whitespace-nowrap flex items-center gap-1.5">
-            <span>🦀</span> crates.io
+          <a href="https://crates.io/crates/pii-veil-core" target="_blank" rel="noopener noreferrer" class="hover:text-orange-400 transition whitespace-nowrap flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-base">deployed_code</span> crates.io
           </a>
-          <a href="https://pypi.org/project/glastor-pii-veil/" target="_blank" class="hover:text-cyber-cyan transition whitespace-nowrap flex items-center gap-1.5">
-            <span>🐍</span> PyPI
+          <a href="https://pypi.org/project/glastor-pii-veil/" target="_blank" rel="noopener noreferrer" class="hover:text-cyber-cyan transition whitespace-nowrap flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-base">terminal</span> PyPI
           </a>
-          <a href="https://www.npmjs.com/package/pii-veil-node" target="_blank" class="hover:text-red-400 transition whitespace-nowrap flex items-center gap-1.5">
-            <span>📦</span> npm
+          <a href="https://www.npmjs.com/package/pii-veil-node" target="_blank" rel="noopener noreferrer" class="hover:text-red-400 transition whitespace-nowrap flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-base">package_2</span> npm
           </a>
           <a href="mailto:founder@glastor.es" class="px-2.5 py-1 rounded-lg bg-cyber-neon/10 border border-cyber-neon/30 text-cyber-neon hover:bg-cyber-neon/20 hover:border-cyber-neon transition whitespace-nowrap font-medium flex items-center gap-1.5">
-            <span>✉️</span> founder@glastor.es
+            <span class="material-symbols-outlined text-base">mail</span> founder@glastor.es
           </a>
         </div>
       </div>
     </footer>
 
-    <!-- Client-side Playground Bootstrapper -->
+    <!-- Client-side Playground & Mobile Menu Bootstrapper -->
     <script>
       import { initPlayground } from '../scripts/playground.ts';
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initPlayground);
-      } else {
+      function bootstrap() {
         initPlayground();
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+        const icon = document.getElementById('mobile-menu-icon');
+        if (menuBtn && menu && icon) {
+          menuBtn.addEventListener('click', () => {
+            const isOpen = !menu.classList.contains('hidden');
+            menu.classList.toggle('hidden');
+            menuBtn.setAttribute('aria-expanded', String(!isOpen));
+            icon.textContent = isOpen ? 'menu' : 'close';
+          });
+          document.querySelectorAll('.mobile-nav-link').forEach((link) => {
+            link.addEventListener('click', () => {
+              menu.classList.add('hidden');
+              menuBtn.setAttribute('aria-expanded', 'false');
+              icon.textContent = 'menu';
+            });
+          });
+        }
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bootstrap);
+      } else {
+        bootstrap();
       }
     </script>
   </body>
