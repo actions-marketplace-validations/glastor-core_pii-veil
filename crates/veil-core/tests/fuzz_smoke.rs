@@ -35,8 +35,8 @@ impl FuzzRng {
     fn random_string(&mut self, max_len: usize) -> String {
         let len = self.next_usize(max_len);
         let chars = [
-            'a', 'b', '1', '2', '@', '.', '-', '_', ' ', '\n', '\t', '\0',
-            'é', 'ñ', '中', '🦀', '<', '>', '/', '\\', ':', ';', '"', '\'',
+            'a', 'b', '1', '2', '@', '.', '-', '_', ' ', '\n', '\t', '\0', 'é', 'ñ', '中', '🦀',
+            '<', '>', '/', '\\', ':', ';', '"', '\'',
         ];
         let mut s = String::with_capacity(len);
         for _ in 0..len {
