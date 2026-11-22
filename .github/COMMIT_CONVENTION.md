@@ -1,4 +1,4 @@
-# 🏛️ Convención de Mensajes de Commit (Conventional Commits) — GLASTOR® pii-veil
+# 🏛 Convención de Mensajes de Commit (Conventional Commits) — GLASTOR® pii-veil
 
 Para escalar el desarrollo y garantizar una **Software Supply Chain** transparente, este repositorio implementa una convención estricta basada en el estándar [Conventional Commits 1.0.0](https://www.conventionalcommits.org/).
 
@@ -6,7 +6,7 @@ Esta práctica impulsa la automatización de versiones con SemVer, la generació
 
 ---
 
-## ⚙️ Estructura del Mensaje
+## ⚙ Estructura del Mensaje
 
 ```text
 <tipo>(<scope>): <asunto en minúsculas y modo imperativo>
@@ -59,4 +59,4 @@ docs(examples): add FastAPI SSE streaming and Go net/http middleware guides
 
 ---
 
-© 2026 Andrés Antonio Cardoso — GLASTOR-DEV / GLASTOR® Core Organization.
+© 2026 GLASTOR Core Organization — Security & Infrastructure Team.

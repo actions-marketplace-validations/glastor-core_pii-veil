@@ -39,7 +39,7 @@ with Veil(mode=RedactionMode.PLACEHOLDER) as veil:
 
 ---
 
-## 🛡️ Zero-Code Decorator (`@veil_protect`)
+## 🛡 Zero-Code Decorator (`@veil_protect`)
 
 Wrap any function that calls an LLM. It automatically anonymizes prompts and restores responses:
 
@@ -81,7 +81,7 @@ with Veil() as veil:
 
 ## 🤖 Framework Integrations
 
-### 🦜️ LangChain
+### 🦜 LangChain
 ```python
 from langchain_openai import ChatOpenAI
 from pii_veil.integrations.langchain import VeilCallbackHandler

@@ -154,3 +154,7 @@ impl CompositeDlpGuard {
 1. **`pii-veil` is the irreplaceable Tier-0 foundation:** It provides guaranteed mathematical compliance, zero latency penalty, and complete protection against infrastructure secret leaks.
 2. **NER is an additive tier, not an alternative:** When unstructured personal name recognition is mandatory, orchestrating `pii-veil` as the gatekeeper eliminates 90% of the overhead of deep NLP models.
 3. **The result is best-of-both-worlds:** Sub-millisecond performance for the vast majority of requests, with semantic capabilities available on demand.
+
+---
+
+© 2026 GLASTOR Core Organization — Security & Infrastructure Team.

@@ -8,7 +8,7 @@ All benchmarks were measured on standard x86_64 hardware using the official Rust
 
 ## 📊 Summary Comparison
 
-| Metric / Capability | 🛡️ GLASTOR® `pii-veil` | 🐍 Microsoft Presidio | ☁️ AWS Comprehend |
+| Metric / Capability | 🛡 GLASTOR® `pii-veil` | 🐍 Microsoft Presidio | ☁ AWS Comprehend |
 | :--- | :--- | :--- | :--- |
 | **Typical Prompt Latency (1 KB)** | **165 µs (0.165 ms)** | ~35 ms (35,000 µs) | ~140 ms (140,000 µs) |
 | **Single-Entity Scan Latency** | **4.01 µs (0.004 ms)** | ~12 ms (12,000 µs) | ~90 ms (network bound) |

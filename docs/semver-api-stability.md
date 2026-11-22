@@ -112,3 +112,7 @@ Adopting `pii-veil` guarantees:
 1. **Zero Unexpected Breakage:** Specter mathematically guarantees that updating `pii-veil` will never break your build or runtime bindings.
 2. **Audit-Ready Telemetry:** Every release generates machine-readable **SARIF 2.1.0** and **CycloneDX 1.5 SBOM** reports for enterprise DevSecOps pipelines.
 3. **High Fuzz Coverage:** Deterministic safety across all parsing and token reconstitution logic.
+
+---
+
+© 2026 GLASTOR Core Organization — Security & Infrastructure Team.

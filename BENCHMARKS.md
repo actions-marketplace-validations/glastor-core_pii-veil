@@ -84,3 +84,7 @@ cd benchmarks
 ```
 
 Visit the official GLASTOR Core open-source benchmark repository at [`glastor-core/benchmarks`](https://github.com/glastor-core/benchmarks).
+
+---
+
+© 2026 GLASTOR Core Organization — Security & Infrastructure Team.

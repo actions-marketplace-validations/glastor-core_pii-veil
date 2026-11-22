@@ -6,7 +6,7 @@ Gracias por sumarte a la misión de construir y optimizar **GLASTOR® pii-veil**
 
 ---
 
-## 🛡️ Política de Protección de Rama (`main`)
+## 🛡 Política de Protección de Rama (`main`)
 
 Para garantizar la máxima estabilidad y la calidad del código en producción:
 - **La rama `main` está protegida**: No se permiten envíos directos (`git push origin main`) ni modificaciones forzadas (`--force`) sin validación previa.
@@ -84,4 +84,4 @@ cd sdks/go && go test -v -race ./...
 
 ---
 
-© 2026 Andrés Antonio Cardoso — GLASTOR-DEV / GLASTOR® Core Organization.
+© 2026 GLASTOR Core Organization — Security & Infrastructure Team.

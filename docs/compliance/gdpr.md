@@ -4,7 +4,7 @@ How to achieve full compliance with the European Union **General Data Protection
 
 ---
 
-## ⚖️ Key GDPR Articles & How `pii-veil` Enforces Them
+## ⚖ Key GDPR Articles & How `pii-veil` Enforces Them
 
 ### 1. Article 25 — Data Protection by Design and by Default
 > *"The controller shall implement appropriate technical and organisational measures, such as pseudonymisation, which are designed to implement data-protection principles..."*

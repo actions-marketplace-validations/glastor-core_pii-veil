@@ -1,4 +1,4 @@
-# 🛡️ Protocolo de Gobernanza y Código de Conducta
+# 🛡 Protocolo de Gobernanza y Código de Conducta
 
 ## 1. El Estándar DX y Excelencia Humana
 
@@ -48,10 +48,10 @@ cualquier entorno donde se represente formalmente al proyecto (conferencias, for
 ## 5. Protocolo de Respuesta a Incidentes (IRP)
 
 Si presencias o experimentas un comportamiento que viole este código de conducta:
-1. Contacta de forma confidencial a: **engineering@glastor.io** o **glastor.info@gmail.com**.
+1. Contacta de forma confidencial a: **founder@glastor.es**.
 2. Los incidentes serán evaluados en un plazo máximo de 48 horas laborables.
 3. Las resoluciones se aplicarán con estricta confidencialidad para proteger a las partes afectadas.
 
 ---
 
-© 2026 Andrés Antonio Cardoso — GLASTOR-DEV / GLASTOR® Core Organization.
+© 2026 GLASTOR Core Organization — Security & Infrastructure Team.
