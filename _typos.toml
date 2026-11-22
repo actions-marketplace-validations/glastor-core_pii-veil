@@ -33,6 +33,7 @@ extend-ignore-re = [
 [default.extend-words]
 # Brand & ecosystem terms
 glastor = "glastor"
+glama = "glama"
 presidio = "presidio"
 specter = "specter"
 nemesis = "nemesis"

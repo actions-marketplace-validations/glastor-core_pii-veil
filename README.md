@@ -10,6 +10,7 @@
   <a href="https://github.com/glastor-core/specter"><img src="https://img.shields.io/badge/API%20Contract-Specter%20AST-8b5cf6?logo=git-pull-request" alt="Specter API Contract Guard" /></a>
   <a href="https://github.com/glastor-core/byte-gauge"><img src="https://img.shields.io/badge/Security-Byte--Gauge%20SIMD-00C7B7?logo=shield" alt="Byte-Gauge Binary Hardened" /></a>
   <a href="https://github.com/glastor-core/benchmarks"><img src="https://img.shields.io/badge/Benchmarks-glastor--core%2Fbenchmarks-00ff66?logo=docker" alt="Reproducible Docker Benchmarks" /></a>
+  <a href="https://glama.ai/mcp/servers/glastor-core/pii-veil"><img src="https://glama.ai/mcp/servers/glastor-core/pii-veil/badges/score.svg" alt="pii-veil MCP server – quality and maintenance score on Glama" /></a>
   <a href="https://github.com/glastor-core/pii-veil/releases"><img src="https://img.shields.io/github/v/release/glastor-core/pii-veil?logo=github&label=release&color=00c896" alt="GitHub Release" /></a>
   <a href="https://crates.io/crates/pii-veil-core"><img src="https://img.shields.io/crates/v/pii-veil-core.svg?logo=rust&color=dea584" alt="Crates.io" /></a>
   <a href="https://crates.io/crates/pii-veil-core"><img src="https://img.shields.io/crates/d/pii-veil-core?logo=rust&color=dea584&label=crates.io%20downloads" alt="Crates.io Downloads" /></a>
@@ -139,6 +140,8 @@ Use `pii-veil` as a sub-millisecond DLP gatekeeper in any GitHub Actions workflo
 `pii-veil` ships with a zero-dependency **Model Context Protocol (MCP)** server (`veil mcp`) over `stdio` exposing four tools: `veil_redact`, `veil_restore`, `veil_redact_json`, and `veil_scan`.
 
 Official MCP Registry identifier: `mcp-name: io.github.glastor-core/pii-veil`
+
+[![pii-veil MCP server – quality and maintenance score on Glama](https://glama.ai/mcp/servers/glastor-core/pii-veil/badges/score.svg)](https://glama.ai/mcp/servers/glastor-core/pii-veil)
 
 Add to your `claude_desktop_config.json`, Cursor (`~/.cursor/mcp.json`), or Windsurf MCP config:
 
