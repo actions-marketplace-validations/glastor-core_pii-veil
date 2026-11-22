@@ -92,3 +92,8 @@ pii = "pii"
 phi = "phi"
 ba = "ba"
 ser = "ser"
+# Healthcare, benchmarking & Spanish fixture terms
+EHR = "EHR"
+wrk = "wrk"
+Cliente = "Cliente"
+DOBLE = "DOBLE"
