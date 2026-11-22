@@ -34,6 +34,7 @@
   <a href="#-quickstart">Quickstart</a> •
   <a href="BENCHMARKS.md">Benchmarks</a> •
   <a href="docs/">Compliance (GDPR / HIPAA / PCI-DSS / LGPD)</a> •
+  <a href="docs/semver-api-stability.md">SemVer Guarantee</a> •
   <a href=".github/SECURITY.md">Security Policy</a> •
   <a href="deploy/kubernetes/README.md">Kubernetes Sidecar</a> •
   <a href="#-enterprise--commercial-support">Enterprise Support</a> •
@@ -164,6 +165,18 @@ Add to your `claude_desktop_config.json`, Cursor (`~/.cursor/mcp.json`), or Wind
   }
 }
 ```
+
+### 8. Fuzz Testing & SemVer Contract Verification
+```bash
+# Run multi-thousand iteration fuzz smoke test across all boundary conditions
+cargo test -p pii-veil-core --test fuzz_smoke
+
+# Run libFuzzer targets locally (requires cargo-fuzz)
+cargo fuzz run fuzz_redact
+cargo fuzz run fuzz_restore
+cargo fuzz run fuzz_checksums
+```
+Every pull request is mathematically audited by **GLASTOR Specter** against Trojan Breaking Changes. Read our **[SemVer Stability & Specter Contract Guarantee](docs/semver-api-stability.md)**.
 
 ---
 

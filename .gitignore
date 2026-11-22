@@ -31,5 +31,6 @@ build/
 # Local Vaults & Temp files
 *.vault
 *.enc
+.vektor/
 .DS_Store
 Thumbs.db

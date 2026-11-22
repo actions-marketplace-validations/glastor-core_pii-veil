@@ -22,6 +22,7 @@
 
 - [⚡ Empirical Benchmarks & Telemetry](benchmarks.md)
 - [Layered Defense & NER Architecture](layered-defense-ner.md)
+- [SemVer Stability & Specter Contract Guarantee](semver-api-stability.md)
 - [🇪🇺 EU GDPR Compliance Guide](compliance/gdpr.md)
 - [🏥 US HIPAA & PHI De-Identification](compliance/hipaa.md)
 - [💳 PCI-DSS v4.0 Cardholder Protection](compliance/pci-dss.md)
