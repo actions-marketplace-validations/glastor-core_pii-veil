@@ -1,6 +1,7 @@
 {
   "mode": "placeholder",
   "allowlist": [
+    "@glastor.es",
     "@glastor.io",
     "@example.com",
     "@example.org",
