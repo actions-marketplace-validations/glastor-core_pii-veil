@@ -8,7 +8,7 @@ All benchmarks were measured on standard x86_64 hardware using the official Rust
 
 ## 📊 Summary Comparison
 
-| Metric / Capability | 🛡️ GLASTOR® `pii-veil` | 🐍 Microsoft Presidio | ☁️ AWS Comprehend |
+| Metric / Capability | 🛡 GLASTOR® `pii-veil` | 🐍 Microsoft Presidio | ☁ AWS Comprehend |
 | :--- | :--- | :--- | :--- |
 | **Typical Prompt Latency (1 KB)** | **165 µs (0.165 ms)** | ~35 ms (35,000 µs) | ~140 ms (140,000 µs) |
 | **Single-Entity Scan Latency** | **4.01 µs (0.004 ms)** | ~12 ms (12,000 µs) | ~90 ms (network bound) |
@@ -45,7 +45,7 @@ Source: `crates/veil-core/benches/bench_throughput.rs`
 
 ---
 
-## 🏎️ Why is `pii-veil` 200x Faster than Presidio?
+## 🏎 Why is `pii-veil` 200x Faster than Presidio?
 
 ```text
 Presidio Architecture:
@@ -65,10 +65,22 @@ pii-veil Architecture:
 
 ## 🔄 Reproduction Steps
 
-To run the exact scientific benchmarks on your own machine:
+### 1. In-Process Statistical Micro-Benchmarks (Criterion)
+To run the exact statistical benchmarks on your own machine:
 
 ```bash
 cargo bench -p pii-veil-core --bench bench_throughput
 ```
 
 Detailed HTML reports with confidence interval distribution charts are generated at `target/criterion/report/index.html`.
+
+### 2. Apples-to-Apples Containerized HTTP and Systems Suite (Docker + k6)
+To independently audit end-to-end latency, throughput, and memory RSS under identical resource quotas (CPU/RAM container limits):
+
+```bash
+git clone https://github.com/glastor-core/benchmarks.git
+cd benchmarks
+./load/run-all.sh
+```
+
+Visit the official GLASTOR Core open-source benchmark repository at [`glastor-core/benchmarks`](https://github.com/glastor-core/benchmarks).

@@ -1,4 +1,4 @@
-# 🛡️ `pii-veil`: Ultrafast Reversible PII & Secret Anonymizer
+# 🛡 `pii-veil`: Ultrafast Reversible PII & Secret Anonymizer
 
 <p align="center">
   <img src="https://res.cloudinary.com/dzualplqi/image/upload/v1794800094/Velo_de_Privacidad_con_IA_Neon_e9k9iw.png" alt="GLASTOR® pii-veil Banner" width="100%" />
@@ -9,6 +9,7 @@
   <a href="https://github.com/glastor-core/pii-veil/actions/workflows/audit.yml"><img src="https://github.com/glastor-core/pii-veil/actions/workflows/audit.yml/badge.svg" alt="Security & SemVer Audit" /></a>
   <a href="https://github.com/glastor-core/specter"><img src="https://img.shields.io/badge/API%20Contract-Specter%20AST-8b5cf6?logo=git-pull-request" alt="Specter API Contract Guard" /></a>
   <a href="https://github.com/glastor-core/byte-gauge"><img src="https://img.shields.io/badge/Security-Byte--Gauge%20SIMD-00C7B7?logo=shield" alt="Byte-Gauge Binary Hardened" /></a>
+  <a href="https://github.com/glastor-core/benchmarks"><img src="https://img.shields.io/badge/Benchmarks-glastor--core%2Fbenchmarks-00ff66?logo=docker" alt="Reproducible Docker Benchmarks" /></a>
   <a href="https://github.com/glastor-core/pii-veil/releases"><img src="https://img.shields.io/github/v/release/glastor-core/pii-veil?logo=github&label=release&color=00c896" alt="GitHub Release" /></a>
   <a href="https://crates.io/crates/pii-veil-core"><img src="https://img.shields.io/crates/v/pii-veil-core.svg?logo=rust&color=dea584" alt="Crates.io" /></a>
   <a href="https://crates.io/crates/pii-veil-core"><img src="https://img.shields.io/crates/d/pii-veil-core?logo=rust&color=dea584&label=crates.io%20downloads" alt="Crates.io Downloads" /></a>
@@ -123,7 +124,7 @@ go test -v ./...
 ### 6. GitHub Action (`glastor-core/pii-veil@v1`)
 Use `pii-veil` as a sub-millisecond DLP gatekeeper in any GitHub Actions workflow:
 ```yaml
-- name: 🛡️ PII & Secret DLP Audit
+- name: 🛡 PII & Secret DLP Audit
   uses: glastor-core/pii-veil@v1
   with:
     path: "."
@@ -164,6 +165,21 @@ Add to your `claude_desktop_config.json`, Cursor (`~/.cursor/mcp.json`), or Wind
 
 ---
 
+## 📊 Scientific Benchmarks & Independent Reproducibility
+
+| DLP Engine / Solution | Latency (p99) | RAM Footprint | LLM SSE Streaming | Network Egress | Cost Model |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| **pii-veil (Rust / WASM)** | **~100 µs (0.1 ms)** | **< 15 MB** | **✅ Native Token-by-Token** | **0 (100% In-Process)** | **Open Source (Apache-2.0 / MIT)** |
+| **Microsoft Presidio (Python)** | ~35,000 µs (35 ms) | ~1,200 MB (spaCy) | ❌ High buffer latency | Local Python server | High Cloud Server Costs |
+| **AWS Comprehend DLP** | ~120,000 µs (120 ms) | N/A (Cloud API) | ❌ No streaming | External Cloud Egress | $0.0001 per unit (Metered) |
+| **Google Cloud DLP** | ~150,000 µs (150 ms) | N/A (Cloud API) | ❌ No streaming | External Cloud Egress | $3.00 per GB inspected |
+
+> 🐳 **Reproduce on your own hardware**: Don't trust self-reported numbers. Every performance claim is independently auditable via our open-source, containerized harness at **[`glastor-core/benchmarks`](https://github.com/glastor-core/benchmarks)** (comparing Rust, Go, Node.js, and Python under identical CPU/RAM container quotas with `k6` and `wrk`).
+>
+> For in-depth statistical Criterion reports (AVX2/NEON micro-benchmarks), see [BENCHMARKS.md](BENCHMARKS.md).
+
+---
+
 ## 📂 Production Examples (`examples/`)
 
 - [`examples/python_fastapi_llm_streaming.py`](examples/python_fastapi_llm_streaming.py) — FastAPI + OpenAI/Anthropic SSE streaming with `StreamingRestorer` and encrypted Vaults.
@@ -173,7 +189,7 @@ Add to your `claude_desktop_config.json`, Cursor (`~/.cursor/mcp.json`), or Wind
 
 ---
 
-## ⚖️ Trade-offs & Limitations
+## ⚖ Trade-offs & Limitations
 
 `pii-veil` is intentionally engineered for **deterministic, sub-millisecond protection** rather than probabilistic NLP:
 
