@@ -20,6 +20,7 @@
   <a href="deploy/kubernetes"><img src="https://img.shields.io/badge/Kubernetes-Sidecar%20Ready-326CE5?logo=kubernetes&logoColor=white" alt="Kubernetes Sidecar" /></a>
   <a href="BENCHMARKS.md"><img src="https://img.shields.io/badge/Latency-165%20%C2%B5s%20(200x%20vs%20Presidio)-ff6b00?logo=speedtest&logoColor=white" alt="Benchmarks" /></a>
   <a href="docs/"><img src="https://img.shields.io/badge/Compliance-GDPR%20%7C%20HIPAA%20%7C%20PCI--DSS%20%7C%20LGPD-00c896?logo=shield&logoColor=white" alt="Compliance" /></a>
+  <a href=".github/SECURITY.md"><img src="https://img.shields.io/badge/Security-Policy%20Active-00c896?logo=shield" alt="Security Policy" /></a>
   <a href="LICENSE-MIT"><img src="https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg" alt="License: MIT OR Apache-2.0" /></a>
 </p>
 
@@ -33,6 +34,7 @@
   <a href="#-quickstart">Quickstart</a> •
   <a href="BENCHMARKS.md">Benchmarks</a> •
   <a href="docs/">Compliance (GDPR / HIPAA / PCI-DSS / LGPD)</a> •
+  <a href=".github/SECURITY.md">Security Policy</a> •
   <a href="deploy/kubernetes/README.md">Kubernetes Sidecar</a> •
   <a href="#-enterprise--commercial-support">Enterprise Support</a> •
   <a href="#-production-examples-examples">Examples</a>
@@ -40,7 +42,7 @@
 
 > [!IMPORTANT]
 > **Need Enterprise On-Premise deployment, SOC2/HIPAA compliance logs, or custom rules?**  
-> Contact our founder and enterprise team at **[founder@glastor.es](mailto:founder@glastor.es)** for on-premise air-gapped VPCs, custom compliance rules, and SLAs.
+> Contact our enterprise security and infrastructure team at **[founder@glastor.es](mailto:founder@glastor.es)** for on-premise air-gapped VPCs, custom compliance rules, and SLAs.
 
 **`pii-veil`** is a sub-millisecond, zero-bloat Rust engine for detecting, anonymizing, and restoring PII and secrets across **LLM prompts, MCP agents, HTTP/SSE proxies, JSON/NDJSON logs, CSVs, and multi-gigabyte SQL dumps**.
 

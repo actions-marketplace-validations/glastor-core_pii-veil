@@ -1,52 +1,52 @@
-# 🛡️ Política de Seguridad (Security Policy) — GLASTOR® pii-veil
+# Security Policy — GLASTOR Core pii-veil
 
-En el proyecto **GLASTOR® pii-veil** (`glastor-core/pii-veil`), desarrollado por `GLASTOR-DEV` (división de ingeniería de **GLASTOR® Core**), la prevención de fuga de datos (DLP), la integridad criptográfica de las bóvedas reversibles (`Vault`) y la seguridad de la cadena de suministro son prioridades inquebrantables.
+At **GLASTOR Core** (`glastor-core/pii-veil`), data loss prevention (DLP), cryptographic integrity of reversible vaults (`Vault`), and supply-chain security are paramount priorities.
 
-El motor central (`crates/veil-core`) y el binario CLI/MCP/Proxy (`crates/veil-cli`) están implementados en **Rust 100% seguro** (sin bloques `unsafe`), previniendo vulnerabilidades de corrupción de memoria y denegación de servicio por expresiones regulares catastróficas (ReDoS) mediante el autómata finito determinista de `regex` y `aho-corasick`.
+The core engine (`crates/veil-core`) and CLI/MCP/Proxy binary (`crates/veil-cli`) are implemented in **100% safe Rust** (no `unsafe` blocks), eliminating memory corruption vulnerabilities and catastrophic regular expression backtracking (ReDoS) through linear-time deterministic finite automata (`regex` and `aho-corasick`).
 
 ---
 
-## 📦 Versiones Soportadas
+## Supported Versions
 
-Mantenemos actualizaciones de seguridad activas para las versiones estables de `pii-veil` en todos sus canales (`crates.io`, `PyPI`, `npm` y `Go`):
+We provide active security updates and patches for stable releases of `pii-veil` across all distribution channels (`crates.io`, `PyPI`, `npm`, and `Go`):
 
-| Versión | Estado de Soporte | Tipo de Soporte |
+| Version | Status | Notes |
 | :--- | :--- | :--- |
-| `0.1.x` | :white_check_mark: | Soporte activo y parches inmediatos |
-| `< 0.1` | :x: No soportada | Versiones de desarrollo previas |
+| `0.1.x` | Supported | Active maintenance & immediate security patches |
+| `< 0.1` | Unsupported | Pre-release development versions |
 
 ---
 
-## 🚨 Reporte Responsable de Vulnerabilidades
+## Reporting a Vulnerability
 
-Si descubres una vulnerabilidad de seguridad o un fallo que comprometa la integridad de `pii-veil` (por ejemplo: evasión/bypass de redacción de PII en el proxy HTTP/SSE o servidor MCP, debilidad en el cifrado autenticado de `.vault` con `--vault-pass`, fuga de tokens en `StreamingRestorer`, o fallo de memoria en la frontera C-ABI `crates/veil-ffi`), te solicitamos **no abrir un issue público**. En su lugar, activa nuestro protocolo de divulgación coordinada:
+If you discover a security vulnerability or bypass affecting `pii-veil` (e.g. DLP redaction evasion in the HTTP/SSE proxy or MCP server, cryptographic weakness in authenticated `.vault` encryption with `--vault-pass`, token leakage in `StreamingRestorer`, or memory flaws at the C-ABI boundary in `crates/veil-ffi`), please **do not open a public issue**. Instead, follow our coordinated vulnerability disclosure process:
 
-### Opción 1: GitHub Private Vulnerability Reporting (Recomendado)
+### Option 1: GitHub Private Vulnerability Reporting (Recommended)
 
-Accede directamente a la herramienta oficial de GitHub:
-👉 [Reportar vulnerabilidad privada en pii-veil](https://github.com/glastor-core/pii-veil/security/advisories/new)
+Submit a confidential report directly via GitHub Security Advisories:
+👉 [Report a private vulnerability in pii-veil](https://github.com/glastor-core/pii-veil/security/advisories/new)
 
-### Opción 2: Correo Electrónico Seguro
+### Option 2: Direct Email Disclosure
 
-Envía los detalles técnicos a nuestro equipo de seguridad:
-📧 **[engineering@glastor.io](mailto:engineering@glastor.io)** o **[glastor.info@gmail.com](mailto:glastor.info@gmail.com)**
+Send technical details directly to our security and engineering desk:
+📧 **[founder@glastor.es](mailto:founder@glastor.es)**
 
-### Información a Incluir en el Reporte
+### Details to Include
 
-Para acelerar el triaje y la mitigación, incluye:
-- Descripción clara del vector de ataque, bypass de DLP o fallo criptográfico.
-- Pasos mínimos de reproducción o prueba de concepto (PoC) utilizando datos sintéticos (nunca PII real).
-- Componente afectado (`veil-core`, `veil mcp`, `veil proxy`, `veil-ffi`, `veil-py`, `veil-node` o `sdks/go`).
-- Parche o mitigación sugerida (si está disponible).
-
----
-
-## ⏱️ SLA y Compromiso de Respuesta
-
-- **Recepción y acuse de recibo inicial:** $\le$ 24 horas hábiles.
-- **Triaje y evaluación de severidad (CVSS):** $\le$ 48 horas hábiles.
-- **Publicación de parche de seguridad:** Prioridad inmediata con aviso público a través de GitHub Security Advisory y actualización sincronizada en `crates.io`, `PyPI` y `npm`.
+To accelerate triage and resolution, please provide:
+- Clear description of the vulnerability, DLP bypass vector, or cryptographic concern.
+- Minimal reproducible proof of concept (PoC) using **synthetic mock data** (never submit real PII or live secrets).
+- Affected components (`veil-core`, `veil mcp`, `veil proxy`, `veil-ffi`, `veil-py`, `veil-node`, or `sdks/go`).
+- Suggested remediation or patch (if available).
 
 ---
 
-© 2026 Andrés Antonio Cardoso — GLASTOR-DEV / GLASTOR® Core Organization.
+## Response SLA & Commitment
+
+- **Initial Acknowledgment:** <= 24 business hours.
+- **Triage & Severity Assessment (CVSS):** <= 48 business hours.
+- **Security Patch Release:** Immediate priority via GitHub Security Advisory, synchronized across `crates.io`, `PyPI`, and `npm`.
+
+---
+
+© 2026 GLASTOR Core Organization — Security & Infrastructure Team.
