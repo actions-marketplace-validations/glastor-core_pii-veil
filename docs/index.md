@@ -38,7 +38,7 @@
 | **CLI & MCP Server** | `crates/veil-cli` | Terminal tool, MCP for Cursor/Claude, and HTTP/SSE Proxy |
 | **C-ABI FFI** | `crates/veil-ffi` | Shared C library for Go cgo, Python, C/C++ |
 | **Go SDK** | `sdks/go` | Golang package and HTTP middleware |
-| **Python SDK** | `sdks/python` | `pip install pii-veil`, LangChain, LlamaIndex, CrewAI |
-| **Node.js SDK** | `sdks/node` | `npm install @glastor/pii-veil`, Next.js, Express, Vercel AI |
+| **Python SDK** | `sdks/python` | `pip install glastor-pii-veil`, LangChain, LlamaIndex, CrewAI |
+| **Node.js SDK** | `sdks/node` | `npm install pii-veil-node`, Next.js, Express, Vercel AI |
 | **Kubernetes Sidecar**| `deploy/kubernetes` | Multi-container pod proxy for zero-code integration |
 | **GitHub Action** | `action.yml` | Marketplace CI/CD DLP scanner |

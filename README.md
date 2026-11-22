@@ -42,7 +42,7 @@
 </p>
 
 > [!IMPORTANT]
-> **Need Enterprise On-Premise deployment, SOC2/HIPAA compliance logs, or custom rules?**  
+> **Need Enterprise On-Premise deployment, SOC2/HIPAA compliance logs, or custom rules?**
 > Contact our enterprise security and infrastructure team at **[founder@glastor.es](mailto:founder@glastor.es)** for on-premise air-gapped VPCs, custom compliance rules, and SLAs.
 
 **`pii-veil`** is a sub-millisecond, zero-bloat Rust engine for detecting, anonymizing, and restoring PII and secrets across **LLM prompts, MCP agents, HTTP/SSE proxies, JSON/NDJSON logs, CSVs, and multi-gigabyte SQL dumps**.
@@ -189,7 +189,7 @@ Every pull request is mathematically audited by **GLASTOR Specter** against Troj
 | **AWS Comprehend DLP** | ~120,000 µs (120 ms) | N/A (Cloud API) | ❌ No streaming | External Cloud Egress | $0.0001 per unit (Metered) |
 | **Google Cloud DLP** | ~150,000 µs (150 ms) | N/A (Cloud API) | ❌ No streaming | External Cloud Egress | $3.00 per GB inspected |
 
-> 🐳 **Reproduce on your own hardware**: Don't trust self-reported numbers. Every performance claim is independently auditable via our open-source, containerized harness at **[`glastor-core/benchmarks`](https://github.com/glastor-core/benchmarks)** (comparing Rust, Go, Node.js, and Python under identical CPU/RAM container quotas with `k6` and `wrk`).
+> 🐳 **Reproduce on your own hardware**: Don't trust self-reported numbers. Run the official apples-to-apples Docker + `k6` suite comparing **`pii-veil` vs. Microsoft Presidio** under identical `2 vCPUs / 2 GiB RAM` quotas at **[`glastor-core/benchmarks/pii-dlp`](https://github.com/glastor-core/benchmarks/tree/main/pii-dlp)**.
 >
 > For in-depth statistical Criterion reports (AVX2/NEON micro-benchmarks), see [BENCHMARKS.md](BENCHMARKS.md).
 
@@ -224,6 +224,6 @@ We offer enterprise licenses and dedicated infrastructure solutions:
 - **Custom DLP Detectors & Proprietary Rules**: Tailored regex patterns, custom checksum algorithms, and domain-specific sensitive data classifications.
 - **24/7 SLA & Architecture Review**: Priority engineering support, guaranteed response times, and LLM streaming pipeline benchmarking.
 
-📩 **Need Enterprise On-Premise deployment, SOC 2 / HIPAA compliance logs, or custom rules?**  
+📩 **Need Enterprise On-Premise deployment, SOC 2 / HIPAA compliance logs, or custom rules?**
 Contact us directly at: **[founder@glastor.es](mailto:founder@glastor.es)**
 

@@ -3,7 +3,7 @@ name = "pii-veil-wasm"
 version = "0.1.4"
 edition = "2021"
 license = "MIT OR Apache-2.0"
-authors = ["Andrés Antonio Cardoso <engineering@glastor.io>"]
+authors = ["GLASTOR Core <founder@glastor.es>"]
 repository = "https://github.com/glastor-core/pii-veil"
 description = "WebAssembly bindings for pii-veil: ultrafast in-browser PII anonymization and reversible vault"
 

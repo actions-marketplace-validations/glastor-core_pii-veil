@@ -12,10 +12,17 @@ readme = "../../README.md"
 
 [dependencies]
 aho-corasick = "1.1"
+chacha20poly1305 = { version = "0.10", default-features = false, features = ["alloc"] }
+getrandom = "0.2"
+pbkdf2 = { version = "0.12", default-features = false, features = ["hmac", "sha2"] }
 regex = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+sha2 = "0.10"
 thiserror = { workspace = true }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+getrandom = { version = "0.2", features = ["js"] }
 
 [dev-dependencies]
 criterion = { version = "0.8", features = ["html_reports"] }

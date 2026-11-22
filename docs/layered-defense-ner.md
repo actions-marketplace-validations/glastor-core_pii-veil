@@ -70,16 +70,16 @@ flowchart TD
 
 ## 3. Implementation Patterns
 
-### Pattern A: CLI & Proxy Flag (`--with-ner`)
+### Pattern A: CLI & Proxy Flag (`--with-ner` — Roadmap v0.2+)
 
-When starting the CLI or local HTTP/SSE proxy, the default operation is deterministic sub-100 us mode:
+When starting the CLI or local HTTP/SSE proxy today (`v0.1.x`), the default operation is deterministic sub-100 us mode. The `--with-ner` CLI flag below illustrates the target **v0.2+ Layered Defense** invocation pattern (for immediate production use today, use Pattern B or Pattern C below):
 
 ```bash
-# Standard High-Throughput Mode (Sub-100 us, 100% Deterministic)
+# Standard High-Throughput Mode (Available today in v0.1.4 — Sub-100 us, 100% Deterministic)
 veil proxy --listen 127.0.0.1:8080
 
-# Layered Defense Mode (Enables optional local ONNX/Candle NER for free-text names)
-veil proxy --listen 127.0.0.1:8080 --with-ner --ner-model "models/minilm-ner-int8.onnx"
+# Layered Defense Mode (Target v0.2+ CLI flag for optional local ONNX/Candle NER)
+# veil proxy --listen 127.0.0.1:8080 --with-ner --ner-model "models/minilm-ner-int8.onnx"
 ```
 
 ### Pattern B: Python Multi-Stage Pipeline (Fast-Path First)

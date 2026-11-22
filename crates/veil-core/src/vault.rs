@@ -1,9 +1,15 @@
 use crate::detector::EntityKind;
 use crate::strategy::keyed_hash64;
 use aho_corasick::AhoCorasick;
+use chacha20poly1305::{aead::AeadInPlace, ChaCha20Poly1305, KeyInit, Nonce, Tag};
+use pbkdf2::pbkdf2_hmac;
 use serde::{Deserialize, Serialize};
+use sha2::Sha256;
 use std::collections::HashMap;
 use std::io::{self, BufRead, Write};
+
+const PBKDF2_ITERATIONS: u32 = 100_000;
+const VAULT_V2_AAD: &[u8] = b"pii-veil-vault-v2";
 
 /// A single entry recorded inside a [`Vault`].
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -174,55 +180,99 @@ impl Vault {
         serde_json::from_str(json_str)
     }
 
-    /// Encrypts and authenticates the vault with `passphrase`, returning a JSON string
-    /// containing an [`EncryptedVaultEnvelope`].
+    /// Encrypts and authenticates the vault with `passphrase` using **PBKDF2-HMAC-SHA256**
+    /// (100,000 iterations, random 128-bit salt) and **ChaCha20-Poly1305 AEAD** (random 96-bit nonce),
+    /// returning a JSON string containing an [`EncryptedVaultEnvelope`] (`version: 2`).
     pub fn to_encrypted_json(&self, passphrase: &str) -> Result<String, String> {
         let plaintext = self.to_json().map_err(|e| e.to_string())?;
-        let nonce = keyed_hash64(
-            passphrase.as_bytes(),
-            "VEIL_NONCE_V1",
-            &format!("len:{}:entries:{}", plaintext.len(), self.len()),
-        );
-        let nonce_hex = format!("{:016x}", nonce);
 
-        let ciphertext = xor_keystream(passphrase.as_bytes(), &nonce_hex, plaintext.as_bytes());
-        let ciphertext_hex = bytes_to_hex(&ciphertext);
-        let tag_hex = compute_auth_tag(passphrase.as_bytes(), &nonce_hex, &ciphertext_hex);
+        let mut salt_and_nonce = [0u8; 28];
+        getrandom::getrandom(&mut salt_and_nonce)
+            .map_err(|e| format!("CSPRNG failure generating vault salt/nonce: {}", e))?;
+        let salt = &salt_and_nonce[..16];
+        let nonce_bytes = &salt_and_nonce[16..28];
+
+        let mut key = [0u8; 32];
+        pbkdf2_hmac::<Sha256>(passphrase.as_bytes(), salt, PBKDF2_ITERATIONS, &mut key);
+
+        let cipher = ChaCha20Poly1305::new_from_slice(&key)
+            .map_err(|_| "failed to initialize ChaCha20-Poly1305 cipher".to_string())?;
+        let nonce = Nonce::from_slice(nonce_bytes);
+
+        let mut buffer = plaintext.into_bytes();
+        let tag = cipher
+            .encrypt_in_place_detached(nonce, VAULT_V2_AAD, &mut buffer)
+            .map_err(|_| "ChaCha20-Poly1305 encryption failed".to_string())?;
 
         let envelope = EncryptedVaultEnvelope {
-            version: 1,
-            nonce_hex,
-            tag_hex,
-            ciphertext_hex,
+            version: 2,
+            nonce_hex: bytes_to_hex(&salt_and_nonce),
+            tag_hex: bytes_to_hex(tag.as_slice()),
+            ciphertext_hex: bytes_to_hex(&buffer),
         };
         serde_json::to_string_pretty(&envelope).map_err(|e| e.to_string())
     }
 
     /// Decrypts and verifies a [`Vault`] from an encrypted JSON envelope produced by [`Vault::to_encrypted_json`].
+    ///
+    /// Supports both `version: 2` (PBKDF2-HMAC-SHA256 + ChaCha20-Poly1305 AEAD) and legacy `version: 1`.
     pub fn from_encrypted_json(encrypted_json: &str, passphrase: &str) -> Result<Self, String> {
         let env: EncryptedVaultEnvelope = serde_json::from_str(encrypted_json)
             .map_err(|e| format!("invalid encrypted vault envelope: {}", e))?;
-        if env.version != 1 {
-            return Err(format!(
-                "unsupported encrypted vault version: {}",
-                env.version
-            ));
+
+        match env.version {
+            2 => {
+                let salt_and_nonce = hex_to_bytes(&env.nonce_hex)?;
+                if salt_and_nonce.len() != 28 {
+                    return Err("invalid v2 vault salt/nonce length".to_string());
+                }
+                let salt = &salt_and_nonce[..16];
+                let nonce_bytes = &salt_and_nonce[16..28];
+
+                let tag_bytes = hex_to_bytes(&env.tag_hex)?;
+                if tag_bytes.len() != 16 {
+                    return Err("invalid v2 vault authentication tag length".to_string());
+                }
+
+                let mut key = [0u8; 32];
+                pbkdf2_hmac::<Sha256>(passphrase.as_bytes(), salt, PBKDF2_ITERATIONS, &mut key);
+
+                let cipher = ChaCha20Poly1305::new_from_slice(&key)
+                    .map_err(|_| "failed to initialize ChaCha20-Poly1305 cipher".to_string())?;
+                let nonce = Nonce::from_slice(nonce_bytes);
+                let tag = Tag::from_slice(&tag_bytes);
+
+                let mut buffer = hex_to_bytes(&env.ciphertext_hex)?;
+                cipher
+                    .decrypt_in_place_detached(nonce, VAULT_V2_AAD, &mut buffer, tag)
+                    .map_err(|_| {
+                        "vault authentication failed: wrong passphrase or tampered file".to_string()
+                    })?;
+
+                let plaintext = String::from_utf8(buffer)
+                    .map_err(|_| "decrypted vault is not valid UTF-8".to_string())?;
+                Self::from_json(&plaintext).map_err(|e| e.to_string())
+            }
+            1 => {
+                let expected_tag =
+                    compute_auth_tag(passphrase.as_bytes(), &env.nonce_hex, &env.ciphertext_hex);
+                if expected_tag != env.tag_hex {
+                    return Err(
+                        "vault authentication failed: wrong passphrase or tampered file"
+                            .to_string(),
+                    );
+                }
+
+                let ciphertext = hex_to_bytes(&env.ciphertext_hex)?;
+                let plaintext_bytes =
+                    xor_keystream(passphrase.as_bytes(), &env.nonce_hex, &ciphertext);
+                let plaintext = String::from_utf8(plaintext_bytes)
+                    .map_err(|_| "decrypted vault is not valid UTF-8".to_string())?;
+
+                Self::from_json(&plaintext).map_err(|e| e.to_string())
+            }
+            v => Err(format!("unsupported encrypted vault version: {}", v)),
         }
-
-        let expected_tag =
-            compute_auth_tag(passphrase.as_bytes(), &env.nonce_hex, &env.ciphertext_hex);
-        if expected_tag != env.tag_hex {
-            return Err(
-                "vault authentication failed: wrong passphrase or tampered file".to_string(),
-            );
-        }
-
-        let ciphertext = hex_to_bytes(&env.ciphertext_hex)?;
-        let plaintext_bytes = xor_keystream(passphrase.as_bytes(), &env.nonce_hex, &ciphertext);
-        let plaintext = String::from_utf8(plaintext_bytes)
-            .map_err(|_| "decrypted vault is not valid UTF-8".to_string())?;
-
-        Self::from_json(&plaintext).map_err(|e| e.to_string())
     }
 }
 

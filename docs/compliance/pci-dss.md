@@ -39,7 +39,7 @@ How to satisfy the **Payment Card Industry Data Security Standard (PCI-DSS v4.0)
 ## 🚀 Express / Next.js Gateway Example
 
 ```typescript
-import { piiVeilMiddleware } from '@glastor/pii-veil/express';
+import { piiVeilMiddleware } from 'pii-veil-node/express';
 import express from 'express';
 
 const app = express();

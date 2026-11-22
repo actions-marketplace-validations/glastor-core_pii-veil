@@ -9,7 +9,7 @@ Includes native integrations for **LangChain**, **LlamaIndex**, and **CrewAI**, 
 ## 📦 Installation
 
 ```bash
-pip install pii-veil
+pip install glastor-pii-veil
 ```
 
 *(Optional framework integrations: `pip install "pii-veil[all]"`)*
