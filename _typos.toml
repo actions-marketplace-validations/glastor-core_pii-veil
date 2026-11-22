@@ -1,0 +1,94 @@
+# Configuration for `typos` (https://github.com/crate-ci/typos)
+# Fast, low-false-positive source code and documentation spell checker.
+
+[files]
+extend-exclude = [
+    "target/**",
+    "web/node_modules/**",
+    "web/dist/**",
+    "Cargo.lock",
+    "web/package-lock.json",
+    "*.wasm",
+    "*.svg",
+    "*.enc",
+    "*.vault",
+    ".vektor/**",
+    # Intentional Spanish/Portuguese fixtures and regional test payloads
+    "web/src/scripts/playground.ts",
+    "docs/compliance/lgpd.md",
+    "CONTRIBUTORS.md",
+    "crates/veil-core/benches/bench_throughput.rs",
+    ".github/COMMIT_CONVENTION.md",
+    ".github/PULL_REQUEST_TEMPLATE.md",
+]
+
+[default]
+extend-ignore-re = [
+    # Ignore synthetic tokens, hex hashes, and placeholder tags
+    "sk-proj-[A-Za-z0-9]+",
+    "0x[0-9A-Fa-f_]+",
+    "\\[[A-Z_0-9]+\\]",
+]
+
+[default.extend-words]
+# Brand & ecosystem terms
+glastor = "glastor"
+presidio = "presidio"
+specter = "specter"
+nemesis = "nemesis"
+vortex = "vortex"
+hyper64 = "hyper64"
+# Security, compliance & cryptography terms
+cuit = "cuit"
+cuil = "cuil"
+dni = "dni"
+nie = "nie"
+rut = "rut"
+luhn = "luhn"
+iban = "iban"
+sarif = "sarif"
+sbom = "sbom"
+cyclonedx = "cyclonedx"
+checksec = "checksec"
+distroless = "distroless"
+redactor = "redactor"
+restorer = "restorer"
+pseudonymization = "pseudonymization"
+anonymizer = "anonymizer"
+anonymize = "anonymize"
+pipeda = "pipeda"
+lgpd = "lgpd"
+hipaa = "hipaa"
+gdpr = "gdpr"
+rgpd = "rgpd"
+dpdp = "dpdp"
+nino = "nino"
+curp = "curp"
+rfc = "rfc"
+cpf = "cpf"
+cnpj = "cnpj"
+aadhaar = "aadhaar"
+verhoeff = "verhoeff"
+steuer = "steuer"
+# Technical / Rust identifiers
+aho = "aho"
+corasick = "corasick"
+pyo3 = "pyo3"
+napi = "napi"
+axum = "axum"
+uvloop = "uvloop"
+httptools = "httptools"
+cdylib = "cdylib"
+staticlib = "staticlib"
+rustfmt = "rustfmt"
+clippy = "clippy"
+maturin = "maturin"
+ndjson = "ndjson"
+jsonl = "jsonl"
+sse = "sse"
+mcp = "mcp"
+dlp = "dlp"
+pii = "pii"
+phi = "phi"
+ba = "ba"
+ser = "ser"
