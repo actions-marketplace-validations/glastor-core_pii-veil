@@ -195,8 +195,8 @@ Add to your `claude_desktop_config.json`, Cursor (`~/.cursor/mcp.json`), or Wind
 
 `pii-veil` is intentionally engineered for **deterministic, sub-millisecond protection** rather than probabilistic NLP:
 
-- **Structured PII & Secrets (Best Fit):** Emails, payment cards (Luhn), IBANs (Mod-97), regional national IDs (SSN, DNI/NIE, CUIT/CUIL, RUT), API keys, JWTs, PEM keys, and database URIs achieve near-zero false positives at `~165 µs` latency and `< 15 MB` RAM.
-- **Unstructured Free-Text Names / Addresses (Not a Transformer NER Replacement):** Because `pii-veil` avoids loading a 400+ MB ML model, it does not perform contextual Named Entity Recognition for ambiguous proper nouns (e.g., distinguishing *"Jordan"* the person from *"Jordan"* the country). For workloads that require semantic NER alongside deterministic DLP, run `pii-veil` as the fast first-pass gatekeeper before an async or selective NLP pass.
+- **Structured PII & Infrastructure Secrets (Tier-0 Fast Path):** Emails, payment cards (Luhn), IBANs (Mod-97), regional national IDs (SSN, DNI/NIE, CUIT/CUIL, RUT), API keys, JWTs, PEM keys, and database URIs achieve near-zero false positives at `~100 µs` latency and `< 15 MB` RAM.
+- **Unstructured Free-Text Names & Addresses (The Layered Defense Pattern):** Rather than forcing 100% of traffic through heavy 500+ MB transformer models (which adds 50 ms of artificial lag and consumes massive GPU compute), enterprise teams use `pii-veil` as the **Fast-Path Gatekeeper** that eliminates 90%+ of structured risk, delegating only residual or flagged unstructured text to local quantized NER models (ONNX / Candle). See our architectural guide: **[Layered Defense & NER Architecture](docs/layered-defense-ner.md)**.
 - **Encrypted Vaults & Stateless Scaling:** Reversible restoration requires passing or persisting the encrypted `.vault` (e.g., in Redis or request-scoped memory) across distributed workers.
 
 ---

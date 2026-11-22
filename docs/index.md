@@ -1,4 +1,4 @@
-# 🛡️ GLASTOR® `pii-veil` Documentation
+# 🛡 GLASTOR® `pii-veil` Documentation
 
 > **Sub-millisecond Reversible PII & Secret Anonymizer for LLMs, Agents, Logs & SQL Streams.**
 
@@ -21,6 +21,7 @@
 ## 📚 Documentation Sections
 
 - [⚡ Empirical Benchmarks & Telemetry](benchmarks.md)
+- [Layered Defense & NER Architecture](layered-defense-ner.md)
 - [🇪🇺 EU GDPR Compliance Guide](compliance/gdpr.md)
 - [🏥 US HIPAA & PHI De-Identification](compliance/hipaa.md)
 - [💳 PCI-DSS v4.0 Cardholder Protection](compliance/pci-dss.md)
