@@ -74,16 +74,16 @@ cargo bench -p pii-veil-core --bench bench_throughput
 
 Detailed HTML reports with confidence interval distribution charts are generated at `target/criterion/report/index.html`.
 
-### 2. Apples-to-Apples Containerized HTTP and Systems Suite (Docker + k6)
-To independently audit end-to-end latency, throughput, and memory RSS under identical resource quotas (CPU/RAM container limits):
+### 2. Apples-to-Apples Containerized Suite: `pii-veil` vs. Microsoft Presidio (Docker + k6)
+To independently audit end-to-end latency, throughput, and memory RSS under identical container quotas (`2.0 vCPUs`, `2 GiB RAM`) directly from this repository:
 
 ```bash
-git clone https://github.com/glastor-core/benchmarks.git
-cd benchmarks
-./load/run-all.sh
+cd benchmarks/presidio-vs-veil
+chmod +x run-pii.sh
+./run-pii.sh
 ```
 
-Visit the official GLASTOR Core open-source benchmark repository at [`glastor-core/benchmarks`](https://github.com/glastor-core/benchmarks).
+Also mirrored in the organization-wide benchmark repository at **[`glastor-core/benchmarks/pii-dlp`](https://github.com/glastor-core/benchmarks/tree/main/pii-dlp)**.
 
 ---
 

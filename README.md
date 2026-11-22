@@ -189,7 +189,7 @@ Every pull request is mathematically audited by **GLASTOR Specter** against Troj
 | **AWS Comprehend DLP** | ~120,000 µs (120 ms) | N/A (Cloud API) | ❌ No streaming | External Cloud Egress | $0.0001 per unit (Metered) |
 | **Google Cloud DLP** | ~150,000 µs (150 ms) | N/A (Cloud API) | ❌ No streaming | External Cloud Egress | $3.00 per GB inspected |
 
-> 🐳 **Reproduce on your own hardware**: Don't trust self-reported numbers. Run the official apples-to-apples Docker + `k6` suite comparing **`pii-veil` vs. Microsoft Presidio** under identical `2 vCPUs / 2 GiB RAM` quotas at **[`glastor-core/benchmarks/pii-dlp`](https://github.com/glastor-core/benchmarks/tree/main/pii-dlp)**.
+> 🐳 **Reproduce on your own hardware**: Don't trust self-reported numbers. Run the built-in apples-to-apples Docker + `k6` suite comparing **`pii-veil` vs. Microsoft Presidio** under identical `2 vCPUs / 2 GiB RAM` quotas right from this repo (`cd benchmarks/presidio-vs-veil && ./run-pii.sh`), or via **[`glastor-core/benchmarks/pii-dlp`](https://github.com/glastor-core/benchmarks/tree/main/pii-dlp)**.
 >
 > For in-depth statistical Criterion reports (AVX2/NEON micro-benchmarks), see [BENCHMARKS.md](BENCHMARKS.md).
 

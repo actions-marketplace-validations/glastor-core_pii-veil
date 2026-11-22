@@ -1,0 +1,18 @@
+services:
+  rust-pii-veil:
+    build: ./rust-pii-veil
+    container_name: glastor-bench-pii-veil
+    ports:
+      - "8091:8080"
+    cpus: 2.0
+    mem_limit: 2g
+    environment:
+      - TOKIO_WORKER_THREADS=2
+
+  python-presidio:
+    build: ./python-presidio
+    container_name: glastor-bench-presidio
+    ports:
+      - "8092:8080"
+    cpus: 2.0
+    mem_limit: 2g
