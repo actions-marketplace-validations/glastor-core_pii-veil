@@ -141,7 +141,7 @@ Use `pii-veil` as a sub-millisecond DLP gatekeeper in any GitHub Actions workflo
 
 Official MCP Registry identifier: `mcp-name: io.github.glastor-core/pii-veil`
 
-[![pii-veil MCP server – quality and maintenance score on Glama](https://glama.ai/mcp/servers/glastor-core/pii-veil/badges/score.svg)](https://glama.ai/mcp/servers/glastor-core/pii-veil)
+[![pii-veil MCP server – quality and maintenance score on Glama](https://glama.ai/mcp/servers/glastor-core/pii-veil/badges/score.svg)](https://glama.ai/mcp/servers/glastor-core/pii-veil) [![GLASTOR pii-veil MCP server](https://mcprush.com/badge/glastor-pii-veil-mcp/card.svg)](https://mcprush.com/to/glastor-pii-veil-mcp?ref=badge)
 
 Add to your `claude_desktop_config.json`, Cursor (`~/.cursor/mcp.json`), or Windsurf MCP config:
 

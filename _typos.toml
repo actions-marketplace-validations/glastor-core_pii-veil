@@ -34,6 +34,7 @@ extend-ignore-re = [
 # Brand & ecosystem terms
 glastor = "glastor"
 glama = "glama"
+mcprush = "mcprush"
 presidio = "presidio"
 specter = "specter"
 nemesis = "nemesis"
