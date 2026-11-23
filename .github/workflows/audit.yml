@@ -82,3 +82,13 @@ jobs:
         run: |
           ./target/release/veil scan --file .github/workflows -p veil.json --fail-on-detect
           ./target/release/veil scan --file Cargo.toml -p veil.json --fail-on-detect
+
+  fuzz-smoke-audit:
+    name: Fuzz Testing — Zero-Panic Invariant Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Run multi-thousand iteration fuzz smoke test
+        run: cargo test -p pii-veil-core --test fuzz_smoke

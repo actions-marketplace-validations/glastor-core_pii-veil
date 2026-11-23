@@ -1,4 +1,4 @@
-# 🛡️ GLASTOR® `pii-veil` Documentation
+# 🛡 GLASTOR® `pii-veil` Documentation
 
 > **Sub-millisecond Reversible PII & Secret Anonymizer for LLMs, Agents, Logs & SQL Streams.**
 
@@ -21,6 +21,8 @@
 ## 📚 Documentation Sections
 
 - [⚡ Empirical Benchmarks & Telemetry](benchmarks.md)
+- [Layered Defense & NER Architecture](layered-defense-ner.md)
+- [SemVer Stability & Specter Contract Guarantee](semver-api-stability.md)
 - [🇪🇺 EU GDPR Compliance Guide](compliance/gdpr.md)
 - [🏥 US HIPAA & PHI De-Identification](compliance/hipaa.md)
 - [💳 PCI-DSS v4.0 Cardholder Protection](compliance/pci-dss.md)
@@ -36,7 +38,7 @@
 | **CLI & MCP Server** | `crates/veil-cli` | Terminal tool, MCP for Cursor/Claude, and HTTP/SSE Proxy |
 | **C-ABI FFI** | `crates/veil-ffi` | Shared C library for Go cgo, Python, C/C++ |
 | **Go SDK** | `sdks/go` | Golang package and HTTP middleware |
-| **Python SDK** | `sdks/python` | `pip install pii-veil`, LangChain, LlamaIndex, CrewAI |
-| **Node.js SDK** | `sdks/node` | `npm install @glastor/pii-veil`, Next.js, Express, Vercel AI |
+| **Python SDK** | `sdks/python` | `pip install glastor-pii-veil`, LangChain, LlamaIndex, CrewAI |
+| **Node.js SDK** | `sdks/node` | `npm install pii-veil-node`, Next.js, Express, Vercel AI |
 | **Kubernetes Sidecar**| `deploy/kubernetes` | Multi-container pod proxy for zero-code integration |
 | **GitHub Action** | `action.yml` | Marketplace CI/CD DLP scanner |

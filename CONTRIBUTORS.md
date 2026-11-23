@@ -1,4 +1,4 @@
-# 🏛️ Gobernanza, Escalabilidad y Sostenibilidad Técnica — GLASTOR® pii-veil
+# 🏛 Gobernanza, Escalabilidad y Sostenibilidad Técnica — GLASTOR® pii-veil
 
 ![Contributors](https://img.shields.io/github/contributors/glastor-core/pii-veil)
 ![Stars](https://img.shields.io/github/stars/glastor-core/pii-veil)
@@ -48,4 +48,4 @@ Para contribuir con nuevos detectores regionales, estrategias de anonimización,
 
 ---
 
-© 2026 Andrés Antonio Cardoso — GLASTOR-DEV / GLASTOR® Core Organization.
+© 2026 GLASTOR Core Organization — Security & Infrastructure Team.

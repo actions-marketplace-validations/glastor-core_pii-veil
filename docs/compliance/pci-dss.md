@@ -17,7 +17,7 @@ How to satisfy the **Payment Card Industry Data Security Standard (PCI-DSS v4.0)
 
 ---
 
-## 🛡️ How `pii-veil` Solves PCI-DSS v4.0
+## 🛡 How `pii-veil` Solves PCI-DSS v4.0
 
 ### 1. Luhn Algorithm Checksum (MOD 10)
 `pii-veil` doesn't just match 16-digit numbers with regex; it validates each candidate using the **ISO/IEC 7812 Luhn Algorithm (Mod 10)**. This prevents false positives on order IDs, tracking numbers, and UUIDs.
@@ -39,7 +39,7 @@ How to satisfy the **Payment Card Industry Data Security Standard (PCI-DSS v4.0)
 ## 🚀 Express / Next.js Gateway Example
 
 ```typescript
-import { piiVeilMiddleware } from '@glastor/pii-veil/express';
+import { piiVeilMiddleware } from 'pii-veil-node/express';
 import express from 'express';
 
 const app = express();

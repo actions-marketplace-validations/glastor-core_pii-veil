@@ -4,7 +4,7 @@ How to satisfy the **Health Insurance Portability and Accountability Act (HIPAA)
 
 ---
 
-## 🛡️ The HIPAA Safe Harbor Standard (§164.514(b)(2))
+## 🛡 The HIPAA Safe Harbor Standard (§164.514(b)(2))
 
 The HIPAA Privacy Rule specifies that health data is deemed not individually identifiable when all **18 specified Protected Health Information (PHI) identifiers** of the individual or of relatives, employers, or household members of the individual are removed:
 
@@ -33,7 +33,7 @@ The HIPAA Privacy Rule specifies that health data is deemed not individually ide
 
 ---
 
-## 👩‍⚕️ Clinical Architecture Example
+## 👩‍⚕ Clinical Architecture Example
 
 ```python
 from pii_veil import Veil, RedactionMode

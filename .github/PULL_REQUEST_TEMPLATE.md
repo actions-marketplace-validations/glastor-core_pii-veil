@@ -27,7 +27,7 @@
 - [ ] Suite de pruebas del SDK de Go + puente MCP: `cd sdks/go && go test -v -race ./...`
 - [ ] Benchmark y demo verificados: `cargo run --release -p pii-veil-cli -- bench`
 
-## 🛡️ Checklist de Protección de Rama (`main`)
+## 🛡 Checklist de Protección de Rama (`main`)
 
 - [ ] Mi rama parte de la versión más reciente de `main`.
 - [ ] Ningún test o ejemplo incluye datos personales (PII) o credenciales reales.
@@ -37,4 +37,4 @@
 
 ---
 
-© 2026 Andrés Antonio Cardoso — GLASTOR-DEV / GLASTOR® Core Organization.
+© 2026 GLASTOR Core Organization — Security & Infrastructure Team.

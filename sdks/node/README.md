@@ -1,4 +1,4 @@
-# GLASTOR® `@glastor/pii-veil` — Node.js & TypeScript SDK
+# GLASTOR® `pii-veil-node` — Node.js & TypeScript SDK
 
 Sub-millisecond Reversible PII & Secret Anonymizer for Node.js, Next.js, Express, Fastify & Vercel AI SDK (Luhn Credit Cards, Mod-97 IBAN, DNI, CUIT, Regional IDs, DB URIs, and API Keys).
 
@@ -7,11 +7,11 @@ Sub-millisecond Reversible PII & Secret Anonymizer for Node.js, Next.js, Express
 ## 📦 Installation
 
 ```bash
-npm install @glastor/pii-veil
+npm install pii-veil-node
 # or
-pnpm add @glastor/pii-veil
+pnpm add pii-veil-node
 # or
-yarn add @glastor/pii-veil
+yarn add pii-veil-node
 ```
 
 ---
@@ -19,7 +19,7 @@ yarn add @glastor/pii-veil
 ## ⚡ Quick Start
 
 ```typescript
-import { Veil, RedactionMode } from '@glastor/pii-veil';
+import { Veil, RedactionMode } from 'pii-veil-node';
 
 const veil = new Veil({ mode: RedactionMode.PLACEHOLDER });
 
@@ -47,7 +47,7 @@ console.log(restored);
 
 ```typescript
 // app/api/chat/route.ts
-import { withPiiVeil } from '@glastor/pii-veil/nextjs';
+import { withPiiVeil } from 'pii-veil-node/nextjs';
 import { OpenAI } from 'openai';
 
 const openai = new OpenAI();
@@ -71,7 +71,7 @@ export const POST = withPiiVeil(async (req, { veil }) => {
 
 ```typescript
 import express from 'express';
-import { piiVeilMiddleware } from '@glastor/pii-veil/express';
+import { piiVeilMiddleware } from 'pii-veil-node/express';
 
 const app = express();
 app.use(express.json());
@@ -93,8 +93,8 @@ app.post('/api/support', async (req, res) => {
 // app/api/chat/route.ts
 import { streamText } from 'ai';
 import { openai } from '@ai-sdk/openai';
-import { Veil } from '@glastor/pii-veil';
-import { createPiiVeilTransformStream } from '@glastor/pii-veil/vercel-ai';
+import { Veil } from 'pii-veil-node';
+import { createPiiVeilTransformStream } from 'pii-veil-node/vercel-ai';
 
 const veil = new Veil();
 

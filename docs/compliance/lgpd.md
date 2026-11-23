@@ -4,7 +4,7 @@ Como garantir conformidade com a **Lei Geral de Proteção de Dados Pessoais do 
 
 ---
 
-## ⚖️ Artigos Chave da LGPD e a Abordagem do `pii-veil`
+## ⚖ Artigos Chave da LGPD e a Abordagem do `pii-veil`
 
 ### 1. Artigo 11 e 13 — Tratamento de Dados Pessoais Sensíveis
 > *"O tratamento de dados pessoais sensíveis somente poderá ocorrer... para a realização de estudos por órgão de pesquisa, garantida, sempre que possível, a anonimização dos dados pessoais sensíveis."*

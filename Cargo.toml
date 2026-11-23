@@ -1,14 +1,14 @@
 [workspace]
 resolver = "2"
 members = ["crates/veil-core", "crates/veil-cli", "crates/veil-ffi", "crates/veil-wasm"]
-# Optional language bindings (built via maturin / napi-rs CLI when publishing to PyPI / NPM)
-exclude = ["crates/veil-py", "crates/veil-node"]
+# Optional language bindings & standalone benchmark harness (built separately)
+exclude = ["crates/veil-py", "crates/veil-node", "benchmarks/presidio-vs-veil/rust-pii-veil"]
 
 [workspace.package]
 version = "0.1.4"
 edition = "2021"
 license = "MIT OR Apache-2.0"
-authors = ["Andrés Antonio Cardoso <engineering@glastor.io>"]
+authors = ["GLASTOR Core <founder@glastor.es>"]
 repository = "https://github.com/glastor-core/pii-veil"
 keywords = ["pii", "anonymization", "dlp", "llm", "mcp"]
 categories = ["command-line-utilities", "text-processing", "cryptography"]

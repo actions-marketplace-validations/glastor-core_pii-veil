@@ -1,10 +1,10 @@
-# ☸️ GLASTOR® `pii-veil` — Kubernetes Sidecar Pattern
+# ☸ GLASTOR® `pii-veil` — Kubernetes Sidecar Pattern
 
 Deploy `pii-veil` as an ultra-lightweight (< 15 MB), zero-attack-surface sidecar proxy container inside your Kubernetes pods to transparently redact outgoing prompts and restore streaming SSE responses.
 
 ---
 
-## 🏗️ Architecture
+## 🏗 Architecture
 
 ```text
 +-------------------------------------------------------------------------------+

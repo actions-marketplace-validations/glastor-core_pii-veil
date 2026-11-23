@@ -1,4 +1,4 @@
-# 🛡️ `pii-veil`: Ultrafast Reversible PII & Secret Anonymizer
+# 🛡 `pii-veil`: Ultrafast Reversible PII & Secret Anonymizer
 
 <p align="center">
   <img src="https://res.cloudinary.com/dzualplqi/image/upload/v1794800094/Velo_de_Privacidad_con_IA_Neon_e9k9iw.png" alt="GLASTOR® pii-veil Banner" width="100%" />
@@ -110,7 +110,7 @@ go test -v ./...
 ### 6. GitHub Action (`glastor-core/pii-veil@v1`)
 Use `pii-veil` as a sub-millisecond DLP gatekeeper in any GitHub Actions workflow:
 ```yaml
-- name: 🛡️ PII & Secret DLP Audit
+- name: 🛡 PII & Secret DLP Audit
   uses: glastor-core/pii-veil@v1
   with:
     path: "."

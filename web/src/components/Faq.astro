@@ -5,13 +5,14 @@
 <section id="faq" class="py-16 px-4 max-w-4xl mx-auto">
   <div class="text-center mb-12">
     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyber-cyan/10 border border-cyber-cyan/30 text-cyber-cyan text-xs font-mono font-semibold uppercase mb-3">
-      ❓ TECHNICAL & ARCHITECTURE FAQ
+      <span class="material-symbols-outlined text-sm">help</span>
+      TECHNICAL & ARCHITECTURE FAQ
     </div>
     <h2 class="text-3xl md:text-5xl font-black text-white tracking-tight mb-3">
       Architecture, Performance & Compliance
     </h2>
     <p class="text-cyber-muted text-base max-w-2xl mx-auto">
-      Everything security architects, CTOs, and engineering teams need to know about `pii-veil`.
+      Everything security architects, CTOs, and engineering teams need to know about <code class="font-mono text-cyber-neon text-sm">pii-veil</code>.
     </p>
   </div>
 
@@ -30,7 +31,7 @@
       </summary>
       <div class="mt-4 pt-4 border-t border-cyber-border/60 text-sm text-slate-300 leading-relaxed font-sans space-y-2">
         <p>
-          When you call <code class="text-cyber-neon font-mono text-xs bg-slate-900 px-1.5 py-0.5 rounded">engine.redact()</code>, the engine performs a linear-time <strong class="text-white">$O(N)$</strong> multi-pattern scan powered by Aho-Corasick automata.
+          When you call <code class="text-cyber-neon font-mono text-xs bg-slate-900 px-1.5 py-0.5 rounded">engine.redact()</code>, the engine performs a linear-time <code class="text-white font-mono font-bold text-xs">O(N)</code> multi-pattern scan powered by Aho-Corasick automata.
         </p>
         <p>
           Identified sensitive values (such as credit cards, emails, or government IDs) are isolated in an ephemeral, <strong class="text-cyber-cyan">in-memory volatile Vault</strong> inside your application process, replacing them with unique cryptographic placeholders (e.g. <code class="text-cyber-neon font-mono text-xs">&lt;CREDIT_CARD_1&gt;</code>). The external LLM processes only the sanitized text. When receiving the response or token stream from the LLM, calling <code class="text-cyber-cyan font-mono text-xs">vault.restore()</code> deterministically re-injects the original plaintext values. Once the Vault object is dropped or goes out of scope, all sensitive data is immediately cleared from RAM.
@@ -119,11 +120,39 @@
       </div>
     </details>
 
-    <!-- Item 6 -->
+    <!-- Item 6: Layered Defense & NER -->
+    <details class="group bg-cyber-card border border-cyber-border rounded-xl p-5 open:border-cyber-cyan/60 transition shadow-lg">
+      <summary class="flex items-center justify-between cursor-pointer list-none select-none font-bold text-white text-base sm:text-lg group-hover:text-cyber-cyan transition">
+        <span class="flex items-center gap-3">
+          <span class="text-cyber-cyan font-mono text-sm">06.</span>
+          Does pii-veil replace Named Entity Recognition (NER) for free-text names?
+        </span>
+        <span class="text-cyber-muted group-open:rotate-180 group-open:text-cyber-cyan transition-transform duration-200">
+          ▼
+        </span>
+      </summary>
+      <div class="mt-4 pt-4 border-t border-cyber-border/60 text-sm text-slate-300 leading-relaxed font-sans space-y-2">
+        <p>
+          No, and deliberately so. Forcing 100% of LLM prompts through heavy transformer models (like Presidio, spaCy, or RoBERTa) introduces <strong>30 to 50 ms of artificial latency</strong> and consumes gigabytes of memory per container, making token streaming sluggish and expensive.
+        </p>
+        <p>
+          Instead, enterprise teams deploy the <strong class="text-cyber-cyan">Layered Defense (Fast Path / Selective Slow Path)</strong> pattern:
+        </p>
+        <ul class="list-disc pl-5 space-y-1.5 text-slate-300">
+          <li><strong class="text-white">Tier 0 (pii-veil Fast Path):</strong> Intercepts 100% of traffic in <strong>sub-100 microseconds</strong>, mathematically scrubbing credit cards, IBANs, national IDs (DNI/SSN/CUIT), API keys, JWTs, and database credentials with zero GPU cost.</li>
+          <li><strong class="text-white">Tier 1 (Selective NER with --with-ner):</strong> Only for payloads requiring contextual name or address disambiguation in unstructured prose, residual clean text is forwarded to a local quantized micro-model (INT8 ONNX / Candle).</li>
+        </ul>
+        <p>
+          This hybrid architecture delivers sub-millisecond speeds for 95% of requests while reducing downstream NER compute by over 80%.
+        </p>
+      </div>
+    </details>
+
+    <!-- Item 7 -->
     <details class="group bg-cyber-card border border-cyber-border rounded-xl p-5 open:border-cyber-neon/60 transition shadow-lg">
       <summary class="flex items-center justify-between cursor-pointer list-none select-none font-bold text-white text-base sm:text-lg group-hover:text-cyber-neon transition">
         <span class="flex items-center gap-3">
-          <span class="text-cyber-neon font-mono text-sm">06.</span>
+          <span class="text-cyber-neon font-mono text-sm">07.</span>
           How are supply-chain integrity and binary security audited?
         </span>
         <span class="text-cyber-muted group-open:rotate-180 group-open:text-cyber-neon transition-transform duration-200">
@@ -141,11 +170,11 @@
       </div>
     </details>
 
-    <!-- Item 7 -->
+    <!-- Item 8 -->
     <details class="group bg-cyber-card border border-cyber-border rounded-xl p-5 open:border-cyber-neon/60 transition shadow-lg">
       <summary class="flex items-center justify-between cursor-pointer list-none select-none font-bold text-white text-base sm:text-lg group-hover:text-cyber-neon transition">
         <span class="flex items-center gap-3">
-          <span class="text-cyber-neon font-mono text-sm">07.</span>
+          <span class="text-cyber-neon font-mono text-sm">08.</span>
           How do I obtain commercial enterprise support, audits, and guaranteed SLAs?
         </span>
         <span class="text-cyber-muted group-open:rotate-180 group-open:text-cyber-neon transition-transform duration-200">

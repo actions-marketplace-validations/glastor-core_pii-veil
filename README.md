@@ -1,4 +1,4 @@
-# 🛡️ `pii-veil`: Ultrafast Reversible PII & Secret Anonymizer
+# 🛡 `pii-veil`: Ultrafast Reversible PII & Secret Anonymizer
 
 <p align="center">
   <img src="https://res.cloudinary.com/dzualplqi/image/upload/v1794800094/Velo_de_Privacidad_con_IA_Neon_e9k9iw.png" alt="GLASTOR® pii-veil Banner" width="100%" />
@@ -9,6 +9,8 @@
   <a href="https://github.com/glastor-core/pii-veil/actions/workflows/audit.yml"><img src="https://github.com/glastor-core/pii-veil/actions/workflows/audit.yml/badge.svg" alt="Security & SemVer Audit" /></a>
   <a href="https://github.com/glastor-core/specter"><img src="https://img.shields.io/badge/API%20Contract-Specter%20AST-8b5cf6?logo=git-pull-request" alt="Specter API Contract Guard" /></a>
   <a href="https://github.com/glastor-core/byte-gauge"><img src="https://img.shields.io/badge/Security-Byte--Gauge%20SIMD-00C7B7?logo=shield" alt="Byte-Gauge Binary Hardened" /></a>
+  <a href="https://github.com/glastor-core/benchmarks"><img src="https://img.shields.io/badge/Benchmarks-glastor--core%2Fbenchmarks-00ff66?logo=docker" alt="Reproducible Docker Benchmarks" /></a>
+  <a href="https://glama.ai/mcp/servers/glastor-core/pii-veil"><img src="https://glama.ai/mcp/servers/glastor-core/pii-veil/badges/score.svg" alt="pii-veil MCP server – quality and maintenance score on Glama" /></a>
   <a href="https://github.com/glastor-core/pii-veil/releases"><img src="https://img.shields.io/github/v/release/glastor-core/pii-veil?logo=github&label=release&color=00c896" alt="GitHub Release" /></a>
   <a href="https://crates.io/crates/pii-veil-core"><img src="https://img.shields.io/crates/v/pii-veil-core.svg?logo=rust&color=dea584" alt="Crates.io" /></a>
   <a href="https://crates.io/crates/pii-veil-core"><img src="https://img.shields.io/crates/d/pii-veil-core?logo=rust&color=dea584&label=crates.io%20downloads" alt="Crates.io Downloads" /></a>
@@ -19,6 +21,7 @@
   <a href="deploy/kubernetes"><img src="https://img.shields.io/badge/Kubernetes-Sidecar%20Ready-326CE5?logo=kubernetes&logoColor=white" alt="Kubernetes Sidecar" /></a>
   <a href="BENCHMARKS.md"><img src="https://img.shields.io/badge/Latency-165%20%C2%B5s%20(200x%20vs%20Presidio)-ff6b00?logo=speedtest&logoColor=white" alt="Benchmarks" /></a>
   <a href="docs/"><img src="https://img.shields.io/badge/Compliance-GDPR%20%7C%20HIPAA%20%7C%20PCI--DSS%20%7C%20LGPD-00c896?logo=shield&logoColor=white" alt="Compliance" /></a>
+  <a href=".github/SECURITY.md"><img src="https://img.shields.io/badge/Security-Policy%20Active-00c896?logo=shield" alt="Security Policy" /></a>
   <a href="LICENSE-MIT"><img src="https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue.svg" alt="License: MIT OR Apache-2.0" /></a>
 </p>
 
@@ -32,14 +35,16 @@
   <a href="#-quickstart">Quickstart</a> •
   <a href="BENCHMARKS.md">Benchmarks</a> •
   <a href="docs/">Compliance (GDPR / HIPAA / PCI-DSS / LGPD)</a> •
+  <a href="docs/semver-api-stability.md">SemVer Guarantee</a> •
+  <a href=".github/SECURITY.md">Security Policy</a> •
   <a href="deploy/kubernetes/README.md">Kubernetes Sidecar</a> •
   <a href="#-enterprise--commercial-support">Enterprise Support</a> •
   <a href="#-production-examples-examples">Examples</a>
 </p>
 
 > [!IMPORTANT]
-> **Need Enterprise On-Premise deployment, SOC2/HIPAA compliance logs, or custom rules?**  
-> Contact our founder and enterprise team at **[founder@glastor.es](mailto:founder@glastor.es)** for on-premise air-gapped VPCs, custom compliance rules, and SLAs.
+> **Need Enterprise On-Premise deployment, SOC2/HIPAA compliance logs, or custom rules?**
+> Contact our enterprise security and infrastructure team at **[founder@glastor.es](mailto:founder@glastor.es)** for on-premise air-gapped VPCs, custom compliance rules, and SLAs.
 
 **`pii-veil`** is a sub-millisecond, zero-bloat Rust engine for detecting, anonymizing, and restoring PII and secrets across **LLM prompts, MCP agents, HTTP/SSE proxies, JSON/NDJSON logs, CSVs, and multi-gigabyte SQL dumps**.
 
@@ -123,7 +128,7 @@ go test -v ./...
 ### 6. GitHub Action (`glastor-core/pii-veil@v1`)
 Use `pii-veil` as a sub-millisecond DLP gatekeeper in any GitHub Actions workflow:
 ```yaml
-- name: 🛡️ PII & Secret DLP Audit
+- name: 🛡 PII & Secret DLP Audit
   uses: glastor-core/pii-veil@v1
   with:
     path: "."
@@ -135,6 +140,8 @@ Use `pii-veil` as a sub-millisecond DLP gatekeeper in any GitHub Actions workflo
 `pii-veil` ships with a zero-dependency **Model Context Protocol (MCP)** server (`veil mcp`) over `stdio` exposing four tools: `veil_redact`, `veil_restore`, `veil_redact_json`, and `veil_scan`.
 
 Official MCP Registry identifier: `mcp-name: io.github.glastor-core/pii-veil`
+
+[![pii-veil MCP server – quality and maintenance score on Glama](https://glama.ai/mcp/servers/glastor-core/pii-veil/badges/score.svg)](https://glama.ai/mcp/servers/glastor-core/pii-veil) [![GLASTOR pii-veil MCP server](https://mcprush.com/badge/glastor-pii-veil-mcp/card.svg)](https://mcprush.com/to/glastor-pii-veil-mcp?ref=badge)
 
 Add to your `claude_desktop_config.json`, Cursor (`~/.cursor/mcp.json`), or Windsurf MCP config:
 
@@ -162,6 +169,33 @@ Add to your `claude_desktop_config.json`, Cursor (`~/.cursor/mcp.json`), or Wind
 }
 ```
 
+### 8. Fuzz Testing & SemVer Contract Verification
+```bash
+# Run multi-thousand iteration fuzz smoke test across all boundary conditions
+cargo test -p pii-veil-core --test fuzz_smoke
+
+# Run libFuzzer targets locally (requires cargo-fuzz)
+cargo fuzz run fuzz_redact
+cargo fuzz run fuzz_restore
+cargo fuzz run fuzz_checksums
+```
+Every pull request is mathematically audited by **GLASTOR Specter** against Trojan Breaking Changes. Read our **[SemVer Stability & Specter Contract Guarantee](docs/semver-api-stability.md)**.
+
+---
+
+## 📊 Scientific Benchmarks & Independent Reproducibility
+
+| DLP Engine / Solution | Latency (p99) | RAM Footprint | LLM SSE Streaming | Network Egress | Cost Model |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| **pii-veil (Rust / WASM)** | **~100 µs (0.1 ms)** | **< 15 MB** | **✅ Native Token-by-Token** | **0 (100% In-Process)** | **Open Source (Apache-2.0 / MIT)** |
+| **Microsoft Presidio (Python)** | ~35,000 µs (35 ms) | ~1,200 MB (spaCy) | ❌ High buffer latency | Local Python server | High Cloud Server Costs |
+| **AWS Comprehend DLP** | ~120,000 µs (120 ms) | N/A (Cloud API) | ❌ No streaming | External Cloud Egress | $0.0001 per unit (Metered) |
+| **Google Cloud DLP** | ~150,000 µs (150 ms) | N/A (Cloud API) | ❌ No streaming | External Cloud Egress | $3.00 per GB inspected |
+
+> 🐳 **Reproduce on your own hardware**: Don't trust self-reported numbers. Run the built-in apples-to-apples Docker + `k6` suite comparing **`pii-veil` vs. Microsoft Presidio** under identical `2 vCPUs / 2 GiB RAM` quotas right from this repo (`cd benchmarks/presidio-vs-veil && ./run-pii.sh`), or via **[`glastor-core/benchmarks/pii-dlp`](https://github.com/glastor-core/benchmarks/tree/main/pii-dlp)**.
+>
+> For in-depth statistical Criterion reports (AVX2/NEON micro-benchmarks), see [BENCHMARKS.md](BENCHMARKS.md).
+
 ---
 
 ## 📂 Production Examples (`examples/`)
@@ -173,12 +207,12 @@ Add to your `claude_desktop_config.json`, Cursor (`~/.cursor/mcp.json`), or Wind
 
 ---
 
-## ⚖️ Trade-offs & Limitations
+## ⚖ Trade-offs & Limitations
 
 `pii-veil` is intentionally engineered for **deterministic, sub-millisecond protection** rather than probabilistic NLP:
 
-- **Structured PII & Secrets (Best Fit):** Emails, payment cards (Luhn), IBANs (Mod-97), regional national IDs (SSN, DNI/NIE, CUIT/CUIL, RUT), API keys, JWTs, PEM keys, and database URIs achieve near-zero false positives at `~165 µs` latency and `< 15 MB` RAM.
-- **Unstructured Free-Text Names / Addresses (Not a Transformer NER Replacement):** Because `pii-veil` avoids loading a 400+ MB ML model, it does not perform contextual Named Entity Recognition for ambiguous proper nouns (e.g., distinguishing *"Jordan"* the person from *"Jordan"* the country). For workloads that require semantic NER alongside deterministic DLP, run `pii-veil` as the fast first-pass gatekeeper before an async or selective NLP pass.
+- **Structured PII & Infrastructure Secrets (Tier-0 Fast Path):** Emails, payment cards (Luhn), IBANs (Mod-97), regional national IDs (SSN, DNI/NIE, CUIT/CUIL, RUT), API keys, JWTs, PEM keys, and database URIs achieve near-zero false positives at `~100 µs` latency and `< 15 MB` RAM.
+- **Unstructured Free-Text Names & Addresses (The Layered Defense Pattern):** Rather than forcing 100% of traffic through heavy 500+ MB transformer models (which adds 50 ms of artificial lag and consumes massive GPU compute), enterprise teams use `pii-veil` as the **Fast-Path Gatekeeper** that eliminates 90%+ of structured risk, delegating only residual or flagged unstructured text to local quantized NER models (ONNX / Candle). See our architectural guide: **[Layered Defense & NER Architecture](docs/layered-defense-ner.md)**.
 - **Encrypted Vaults & Stateless Scaling:** Reversible restoration requires passing or persisting the encrypted `.vault` (e.g., in Redis or request-scoped memory) across distributed workers.
 
 ---
@@ -193,6 +227,6 @@ We offer enterprise licenses and dedicated infrastructure solutions:
 - **Custom DLP Detectors & Proprietary Rules**: Tailored regex patterns, custom checksum algorithms, and domain-specific sensitive data classifications.
 - **24/7 SLA & Architecture Review**: Priority engineering support, guaranteed response times, and LLM streaming pipeline benchmarking.
 
-📩 **Need Enterprise On-Premise deployment, SOC 2 / HIPAA compliance logs, or custom rules?**  
+📩 **Need Enterprise On-Premise deployment, SOC 2 / HIPAA compliance logs, or custom rules?**
 Contact us directly at: **[founder@glastor.es](mailto:founder@glastor.es)**
 

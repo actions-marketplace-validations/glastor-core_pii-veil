@@ -1,0 +1,30 @@
+[package]
+name = "pii-veil-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+pii-veil-core = { path = "../crates/veil-core" }
+
+[[bin]]
+name = "fuzz_redact"
+path = "fuzz_targets/fuzz_redact.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "fuzz_restore"
+path = "fuzz_targets/fuzz_restore.rs"
+test = false
+doc = false
+
+[[bin]]
+name = "fuzz_checksums"
+path = "fuzz_targets/fuzz_checksums.rs"
+test = false
+doc = false

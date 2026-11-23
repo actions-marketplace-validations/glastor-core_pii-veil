@@ -1,87 +1,101 @@
-# 🌌 Guía de Contribución y Estándares de Ingeniería — GLASTOR® pii-veil
+# Contributing to GLASTOR Core pii-veil
 
-Gracias por sumarte a la misión de construir y optimizar **GLASTOR® pii-veil** dentro del ecosistema de `GLASTOR-DEV` (división de ingeniería de **GLASTOR® Core**).
+Thank you for your interest in contributing to **GLASTOR Core pii-veil**! We build ultrafast, deterministic, and reversible data loss prevention (DLP) engines, MCP servers, and privacy proxies in Rust, WebAssembly, Go, Python, and Node.js.
 
-`pii-veil` es el motor de anonimización reversible, prevención de fuga de datos (DLP), servidor MCP y proxy HTTP/SSE de sub-milisegundo diseñado bajo una arquitectura **6-en-1** (`veil-core`, `veil-cli`, `veil-ffi`, `veil-py`, `veil-node` y `sdks/go`).
-
----
-
-## 🛡️ Política de Protección de Rama (`main`)
-
-Para garantizar la máxima estabilidad y la calidad del código en producción:
-- **La rama `main` está protegida**: No se permiten envíos directos (`git push origin main`) ni modificaciones forzadas (`--force`) sin validación previa.
-- **Todo cambio debe ingresar mediante Pull Request (PR)**:
-  - Debe crearse una rama temática (`feat/nombre`, `fix/nombre`, `perf/nombre`).
-  - La suite automatizada de GitHub Actions ([ci.yml](./workflows/ci.yml): formato, Clippy sin warnings, tests del workspace en Linux/Windows/macOS y tests de integración del SDK de Go) debe finalizar en estado verde (`[PASS]`).
-  - Se requiere al menos una revisión aprobada por los mantenedores ([CODEOWNERS](./CODEOWNERS)).
+This document provides clear engineering guidelines to ensure smooth, high-signal collaboration.
 
 ---
 
-## 💻 Setup del Entorno de Desarrollo
+## Code of Conduct & Governance
 
-### Requisitos Previos
+- All contributors are expected to uphold our [Code of Conduct](CODE_OF_CONDUCT.md). Please report any violations confidentially to [`founder@glastor.es`](mailto:founder@glastor.es).
+- For security vulnerabilities or DLP redaction bypasses, **never open a public issue**—follow our [Security Policy](SECURITY.md).
+- Review our [Support Guidelines](SUPPORT.md) for architecture discussions and community forums.
 
-- **Rust**: Versión estable 1.80+ (`rustup`, `cargo`, `rustfmt`, `clippy`).
-- **Go** *(opcional para `sdks/go`)*: 1.22+.
-- **Python 3.9+ & `maturin`** *(opcional para `crates/veil-py`)*.
-- **Node.js 20+ & `@napi-rs/cli`** *(opcional para `crates/veil-node`)*.
+---
 
-### 1. Clonación del Repositorio
+## Finding Work, Reporting Bugs & Proposing Changes
 
-```bash
-git clone https://github.com/glastor-core/pii-veil.git
-cd pii-veil
+- **First-Time Contributors:** Look for issues labeled `good first issue` or `help wanted`. Comment on the issue to claim it before starting work.
+- **Reporting Bugs:** Open an issue with exact reproduction steps, operating system, `veil --version`, and expected vs. actual behavior. **Never include real PII, credentials, or production secrets in issues**—always use synthetic mock data.
+- **Architecture RFCs & New Detectors:** Before starting large refactors, adding regional ID checksum algorithms, or altering public APIs, open a **GitHub Discussion** first to align on design and scope with maintainers.
+
+---
+
+## Development Workflow
+
+We follow a structured Git branching model and enforce linear history via GitHub Pull Requests:
+
+```text
+main (production-ready, releases)
+  └── feat/your-feature-name
+  └── fix/issue-description
+  └── perf/optimization-name
 ```
 
-### 2. Comandos de Trabajo y Verificación
+### 1. Prerequisites
+- **Rust:** Stable 1.80+ (`rustup`, `cargo`, `rustfmt`, `clippy`).
+- **Go** *(optional, for `sdks/go`)*: 1.22+.
+- **Node.js** *(optional, for `web/` and `crates/veil-node`)*: 20 LTS+.
+- **Python** *(optional, for `crates/veil-py`)*: 3.9+ with `maturin`.
+
+### 2. Fork, Clone & Branch
 
 ```bash
-# Compilar todo el workspace de Rust (veil-core, veil-cli, veil-ffi)
+git clone https://github.com/<your-username>/pii-veil.git
+cd pii-veil
+git remote add upstream https://github.com/glastor-core/pii-veil.git
+git checkout -b feat/my-detector-enhancement
+```
+
+### 3. Local Verification & Quality Gates
+
+All contributions must pass local quality gates prior to opening a PR:
+
+```bash
+# Build the complete Rust workspace
 cargo build --workspace --all-targets
 
-# Ejecutar todas las pruebas unitarias y de integración en Rust
+# Run the complete test suite (including multi-thousand iteration fuzz smoke test)
 cargo test --workspace
 
-# Verificar cumplimiento de formato oficial
+# Verify strict formatting
 cargo fmt --all -- --check
 
-# Ejecutar auditoría estricta de Clippy (cero warnings permitidos)
+# Enforce zero Clippy warnings
 cargo clippy --workspace --all-targets -- -D warnings
 
-# Ejecutar demo interactiva y benchmark de rendimiento en modo release
-cargo run --release -p pii-veil-cli -- demo
-cargo run --release -p pii-veil-cli -- bench
-
-# Ejecutar pruebas unitarias y de integración MCP en el SDK de Go
+# Run Go SDK tests (if touching sdks/go)
 cd sdks/go && go test -v -race ./...
 ```
 
 ---
 
-## 📐 Estándares de Código, Privacidad y Manejo de `unsafe`
+## Commit Message Conventions
 
-1. **Cero Falsos Positivos con Validación Matemática**:
-   - Todo nuevo detector de documentos financieros o de identidad (tarjetas, IBAN, DNI, CUIT, RUT, etc.) debe ir acompañado de su función verificadora de dígito de control en `crates/veil-core/src/detector.rs` y su generador sintético válido en `crates/veil-core/src/strategy.rs`.
-2. **Prohibición de PII o Credenciales Reales en Tests**:
-   - Todos los casos de prueba, ejemplos y benchmarks deben utilizar exclusivamente datos sintéticos de prueba (por ejemplo, tarjetas de prueba Luhn `4532-0151-1283-0366`, dominios `@example.com` / `@fintech.io`, claves ficticias).
-3. **Mandato de Seguridad en FFI (`crates/veil-ffi`)**:
-   - El núcleo (`veil-core`) y el CLI (`veil-cli`) son 100% Rust seguro.
-   - Los bloques `unsafe` están restringidos exclusivamente a la frontera C-ABI en `crates/veil-ffi/src/lib.rs` y deben documentar sus invariantes bajo una sección `# Safety` verificando punteros nulos antes de desreferenciar.
+We enforce [Conventional Commits](COMMIT_CONVENTION.md) to ensure automated changelog generation and SemVer tracking:
 
----
-
-## 🤝 Proceso de Envío de Pull Requests
-
-1. Crea una rama descriptiva a partir de la versión más reciente de `main`:
-   ```bash
-   git checkout main
-   git pull origin main
-   git checkout -b feat/nuevo-detector-regional
-   ```
-2. Realiza tus cambios asegurando que las pruebas en Rust y Go pasen al 100%.
-3. Escribe mensajes de commit bajo el estándar [Conventional Commits](./COMMIT_CONVENTION.md).
-4. Abre el Pull Request en GitHub seleccionando como destino la rama `main` y completa el formulario de [PULL_REQUEST_TEMPLATE.md](./PULL_REQUEST_TEMPLATE.md).
+- `feat(detector)`: Add new entity detector or checksum validator
+- `fix(vault)`: Fix token reconstitution or vault boundary issue
+- `perf(core)`: Optimize Aho-Corasick automaton or SIMD scanning
+- `docs(web)`: Documentation, architecture whitepapers, or landing page updates
+- `test(fuzz)`: Fuzzing targets or edge-case regression suites
+- `refactor(cli)`: Internal restructuring without API change
 
 ---
 
-© 2026 Andrés Antonio Cardoso — GLASTOR-DEV / GLASTOR® Core Organization.
+## Pull Request Submission Checklist
+
+Before requesting review from maintainers ([CODEOWNERS](CODEOWNERS)):
+
+- [ ] Branch is rebased against the latest `upstream/main`.
+- [ ] No real PII, tokens, or live credentials exist in any test fixture or commit.
+- [ ] `cargo fmt --all -- --check` passes cleanly.
+- [ ] `cargo clippy --workspace --all-targets -- -D warnings` produces zero warnings.
+- [ ] All tests pass: `cargo test --workspace`.
+- [ ] Specter contract verification: public API signatures are backward-compatible.
+- [ ] Documentation updated if public structs, flags, or configuration options changed.
+
+---
+
+© 2026 GLASTOR Core Organization — Security & Infrastructure Team.
