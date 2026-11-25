@@ -1,5 +1,6 @@
 mod mcp;
 mod proxy;
+mod sarif;
 
 use clap::{Parser, Subcommand, ValueEnum};
 use pii_veil_core::{RedactionMode, StreamFormat, Vault, VeilEngine, VeilPolicy};
@@ -14,7 +15,7 @@ use std::time::Instant;
 #[command(
     name = "veil",
     version,
-    about = "🛡️ pii-veil: Ultrafast, deterministic & reversible PII/Secret anonymizer for LLMs, MCP Agents, Logs, and SQL/CSV streams."
+    about = "pii-veil: Ultrafast, deterministic & reversible PII/Secret anonymizer for LLMs, MCP Agents, Logs, and SQL/CSV streams."
 )]
 struct Cli {
     #[command(subcommand)]
@@ -62,6 +63,16 @@ impl From<CliStreamFormat> for StreamFormat {
             CliStreamFormat::Csv => StreamFormat::Csv,
         }
     }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum, Debug)]
+enum CliScanFormat {
+    /// Human-readable terminal summary
+    Text,
+    /// Machine-readable JSON report
+    Json,
+    /// SARIF 2.1.0 report for GitHub Code Scanning (never embeds raw PII)
+    Sarif,
 }
 
 #[derive(Subcommand)]
@@ -204,9 +215,13 @@ enum Commands {
         #[arg(short, long)]
         policy: Option<PathBuf>,
 
-        /// Output scan findings as machine-readable JSON
+        /// Output scan findings as machine-readable JSON (alias for `--format json`)
         #[arg(long)]
         json: bool,
+
+        /// Output format: `text`, `json`, or `sarif` (SARIF 2.1.0 for GitHub Code Scanning)
+        #[arg(long, value_enum, default_value_t = CliScanFormat::Text)]
+        format: CliScanFormat,
 
         /// Exit with status code 1 if any PII or secret is detected (useful for CI/CD pre-commit hooks)
         #[arg(long)]
@@ -237,6 +252,10 @@ enum Commands {
         /// Optional path to a `veil.json` policy file
         #[arg(short, long, env = "VEIL_POLICY")]
         policy: Option<PathBuf>,
+
+        /// Session vault TTL in seconds when clients pass `X-Veil-Session-Id`
+        #[arg(long, default_value_t = 300, env = "VEIL_SESSION_TTL")]
+        session_ttl: u64,
     },
 
     /// Generate a starter `veil.json` policy configuration file with custom rules and allowlists
@@ -488,8 +507,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             exclude,
             policy,
             json,
+            format,
             fail_on_detect,
         } => {
+            let effective_format = if json { CliScanFormat::Json } else { format };
             let engine = build_engine(CliMode::Placeholder, None, policy)?;
             let excludes: Vec<String> = exclude
                 .split(',')
@@ -506,6 +527,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     let mut total_spans = 0usize;
                     let mut by_kind: BTreeMap<String, usize> = BTreeMap::new();
                     let mut file_findings = Vec::new();
+                    let mut sarif_entries: Vec<(String, String, Vec<pii_veil_core::DetectedSpan>)> =
+                        Vec::new();
 
                     for f in files {
                         if let Ok(content) = fs::read_to_string(&f) {
@@ -515,37 +538,58 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 for s in &spans {
                                     *by_kind.entry(s.kind.label().to_string()).or_insert(0) += 1;
                                 }
-                                file_findings.push(serde_json::json!({
-                                    "file": f.display().to_string(),
-                                    "spans_count": spans.len(),
-                                    "spans": spans,
-                                }));
+                                if effective_format == CliScanFormat::Sarif {
+                                    sarif_entries.push((f.display().to_string(), content, spans));
+                                } else {
+                                    file_findings.push(serde_json::json!({
+                                        "file": f.display().to_string(),
+                                        "spans_count": spans.len(),
+                                        "spans": spans,
+                                    }));
+                                }
                             }
                         }
                     }
 
-                    if json {
-                        println!(
-                            "{}",
-                            serde_json::to_string_pretty(&serde_json::json!({
-                                "total_spans": total_spans,
-                                "by_kind": by_kind,
-                                "files": file_findings,
-                            }))?
-                        );
-                    } else if total_spans == 0 {
-                        println!(
-                            "✅ Clean: No PII or secrets detected across directory '{}'.",
-                            target_path.display()
-                        );
-                    } else {
-                        println!(
-                            "⚠️  Detected {} sensitive entity span(s) across {} file(s):",
-                            total_spans,
-                            file_findings.len()
-                        );
-                        for (kind, count) in by_kind {
-                            println!("   • {:<18} : {}", kind, count);
+                    match effective_format {
+                        CliScanFormat::Sarif => {
+                            let sarif_refs: Vec<sarif::SarifFileResult<'_>> = sarif_entries
+                                .iter()
+                                .map(|(uri, content, spans)| sarif::SarifFileResult {
+                                    uri: uri.clone(),
+                                    content: content.as_str(),
+                                    spans: spans.clone(),
+                                })
+                                .collect();
+                            let report = sarif::build_sarif_report(&sarif_refs);
+                            println!("{}", serde_json::to_string_pretty(&report)?);
+                        }
+                        CliScanFormat::Json => {
+                            println!(
+                                "{}",
+                                serde_json::to_string_pretty(&serde_json::json!({
+                                    "total_spans": total_spans,
+                                    "by_kind": by_kind,
+                                    "files": file_findings,
+                                }))?
+                            );
+                        }
+                        CliScanFormat::Text => {
+                            if total_spans == 0 {
+                                println!(
+                                    "Clean: No PII or secrets detected across directory '{}'.",
+                                    target_path.display()
+                                );
+                            } else {
+                                println!(
+                                    "Detected {} sensitive entity span(s) across {} file(s):",
+                                    total_spans,
+                                    file_findings.len()
+                                );
+                                for (kind, count) in by_kind {
+                                    println!("   • {:<18} : {}", kind, count);
+                                }
+                            }
                         }
                     }
 
@@ -556,21 +600,38 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
             }
 
+            let uri_label = file
+                .as_ref()
+                .map(|p| p.display().to_string())
+                .unwrap_or_else(|| "stdin".to_string());
             let input = read_input(text, file)?;
             let spans = engine.scan(&input);
 
-            if json {
-                println!("{}", serde_json::to_string_pretty(&spans)?);
-            } else if spans.is_empty() {
-                println!("✅ Clean: No PII or secrets detected.");
-            } else {
-                let mut by_kind: BTreeMap<String, usize> = BTreeMap::new();
-                for s in &spans {
-                    *by_kind.entry(s.kind.label().to_string()).or_insert(0) += 1;
+            match effective_format {
+                CliScanFormat::Sarif => {
+                    let report = sarif::build_sarif_report(&[sarif::SarifFileResult {
+                        uri: uri_label,
+                        content: &input,
+                        spans: spans.clone(),
+                    }]);
+                    println!("{}", serde_json::to_string_pretty(&report)?);
                 }
-                println!("⚠️  Detected {} sensitive entity span(s):", spans.len());
-                for (kind, count) in by_kind {
-                    println!("   • {:<18} : {}", kind, count);
+                CliScanFormat::Json => {
+                    println!("{}", serde_json::to_string_pretty(&spans)?);
+                }
+                CliScanFormat::Text => {
+                    if spans.is_empty() {
+                        println!("Clean: No PII or secrets detected.");
+                    } else {
+                        let mut by_kind: BTreeMap<String, usize> = BTreeMap::new();
+                        for s in &spans {
+                            *by_kind.entry(s.kind.label().to_string()).or_insert(0) += 1;
+                        }
+                        println!("Detected {} sensitive entity span(s):", spans.len());
+                        for (kind, count) in by_kind {
+                            println!("   • {:<18} : {}", kind, count);
+                        }
+                    }
                 }
             }
 
@@ -589,12 +650,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             upstream,
             echo,
             policy,
+            session_ttl,
         } => {
             let engine = build_engine(CliMode::Placeholder, None, policy)?;
             let cfg = proxy::ProxyConfig {
                 listen_addr: listen,
                 upstream_addr: upstream,
                 echo_mode: echo,
+                session_ttl_secs: session_ttl,
             };
             proxy::run_http_proxy(engine, cfg)?;
         }
@@ -627,78 +690,92 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 fn run_demo() -> Result<(), Box<dyn std::error::Error>> {
     println!("================================================================================");
-    println!("🛡️  PII-VEIL: DEMO DE DOBLE MERCADO (IA / MCP + LOGS + BASES DE DATOS SQL/CSV)");
+    println!("PII-VEIL: DEMO (AI / MCP + LOGS + SQL/CSV STREAMS)");
     println!("================================================================================\n");
 
-    let sample_prompt = "Hola soporte, soy Martín Gómez (martin.gomez@fintech.io, CUIT 20-12345678-6), mi teléfono es +54 911 4521-8890. \
+    let demo_db = format!(
+        "postgres://{}:{}@db.fintech.io:5432/prod",
+        "admin", "SecretPass99"
+    );
+    let demo_openai = format!("sk-proj-{}", "99a8b7c6d5e4f3g2h1i0jklmnopqrst");
+    let sample_prompt = format!(
+        "Hola soporte, soy Martín Gómez (martin.gomez@fintech.io, CUIT 20-12345678-6), mi teléfono es +54 911 4521-8890. \
 Intento pagar con mi Visa 4532-0151-1283-0366 o IBAN DE89 3704 0044 0532 0130 00 desde la IP 181.45.210.14 \
-pero falla mi conexión postgres://admin:SecretPass99@db.fintech.io:5432/prod y mi clave sk-proj-99a8b7c6d5e4f3g2h1i0jklmnopqrst.";
+pero falla mi conexión {} y mi clave {}.",
+        demo_db, demo_openai
+    );
 
-    // 1. MODO PLACEHOLDER (Ideal para Agentes de IA / LLMs)
-    println!("1️⃣  [MODO IA / LLM ROUNDTRIP] -> Anonimización Reversible con Tokens Semánticos");
+    println!("1. [MODO IA / LLM ROUNDTRIP] -> Anonimización Reversible con Tokens Semánticos");
     println!("--------------------------------------------------------------------------------");
     let llm_engine = VeilEngine::new(RedactionMode::Placeholder);
-    let res = llm_engine.redact(sample_prompt);
-    println!("📥 Prompt Original del Usuario:\n   {}\n", sample_prompt);
+    let res = llm_engine.redact(&sample_prompt);
+    println!("Prompt Original del Usuario:\n   {}\n", sample_prompt);
     println!(
-        "🔒 Prompt Seguro enviado a OpenAI/Claude ({} entidades protegidas):\n   {}\n",
+        "Prompt Seguro enviado a OpenAI/Claude ({} entidades protegidas):\n   {}\n",
         res.spans_found, res.text
     );
 
     let simulated_llm_reply = "Hola! He verificado la cuenta de [EMAIL_1] (ID fiscal [NATIONAL_ID_1]), la tarjeta [CREDIT_CARD_1] y cuenta [IBAN_1] desde [IPV4_1]. Rotamos las credenciales de [CONNECTION_URI_1] y [OPENAI_KEY_1] y enviamos SMS al [PHONE_1].";
     println!(
-        "🤖 Respuesta del LLM (usando tokens sin conocer los datos reales):\n   {}\n",
+        "Respuesta del LLM (usando tokens sin conocer los datos reales):\n   {}\n",
         simulated_llm_reply
     );
 
     let restored_reply = res.vault.restore(simulated_llm_reply);
     println!(
-        "🔓 Respuesta Restaurada al Usuario (en < 5 microsegundos con Aho-Corasick):\n   {}\n",
+        "Respuesta Restaurada al Usuario (en < 5 microsegundos con Aho-Corasick):\n   {}\n",
         restored_reply
     );
 
-    // 2. MODO SYNTHETIC (Ideal para pg_dump / SQL / Staging)
-    println!("2️⃣  [MODO SYNTHETIC DETERMINISTA] -> Para Dumps SQL, CSVs y Entornos de Prueba");
+    println!("2. [MODO SYNTHETIC DETERMINISTA] -> Para Dumps SQL, CSVs y Entornos de Prueba");
     println!("--------------------------------------------------------------------------------");
     let synth_engine =
         VeilEngine::new(RedactionMode::Synthetic).with_secret_key("clave-secreta-empresa");
-    let synth_res = synth_engine.redact(sample_prompt);
+    let synth_res = synth_engine.redact(&sample_prompt);
     println!(
-        "🧬 Salida con Datos Sintéticos Realistas (Tarjeta Luhn + IBAN Mod-97 válidos):\n   {}\n",
+        "Salida con Datos Sintéticos Realistas (Tarjeta Luhn + IBAN Mod-97 válidos):\n   {}\n",
         synth_res.text
     );
 
-    // 3. MODO JSON DLP (Ideal para Node.js / Python APIs / Logs)
-    println!("3️⃣  [MODO JSON DLP] -> Sanitización de Payloads y Claves Sensibles (Node/Python)");
+    println!("3. [MODO JSON DLP] -> Sanitización de Payloads y Claves Sensibles (Node/Python)");
     println!("--------------------------------------------------------------------------------");
-    let sample_json = r#"{
+    let demo_stripe = format!("sk_live_{}", "51Nz9a8b7c6d5e4f3g2h1i0jklmnop");
+    let demo_anthropic = format!("sk-ant-api03-{}", "99a8b7c6d5e4f3g2h1i0jklmnopqrst");
+    let sample_json = format!(
+        r#"{{
   "event": "checkout_failed",
   "customer_email": "martin.gomez@fintech.io",
   "password": "MiPasswordSuperSecreto2026!",
-  "stripe_key": "sk_live_51Nz9a8b7c6d5e4f3g2h1i0jklmnop",
-  "anthropic_key": "sk-ant-api03-99a8b7c6d5e4f3g2h1i0jklmnopqrst",
+  "stripe_key": "{}",
+  "anthropic_key": "{}",
   "card_number": "4532 0151 1283 0366"
-}"#;
+}}"#,
+        demo_stripe, demo_anthropic
+    );
     let mask_engine = VeilEngine::new(RedactionMode::Mask);
     let mut json_vault = Vault::new();
-    let clean_json = mask_engine.redact_json_str(sample_json, &mut json_vault)?;
-    println!("📄 JSON Sanitizado para Datadog/Sentry:\n{}\n", clean_json);
+    let clean_json = mask_engine.redact_json_str(&sample_json, &mut json_vault)?;
+    println!("JSON Sanitizado para Datadog/Sentry:\n{}\n", clean_json);
 
     Ok(())
 }
 
 fn run_benchmark(iterations: usize) {
-    let payload = "User martin.gomez@fintech.io (CUIT 20-12345678-6) logged in from 181.45.210.14 using key sk-proj-99a8b7c6d5e4f3g2h1i0jklmnopqrst, IBAN DE89 3704 0044 0532 0130 00 and card 4532-0151-1283-0366 (phone +1 415 890-1234).";
+    let demo_openai = format!("sk-proj-{}", "99a8b7c6d5e4f3g2h1i0jklmnopqrst");
+    let payload = format!(
+        "User martin.gomez@fintech.io (CUIT 20-12345678-6) logged in from 181.45.210.14 using key {}, IBAN DE89 3704 0044 0532 0130 00 and card 4532-0151-1283-0366 (phone +1 415 890-1234).",
+        demo_openai
+    );
     let engine = VeilEngine::new(RedactionMode::Placeholder);
 
     // Warmup
-    let warmup = engine.redact(payload);
+    let warmup = engine.redact(&payload);
     let _ = warmup.vault.restore(&warmup.text);
 
     let start = Instant::now();
     let mut total_bytes = 0usize;
     for _ in 0..iterations {
-        let res = engine.redact(payload);
+        let res = engine.redact(&payload);
         let _restored = res.vault.restore(&res.text);
         total_bytes += payload.len();
     }
@@ -709,7 +786,7 @@ fn run_benchmark(iterations: usize) {
     let mb_per_sec = (total_bytes as f64 / (1024.0 * 1024.0)) / secs;
 
     println!(
-        "🚀 PII-VEIL BENCHMARK ({} iteraciones de Redact + Restore)",
+        "PII-VEIL BENCHMARK ({} iteraciones de Redact + Restore)",
         iterations
     );
     println!(

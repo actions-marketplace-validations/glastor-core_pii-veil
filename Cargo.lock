@@ -521,7 +521,7 @@ dependencies = [
 
 [[package]]
 name = "pii-veil-cli"
-version = "0.1.4"
+version = "1.0.0"
 dependencies = [
  "clap",
  "pii-veil-core",
@@ -530,7 +530,7 @@ dependencies = [
 
 [[package]]
 name = "pii-veil-core"
-version = "0.1.4"
+version = "1.0.0"
 dependencies = [
  "aho-corasick",
  "chacha20poly1305",
@@ -546,7 +546,7 @@ dependencies = [
 
 [[package]]
 name = "pii-veil-ffi"
-version = "0.1.4"
+version = "1.0.0"
 dependencies = [
  "pii-veil-core",
  "serde_json",
@@ -554,7 +554,7 @@ dependencies = [
 
 [[package]]
 name = "pii-veil-wasm"
-version = "0.1.4"
+version = "1.0.0"
 dependencies = [
  "pii-veil-core",
  "serde",

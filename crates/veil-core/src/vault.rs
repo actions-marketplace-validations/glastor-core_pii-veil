@@ -332,9 +332,12 @@ fn hex_to_bytes(hex: &str) -> Result<Vec<u8>, String> {
 ///
 /// Safely buffers incomplete placeholder tokens (e.g. `"[EMA"` followed by `"IL_1]"`)
 /// across token boundaries so partial tokens are never emitted un-restored.
+/// Compiles the `AhoCorasick` automaton once on creation for zero-recompilation $O(N)$ streaming.
 #[derive(Debug, Clone)]
 pub struct StreamingRestorer {
     vault: Vault,
+    ac: Option<AhoCorasick>,
+    replacements: Vec<String>,
     buffer: String,
     max_token_len: usize,
 }
@@ -348,10 +351,37 @@ impl StreamingRestorer {
             .max()
             .unwrap_or(32)
             .max(24);
+
+        let mut patterns: Vec<&str> = Vec::with_capacity(vault.replacement_to_original.len());
+        let mut replacements: Vec<String> = Vec::with_capacity(vault.replacement_to_original.len());
+        for (rep, orig) in &vault.replacement_to_original {
+            patterns.push(rep.as_str());
+            replacements.push(orig.clone());
+        }
+        let ac = if patterns.is_empty() {
+            None
+        } else {
+            AhoCorasick::new(&patterns).ok()
+        };
+
         Self {
             vault,
+            ac,
+            replacements,
             buffer: String::new(),
             max_token_len,
+        }
+    }
+
+    #[inline]
+    fn restore_slice(&self, text: &str) -> String {
+        if text.is_empty() {
+            return String::new();
+        }
+        if let Some(ref ac) = self.ac {
+            ac.replace_all(text, &self.replacements)
+        } else {
+            self.vault.restore(text)
         }
     }
 
@@ -363,8 +393,12 @@ impl StreamingRestorer {
             return String::new();
         }
 
-        // Check if there is an unclosed '[' or '<' near the tail of the buffer
-        let tail_start = self.buffer.len().saturating_sub(self.max_token_len);
+        // Check if there is an unclosed '[' or '<' near the tail of the buffer.
+        // Snap `tail_start` forward to a valid UTF-8 char boundary to prevent panics on multibyte text.
+        let mut tail_start = self.buffer.len().saturating_sub(self.max_token_len);
+        while tail_start < self.buffer.len() && !self.buffer.is_char_boundary(tail_start) {
+            tail_start += 1;
+        }
         let tail = &self.buffer[tail_start..];
 
         if let Some(rel_open_idx) = tail.rfind(['[', '<']) {
@@ -377,12 +411,12 @@ impl StreamingRestorer {
                 }
                 let ready = self.buffer[..split_pos].to_string();
                 self.buffer = self.buffer[split_pos..].to_string();
-                return self.vault.restore(&ready);
+                return self.restore_slice(&ready);
             }
         }
 
         let ready = std::mem::take(&mut self.buffer);
-        self.vault.restore(&ready)
+        self.restore_slice(&ready)
     }
 
     /// Flushes and restores any remaining buffered characters at the end of the stream.
@@ -391,6 +425,6 @@ impl StreamingRestorer {
             return String::new();
         }
         let remainder = std::mem::take(&mut self.buffer);
-        self.vault.restore(&remainder)
+        self.restore_slice(&remainder)
     }
 }

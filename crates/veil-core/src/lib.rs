@@ -4,7 +4,7 @@
 //! observability logs, and SQL/CSV/NDJSON streams.
 //!
 //! ## Core Features
-//! - **Sub-millisecond PII & Secret Detection (18 Built-in Detectors)**:
+//! - **Sub-millisecond PII & Secret Detection (19 Built-in Detectors)**:
 //!   Emails, Credit Cards (Luhn), IBANs (ISO 13616 Mod-97), Regional IDs (US SSN, Spain DNI/NIE Mod-23,
 //!   Argentina CUIT/CUIL Mod-11, Chile RUT Mod-11), Database Connection URIs (`postgres://`, `mongodb+srv://`, `redis://`),
 //!   Slack/Discord Webhooks, OpenAI/Anthropic/AWS/GitHub/Slack/Google/Stripe keys, JWTs, PEM Private Keys,
@@ -19,15 +19,22 @@
 //!   - Persist vaults securely with authenticated encryption via [`Vault::to_encrypted_json`].
 
 pub mod detector;
+pub mod ner;
 pub mod policy;
 pub mod strategy;
 pub mod stream;
 pub mod vault;
 
 pub use detector::{
-    is_valid_arg_cuit, is_valid_chilean_rut, is_valid_iban, is_valid_ipv4, is_valid_luhn,
-    is_valid_national_id, is_valid_spanish_dni_nie, DetectedSpan, DetectorPipeline, EntityKind,
+    is_valid_arg_cuit, is_valid_brazil_cnpj, is_valid_brazil_cpf, is_valid_canada_sin,
+    is_valid_chilean_rut, is_valid_credit_card, is_valid_german_steuer_id, is_valid_iban,
+    is_valid_india_aadhaar, is_valid_india_pan, is_valid_ipv4, is_valid_luhn, is_valid_mexico_curp,
+    is_valid_national_id, is_valid_spanish_dni_nie, is_valid_uk_nino, shannon_entropy,
+    DetectedSpan, DetectorPipeline, EntityKind,
 };
+#[cfg(feature = "ner")]
+pub use ner::HeuristicNerDetector;
+pub use ner::NerDetector;
 pub use policy::{CustomRuleConfig, VeilPolicy};
 pub use strategy::{generate_replacement, keyed_hash64, RedactionMode};
 pub use stream::{StreamFormat, StreamStats};
@@ -35,6 +42,7 @@ pub use vault::{EncryptedVaultEnvelope, StreamingRestorer, Vault, VaultEntry};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::sync::Arc;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -67,8 +75,20 @@ const SENSITIVE_FIELD_KEYS: &[&str] = &[
     "private_key",
     "cvv",
     "cvc",
-    "pin",
+    "card_pin",
+    "user_pin",
+    "security_pin",
+    "atm_pin",
 ];
+
+/// Non-sensitive sentinel values that should not be redacted when matched only by JSON key name.
+fn is_sentinel_value(val: &str) -> bool {
+    let lower = val.trim().to_ascii_lowercase();
+    matches!(
+        lower.as_str(),
+        "" | "null" | "none" | "n/a" | "na" | "true" | "false" | "redacted" | "***" | "<redacted>"
+    )
+}
 
 /// Primary engine for detecting, anonymizing, and restoring PII and secrets.
 #[derive(Debug, Clone)]
@@ -77,6 +97,7 @@ pub struct VeilEngine {
     mode: RedactionMode,
     secret_key: Vec<u8>,
     extra_sensitive_keys: Vec<String>,
+    ner_detector: Option<Arc<dyn NerDetector>>,
 }
 
 impl Default for VeilEngine {
@@ -93,7 +114,15 @@ impl VeilEngine {
             mode,
             secret_key: b"pii-veil-default-seed-key-2026".to_vec(),
             extra_sensitive_keys: Vec::new(),
+            ner_detector: None,
         }
+    }
+
+    /// Attaches an optional Tier-1 [`NerDetector`] (e.g. `HeuristicNerDetector` with `--features ner`,
+    /// or a custom ONNX/Candle implementation) for Layered Defense unstructured PII detection.
+    pub fn with_ner_detector(mut self, detector: Arc<dyn NerDetector>) -> Self {
+        self.ner_detector = Some(detector);
+        self
     }
 
     /// Constructs a [`VeilEngine`] from a declarative [`VeilPolicy`].
@@ -116,8 +145,17 @@ impl VeilEngine {
 
     /// Sets the secret key used for deterministic synthetic data generation.
     pub fn with_secret_key(mut self, key: impl AsRef<[u8]>) -> Self {
-        self.secret_key = key.as_ref().to_vec();
+        self.secret_key.clear();
+        self.secret_key.extend_from_slice(key.as_ref());
         self
+    }
+
+    /// Returns a cloned [`VeilEngine`] with the specified [`RedactionMode`] while preserving
+    /// all configured allowlists, disabled entities, custom rules, sensitive keys, and secret key.
+    pub fn with_mode(&self, mode: RedactionMode) -> Self {
+        let mut cloned = self.clone();
+        cloned.mode = mode;
+        cloned
     }
 
     /// Returns the configured [`RedactionMode`].
@@ -161,9 +199,10 @@ impl VeilEngine {
     /// Checks whether a JSON key or CSV column header is considered sensitive by default or policy.
     pub fn is_sensitive_key_name(&self, key: &str) -> bool {
         let key_lower = key.trim().to_ascii_lowercase();
-        SENSITIVE_FIELD_KEYS
-            .iter()
-            .any(|&sk| key_lower == sk || key_lower.ends_with(&format!("_{}", sk)))
+        key_lower == "pin"
+            || SENSITIVE_FIELD_KEYS
+                .iter()
+                .any(|&sk| key_lower == sk || key_lower.ends_with(&format!("_{}", sk)))
             || self
                 .extra_sensitive_keys
                 .iter()
@@ -175,14 +214,23 @@ impl VeilEngine {
         &self.pipeline
     }
 
-    /// Scans `text` without modifying it and returns all detected sensitive spans.
+    /// Scans `text` without modifying it and returns all detected sensitive spans
+    /// (combining Tier-0 deterministic detectors and optional Tier-1 [`NerDetector`]).
     pub fn scan(&self, text: &str) -> Vec<DetectedSpan> {
-        self.pipeline.detect(text)
+        let mut spans = self.pipeline.detect(text);
+        if let Some(ref ner) = self.ner_detector {
+            let ner_spans = ner.detect_unstructured(text);
+            if !ner_spans.is_empty() {
+                spans.extend(ner_spans);
+                spans = detector::resolve_overlaps(spans);
+            }
+        }
+        spans
     }
 
     /// Scans `text` without modifying it and returns all detected spans serialized as a JSON string.
     pub fn scan_json(&self, text: &str) -> Result<String, VeilError> {
-        let spans = self.pipeline.detect(text);
+        let spans = self.scan(text);
         Ok(serde_json::to_string(&spans)?)
     }
 
@@ -193,7 +241,7 @@ impl VeilEngine {
 
     /// Redacts sensitive entities in `text`, returning `(redacted_text, spans_count)`.
     pub fn redact_with_vault_counted(&self, text: &str, vault: &mut Vault) -> (String, usize) {
-        let spans = self.pipeline.detect(text);
+        let spans = self.scan(text);
         let spans_count = spans.len();
         if spans.is_empty() {
             return (text.to_string(), 0);
@@ -272,7 +320,7 @@ impl VeilEngine {
                 for (k, v) in map.iter_mut() {
                     if self.is_sensitive_key_name(k) {
                         if let Value::String(secret_val) = v {
-                            if !secret_val.is_empty() {
+                            if !is_sentinel_value(secret_val) {
                                 let mode = self.mode;
                                 let secret = &self.secret_key;
                                 let kind = EntityKind::Custom("SECRET_FIELD".to_string());
@@ -352,20 +400,27 @@ mod tests {
         let engine = VeilEngine::new(RedactionMode::Placeholder);
         let mut vault = Vault::new();
 
-        let payload = r#"{
-            "customer": "ana@cliente.com",
-            "password": "SuperSecretPassword123!",
-            "openai": "sk-proj-abc123def456ghi789jkl012mno345pqr",
-            "anthropic": "sk-ant-api03-abc123def456ghi789jkl012mno345pqr",
-            "aws": "AKIAIOSFODNN7EXAMPLE"
-        }"#;
+        let openai_tok = format!("sk-proj-{}", "abc123def456ghi789jkl012mno345pqr");
+        let anthropic_tok = format!("sk-ant-api03-{}", "abc123def456ghi789jkl012mno345pqr");
+        let aws_tok = format!("AKIA{}", "9K7M3P2Q8R4T6W1X");
 
-        let sanitized = engine.redact_json_str(payload, &mut vault).unwrap();
+        let payload = format!(
+            r#"{{
+                "customer": "ana@cliente.com",
+                "password": "SuperSecretPassword123!",
+                "openai": "{}",
+                "anthropic": "{}",
+                "aws": "{}"
+            }}"#,
+            openai_tok, anthropic_tok, aws_tok
+        );
+
+        let sanitized = engine.redact_json_str(&payload, &mut vault).unwrap();
         assert!(!sanitized.contains("ana@cliente.com"));
         assert!(!sanitized.contains("SuperSecretPassword123!"));
-        assert!(!sanitized.contains("sk-proj-abc123def456ghi789jkl012mno345pqr"));
-        assert!(!sanitized.contains("sk-ant-api03-abc123def456ghi789jkl012mno345pqr"));
-        assert!(!sanitized.contains("AKIAIOSFODNN7EXAMPLE"));
+        assert!(!sanitized.contains(&openai_tok));
+        assert!(!sanitized.contains(&anthropic_tok));
+        assert!(!sanitized.contains(&aws_tok));
         assert_eq!(vault.len(), 5);
     }
 
@@ -383,6 +438,21 @@ mod tests {
         assert!(!res.text.contains("EMP-123456"));
         assert!(res.text.contains("[EMAIL_1]"));
         assert!(res.text.contains("[EMPLOYEE_ID_1]"));
+    }
+
+    #[test]
+    fn test_with_mode_preserves_policy() {
+        let policy = VeilPolicy::default();
+        let base = VeilEngine::from_policy(policy).unwrap();
+        let masked = base.with_mode(RedactionMode::Mask);
+
+        assert_eq!(masked.mode(), RedactionMode::Mask);
+        let text = "Allow test@example.com and 127.0.0.1, mask real@corp.io and EMP-654321";
+        let res = masked.redact(text);
+        assert!(res.text.contains("test@example.com"));
+        assert!(res.text.contains("127.0.0.1"));
+        assert!(res.text.contains("r***@corp.io"));
+        assert!(!res.text.contains("EMP-654321"));
     }
 
     #[test]
@@ -448,6 +518,31 @@ mod tests {
     }
 
     #[test]
+    fn test_streaming_restorer_utf8_multibyte_no_panic() {
+        let engine = VeilEngine::new(RedactionMode::Placeholder);
+        let res = engine.redact("Correo: sofia@fintech.cl");
+
+        // Feed multibyte UTF-8 characters (ñ, á, €, 🚀) across every possible split point
+        // so `buffer.len() - max_token_len` lands inside a multibyte char.
+        let full_stream =
+            "España ñandú áéíóú €100 🚀 verificación para [EMAIL_1] completada con éxito ñá€🚀!";
+        for chunk_chars in 1..=5 {
+            let mut restorer = res.vault.streaming_restorer();
+            let mut out = String::new();
+            let chars: Vec<char> = full_stream.chars().collect();
+            for group in chars.chunks(chunk_chars) {
+                let piece: String = group.iter().collect();
+                out.push_str(&restorer.push_chunk(&piece));
+            }
+            out.push_str(&restorer.finish());
+            assert_eq!(
+                out,
+                "España ñandú áéíóú €100 🚀 verificación para sofia@fintech.cl completada con éxito ñá€🚀!"
+            );
+        }
+    }
+
+    #[test]
     fn test_regional_ids_conn_uris_and_webhooks() {
         // Valid ES DNI (00000000T), valid AR CUIT (20-12345678-6), valid CL RUT (12.345.678-5)
         assert!(is_valid_spanish_dni_nie("00000000T"));
@@ -458,8 +553,19 @@ mod tests {
         assert!(!is_valid_chilean_rut("12.345.678-9"));
 
         let engine = VeilEngine::new(RedactionMode::Placeholder);
-        let input = "DB: postgres://admin:Sup3rS3cret@db.internal:5432/prod, DNI: 00000000T, CUIT: 20-12345678-6, RUT: 12.345.678-5, Webhook: https://hooks.slack.com/services/T12345678/B12345678/abcdefghijklmnopqrstuvwx";
-        let res = engine.redact(input);
+        let db_uri = format!(
+            "postgres://{}:{}@db.internal:5432/prod",
+            "admin", "Sup3rS3cret"
+        );
+        let webhook = format!(
+            "https://hooks.slack.com/services/T{}/B{}/{}",
+            "12345678", "12345678", "abcdefghijklmnopqrstuvwx"
+        );
+        let input = format!(
+            "DB: {}, DNI: 00000000T, CUIT: 20-12345678-6, RUT: 12.345.678-5, Webhook: {}",
+            db_uri, webhook
+        );
+        let res = engine.redact(&input);
 
         assert!(res.text.contains("[CONNECTION_URI_1]"));
         assert!(res.text.contains("[NATIONAL_ID_1]"));

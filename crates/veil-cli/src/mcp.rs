@@ -148,10 +148,9 @@ fn handle_tool_call(
         "veil_redact" => {
             let text = args.get("text").and_then(|t| t.as_str()).unwrap_or("");
             let active_engine = match args.get("mode").and_then(|m| m.as_str()) {
-                Some("synthetic") => VeilEngine::new(RedactionMode::Synthetic)
-                    .with_secret_key(default_engine.secret_key()),
-                Some("mask") => VeilEngine::new(RedactionMode::Mask)
-                    .with_secret_key(default_engine.secret_key()),
+                Some("placeholder") => default_engine.with_mode(RedactionMode::Placeholder),
+                Some("synthetic") => default_engine.with_mode(RedactionMode::Synthetic),
+                Some("mask") => default_engine.with_mode(RedactionMode::Mask),
                 _ => default_engine.clone(),
             };
 

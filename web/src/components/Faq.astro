@@ -5,8 +5,8 @@
 <section id="faq" class="py-16 px-4 max-w-4xl mx-auto">
   <div class="text-center mb-12">
     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyber-cyan/10 border border-cyber-cyan/30 text-cyber-cyan text-xs font-mono font-semibold uppercase mb-3">
-      <span class="material-symbols-outlined text-sm">help</span>
-      TECHNICAL & ARCHITECTURE FAQ
+      <span translate="no" aria-hidden="true" class="material-symbols-outlined notranslate text-sm shrink-0">help</span>
+      TECHNICAL &amp; ARCHITECTURE FAQ
     </div>
     <h2 class="text-3xl md:text-5xl font-black text-white tracking-tight mb-3">
       Architecture, Performance & Compliance
@@ -115,7 +115,7 @@
       </summary>
       <div class="mt-4 pt-4 border-t border-cyber-border/60 text-sm text-slate-300 leading-relaxed font-sans space-y-2">
         <p>
-          Yes. In addition to the 18 built-in detectors backed by mathematical checksums, you can register custom regular expressions, contextual keyword dictionaries, or domain-specific validation algorithms tailored to your industry (e.g., internal insurance policy numbers, proprietary patient record IDs, or employee identifiers).
+          Yes. In addition to the 19 built-in detectors and 12 global national ID validators backed by mathematical checksums, you can register custom regular expressions, contextual keyword dictionaries, or pluggable <code class="text-cyber-neon font-mono text-xs">NerDetector</code> providers tailored to your industry (e.g., internal insurance policy numbers, proprietary patient record IDs, or employee identifiers).
         </p>
       </div>
     </details>
@@ -140,7 +140,7 @@
         </p>
         <ul class="list-disc pl-5 space-y-1.5 text-slate-300">
           <li><strong class="text-white">Tier 0 (pii-veil Fast Path):</strong> Intercepts 100% of traffic in <strong>sub-100 microseconds</strong>, mathematically scrubbing credit cards, IBANs, national IDs (DNI/SSN/CUIT), API keys, JWTs, and database credentials with zero GPU cost.</li>
-          <li><strong class="text-white">Tier 1 (Selective NER with --with-ner):</strong> Only for payloads requiring contextual name or address disambiguation in unstructured prose, residual clean text is forwarded to a local quantized micro-model (INT8 ONNX / Candle).</li>
+          <li><strong class="text-white">Tier 1 (Selective NER via <code class="text-cyber-cyan font-mono text-xs">--features ner</code> or <code class="text-cyber-neon font-mono text-xs">NerDetector</code>):</strong> Attach your own local quantized ONNX/Candle model via <code class="text-cyber-neon font-mono text-xs">VeilEngine::with_ner_detector(...)</code>, or enable the built-in zero-download <code class="text-cyber-cyan font-mono text-xs">HeuristicNerDetector</code> for English/Spanish person names and physical street addresses.</li>
         </ul>
         <p>
           This hybrid architecture delivers sub-millisecond speeds for 95% of requests while reducing downstream NER compute by over 80%.

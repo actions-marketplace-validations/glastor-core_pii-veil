@@ -1,21 +1,21 @@
 ---
-// DetectorsBento.astro - Bento Grid of 18 Built-in Detectors
+// DetectorsBento.astro - Bento Grid of 19 Built-in Detectors + 12 Global National IDs
 ---
 
 <section id="detectors" class="py-16 px-4 max-w-7xl mx-auto">
   <div class="text-center mb-12">
     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyber-neon/10 border border-cyber-neon/30 text-cyber-neon text-xs font-mono font-semibold uppercase mb-3">
-      <span class="material-symbols-outlined text-sm">verified_user</span>
-      ZERO FALSE POSITIVES
+      <span translate="no" aria-hidden="true" class="material-symbols-outlined notranslate text-sm shrink-0">verified_user</span>
+      100.00% PRECISION • 0 FALSE POSITIVES (<span translate="no" class="notranslate">ACCURACY_EVAL</span>)
     </div>
     <h2 class="text-3xl md:text-5xl font-black text-white tracking-tight mb-3">
-      18 Built-in Detectors with <br />
+      19 Built-in Detectors &amp; 12 Global IDs <br />
       <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyber-neon via-cyber-cyan to-cyber-purple">
         Mathematical Checksum Verification
       </span>
     </h2>
     <p class="text-cyber-muted text-base max-w-2xl mx-auto">
-      <code class="font-mono text-cyber-neon text-sm">pii-veil</code> doesn't just guess with sloppy regex. Every entity is validated through cryptographic or standard mathematical checksums.
+      <code class="font-mono text-cyber-neon text-sm">pii-veil</code> validates every candidate with IIN/BIN prefixes, Shannon entropy, dihedral Verhoeff / Mod-11 / Mod-97 checksums, and contextual anti-FP guards.
     </p>
   </div>
 
@@ -25,52 +25,67 @@
     <!-- Bento 1: Financial & Cards (Large) -->
     <div class="lg:col-span-2 bg-cyber-card border border-cyber-border rounded-2xl p-6 hover:border-cyber-neon/60 transition shadow-xl relative overflow-hidden group">
       <div class="flex items-center justify-between mb-4">
-        <span class="text-3xl">💳</span>
+        <span translate="no" aria-hidden="true" class="material-symbols-outlined notranslate text-3xl text-cyber-neon">credit_card</span>
         <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyber-neon/10 text-cyber-neon border border-cyber-neon/30 font-bold">
           FINANCIAL CORE
         </span>
       </div>
-      <h3 class="text-xl font-bold text-white mb-2">Banking & Payment Systems</h3>
+      <h3 class="text-xl font-bold text-white mb-2">Banking &amp; Payment Systems</h3>
       <p class="text-xs text-cyber-muted mb-4 leading-relaxed">
-        Validated through formal checksum standards. Discards random 16-digit sequences that fail mathematical validation.
+        Validated through official IIN/BIN issuer ranges and formal checksums. Rejects Snowflake IDs, timestamps, and random 16-digit numbers.
       </p>
       <div class="flex flex-wrap gap-2 text-xs font-mono">
         <span class="px-2.5 py-1 rounded-lg bg-black/60 border border-cyber-border text-slate-200">
-          • Credit Cards <strong class="text-cyber-neon">(Luhn Mod-10)</strong>
+          • Credit Cards <strong class="text-cyber-neon">(IIN/BIN + Luhn)</strong>
         </span>
         <span class="px-2.5 py-1 rounded-lg bg-black/60 border border-cyber-border text-slate-200">
           • International IBAN <strong class="text-cyber-cyan">(ISO 13616 Mod-97)</strong>
         </span>
         <span class="px-2.5 py-1 rounded-lg bg-black/60 border border-cyber-border text-slate-200">
-          • Argentine CBU & Banking Aliases
+          • Visa, MC, Amex, Discover, JCB, UnionPay
         </span>
       </div>
     </div>
 
-    <!-- Bento 2: Regional National IDs (Large) -->
+    <!-- Bento 2: Global Regional National IDs (Large) -->
     <div class="lg:col-span-2 bg-cyber-card border border-cyber-border rounded-2xl p-6 hover:border-cyber-cyan/60 transition shadow-xl relative overflow-hidden group">
       <div class="flex items-center justify-between mb-4">
-        <span class="text-3xl">🆔</span>
+        <span translate="no" aria-hidden="true" class="material-symbols-outlined notranslate text-3xl text-cyber-cyan">badge</span>
         <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyber-cyan/10 text-cyber-cyan border border-cyber-cyan/30 font-bold">
-          REGIONAL COMPLIANCE
+          12 GLOBAL IDS
         </span>
       </div>
-      <h3 class="text-xl font-bold text-white mb-2">Government & Citizen Identifiers</h3>
+      <h3 class="text-xl font-bold text-white mb-2">Global Government &amp; Tax Identifiers</h3>
       <p class="text-xs text-cyber-muted mb-4 leading-relaxed">
-        Strict regional modulo verification algorithms prevent false alerts on order IDs and invoices.
+        Strict regional modulo, Verhoeff, and HMRC verification algorithms prevent false alerts on order IDs and invoices.
       </p>
       <div class="flex flex-wrap gap-2 text-xs font-mono">
         <span class="px-2.5 py-1 rounded-lg bg-black/60 border border-cyber-border text-slate-200">
-          • Spain DNI / NIE <strong class="text-cyber-cyan">(Mod-23)</strong>
+          • ES DNI/NIE <strong class="text-cyber-cyan">(Mod-23)</strong>
         </span>
         <span class="px-2.5 py-1 rounded-lg bg-black/60 border border-cyber-border text-slate-200">
-          • Argentina CUIT / CUIL <strong class="text-cyber-neon">(Mod-11)</strong>
+          • AR CUIT/CUIL <strong class="text-cyber-neon">(AFIP Mod-11)</strong>
         </span>
         <span class="px-2.5 py-1 rounded-lg bg-black/60 border border-cyber-border text-slate-200">
-          • Chile RUT <strong class="text-amber-400">(Mod-11)</strong>
+          • CL RUT <strong class="text-amber-400">(Mod-11)</strong>
         </span>
         <span class="px-2.5 py-1 rounded-lg bg-black/60 border border-cyber-border text-slate-200">
-          • US Social Security (SSN)
+          • BR CPF/CNPJ <strong class="text-cyber-neon">(Dual Mod-11)</strong>
+        </span>
+        <span class="px-2.5 py-1 rounded-lg bg-black/60 border border-cyber-border text-slate-200">
+          • MX CURP <strong class="text-cyber-cyan">(RENAPO Mod-10)</strong>
+        </span>
+        <span class="px-2.5 py-1 rounded-lg bg-black/60 border border-cyber-border text-slate-200">
+          • US SSN / CA SIN <strong class="text-cyber-purple">(Luhn)</strong>
+        </span>
+        <span class="px-2.5 py-1 rounded-lg bg-black/60 border border-cyber-border text-slate-200">
+          • UK NINO <strong class="text-slate-300">(HMRC)</strong>
+        </span>
+        <span class="px-2.5 py-1 rounded-lg bg-black/60 border border-cyber-border text-slate-200">
+          • IN Aadhaar <strong class="text-amber-400">(Verhoeff)</strong> &amp; PAN
+        </span>
+        <span class="px-2.5 py-1 rounded-lg bg-black/60 border border-cyber-border text-slate-200">
+          • DE Steuer-ID <strong class="text-cyber-cyan">(Mod 11,10)</strong>
         </span>
       </div>
     </div>
@@ -78,58 +93,55 @@
     <!-- Bento 3: Secrets & Cloud Keys -->
     <div class="lg:col-span-2 bg-cyber-card border border-cyber-border rounded-2xl p-6 hover:border-cyber-purple/60 transition shadow-xl relative overflow-hidden group">
       <div class="flex items-center justify-between mb-4">
-        <span class="text-3xl">🔑</span>
+        <span translate="no" aria-hidden="true" class="material-symbols-outlined notranslate text-3xl text-cyber-purple">key</span>
         <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyber-purple/10 text-cyber-purple border border-cyber-purple/30 font-bold">
-          DEVOPS & SECRETS
+          DEVSECOPS &amp; SARIF 2.1.0
         </span>
       </div>
-      <h3 class="text-xl font-bold text-white mb-2">Cloud Infrastructure & API Keys</h3>
+      <h3 class="text-xl font-bold text-white mb-2">Cloud Infrastructure &amp; API Keys</h3>
       <p class="text-xs text-cyber-muted mb-4 leading-relaxed">
-        Detects sensitive credentials leaking into prompt logs, embeddings, or vector databases.
+        Filtered with O(N) Shannon entropy and placeholder guards. Emits zero-PII SARIF 2.1.0 directly to GitHub Code Scanning.
       </p>
       <div class="flex flex-wrap gap-2 text-xs font-mono">
         <span class="px-2.5 py-1 rounded-lg bg-black/60 border border-cyber-border text-slate-200">
-          • OpenAI Keys (<code class="text-cyber-neon">sk-proj-*</code>)
+          • OpenAI &amp; Anthropic (<code class="text-cyber-neon">sk-proj-*</code>, <code class="text-cyber-cyan">sk-ant-*</code>)
         </span>
         <span class="px-2.5 py-1 rounded-lg bg-black/60 border border-cyber-border text-slate-200">
-          • AWS Access Keys (<code class="text-amber-400">AKIA*</code>)
+          • AWS, GitHub, Stripe, Slack, Google API
         </span>
         <span class="px-2.5 py-1 rounded-lg bg-black/60 border border-cyber-border text-slate-200">
           • DB URIs (<code class="text-cyber-cyan">postgres://, mongodb://, redis://</code>)
         </span>
         <span class="px-2.5 py-1 rounded-lg bg-black/60 border border-cyber-border text-slate-200">
-          • Webhooks (Slack & Discord)
-        </span>
-        <span class="px-2.5 py-1 rounded-lg bg-black/60 border border-cyber-border text-slate-200">
-          • PEM Private Keys & JWT Tokens
+          • Webhooks (Slack &amp; Discord) &amp; PEM / JWT
         </span>
       </div>
     </div>
 
-    <!-- Bento 4: Personal Data & Telemetry -->
+    <!-- Bento 4: Personal Data, Telemetry & Opt-in NER -->
     <div class="lg:col-span-2 bg-cyber-card border border-cyber-border rounded-2xl p-6 hover:border-cyber-neon/60 transition shadow-xl relative overflow-hidden group">
       <div class="flex items-center justify-between mb-4">
-        <span class="text-3xl">🌐</span>
+        <span translate="no" aria-hidden="true" class="material-symbols-outlined notranslate text-3xl text-cyber-neon">public</span>
         <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyber-neon/10 text-cyber-neon border border-cyber-neon/30 font-bold">
-          PRIVACY & GDPR
+          PRIVACY &amp; LAYERED NER
         </span>
       </div>
-      <h3 class="text-xl font-bold text-white mb-2">Telemetry, Logs & Contact Info</h3>
+      <h3 class="text-xl font-bold text-white mb-2">Telemetry, Contact Info &amp; Opt-in NER</h3>
       <p class="text-xs text-cyber-muted mb-4 leading-relaxed">
-        Comprehensive scrubbing of communication metadata across multi-gigabyte log files and NDJSON streams.
+        Scrubs contact metadata with asset/version anti-FP filters, plus pluggable <code class="text-cyber-neon font-mono">NerDetector</code> &amp; <code class="text-cyber-cyan font-mono">--features ner</code> for names &amp; addresses.
       </p>
       <div class="flex flex-wrap gap-2 text-xs font-mono">
         <span class="px-2.5 py-1 rounded-lg bg-black/60 border border-cyber-border text-slate-200">
-          • RFC 5322 Corporate & Personal Emails
+          • Emails (rejects <code class="text-slate-400">hero@2x.png</code>)
         </span>
         <span class="px-2.5 py-1 rounded-lg bg-black/60 border border-cyber-border text-slate-200">
-          • International Phones (E.164 standard)
+          • Phones (rejects dates &amp; port lists)
         </span>
         <span class="px-2.5 py-1 rounded-lg bg-black/60 border border-cyber-border text-slate-200">
-          • IPv4 & IPv6 Addresses (with Allowlist support)
+          • IPv4 / IPv6 / MAC (rejects <code class="text-slate-400">v1.2.3.4</code> &amp; <code class="text-slate-400">dead::beef</code>)
         </span>
         <span class="px-2.5 py-1 rounded-lg bg-black/60 border border-cyber-border text-slate-200">
-          • Hardware MAC Addresses
+          • Opt-in EN/ES <strong class="text-cyber-neon">PERSON</strong> &amp; <strong class="text-cyber-cyan">ADDRESS</strong> NER
         </span>
       </div>
     </div>

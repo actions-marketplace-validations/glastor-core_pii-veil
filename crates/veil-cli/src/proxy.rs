@@ -1,9 +1,18 @@
 use pii_veil_core::{Vault, VeilEngine};
 use serde_json::{json, Value};
+use std::collections::HashMap;
 use std::io::{self, BufRead, BufReader, Read, Write};
 use std::net::{TcpListener, TcpStream};
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
+use std::time::{Duration, Instant};
+
+/// Maximum allowed HTTP request body size (10 MiB) to prevent memory exhaustion DoS.
+pub const MAX_BODY_SIZE: usize = 10 * 1024 * 1024;
+
+/// Maximum number of concurrent session vaults held in memory.
+pub const MAX_ACTIVE_SESSIONS: usize = 10_000;
 
 /// Configuration for the local HTTP/SSE DLP Proxy (`veil proxy`).
 #[derive(Debug, Clone)]
@@ -11,19 +20,183 @@ pub struct ProxyConfig {
     pub listen_addr: String,
     pub upstream_addr: Option<String>,
     pub echo_mode: bool,
+    pub session_ttl_secs: u64,
+}
+
+/// Zero-PII Prometheus telemetry & latency histogram for `veil proxy`.
+#[derive(Default)]
+pub struct ProxyMetrics {
+    pub requests_total: AtomicU64,
+    pub rejected_413_total: AtomicU64,
+    pub entities_redacted_total: AtomicU64,
+    pub redaction_us_sum: AtomicU64,
+    pub redaction_us_count: AtomicU64,
+    // Histogram cumulative buckets (microseconds): <=100, <=500, <=1000, <=5000, <=10000, +Inf
+    pub bucket_le_100: AtomicU64,
+    pub bucket_le_500: AtomicU64,
+    pub bucket_le_1000: AtomicU64,
+    pub bucket_le_5000: AtomicU64,
+    pub bucket_le_10000: AtomicU64,
+}
+
+impl ProxyMetrics {
+    pub fn record_redaction(&self, elapsed_us: u64, spans: u64) {
+        self.entities_redacted_total
+            .fetch_add(spans, Ordering::Relaxed);
+        self.redaction_us_sum
+            .fetch_add(elapsed_us, Ordering::Relaxed);
+        self.redaction_us_count.fetch_add(1, Ordering::Relaxed);
+        if elapsed_us <= 100 {
+            self.bucket_le_100.fetch_add(1, Ordering::Relaxed);
+        }
+        if elapsed_us <= 500 {
+            self.bucket_le_500.fetch_add(1, Ordering::Relaxed);
+        }
+        if elapsed_us <= 1000 {
+            self.bucket_le_1000.fetch_add(1, Ordering::Relaxed);
+        }
+        if elapsed_us <= 5000 {
+            self.bucket_le_5000.fetch_add(1, Ordering::Relaxed);
+        }
+        if elapsed_us <= 10000 {
+            self.bucket_le_10000.fetch_add(1, Ordering::Relaxed);
+        }
+    }
+
+    pub fn render_prometheus(&self, active_sessions: usize) -> String {
+        let reqs = self.requests_total.load(Ordering::Relaxed);
+        let rej = self.rejected_413_total.load(Ordering::Relaxed);
+        let ents = self.entities_redacted_total.load(Ordering::Relaxed);
+        let us_sum = self.redaction_us_sum.load(Ordering::Relaxed);
+        let us_cnt = self.redaction_us_count.load(Ordering::Relaxed);
+        let b100 = self.bucket_le_100.load(Ordering::Relaxed);
+        let b500 = self.bucket_le_500.load(Ordering::Relaxed);
+        let b1000 = self.bucket_le_1000.load(Ordering::Relaxed);
+        let b5000 = self.bucket_le_5000.load(Ordering::Relaxed);
+        let b10000 = self.bucket_le_10000.load(Ordering::Relaxed);
+
+        format!(
+            "# HELP veil_proxy_requests_total Total HTTP requests handled by pii-veil proxy.\n\
+             # TYPE veil_proxy_requests_total counter\n\
+             veil_proxy_requests_total {reqs}\n\
+             # HELP veil_proxy_requests_rejected_413_total Requests rejected for exceeding MAX_BODY_SIZE.\n\
+             # TYPE veil_proxy_requests_rejected_413_total counter\n\
+             veil_proxy_requests_rejected_413_total {rej}\n\
+             # HELP veil_proxy_entities_redacted_total Total PII and secret spans redacted.\n\
+             # TYPE veil_proxy_entities_redacted_total counter\n\
+             veil_proxy_entities_redacted_total {ents}\n\
+             # HELP veil_proxy_active_sessions Current number of active TTL-scoped session vaults.\n\
+             # TYPE veil_proxy_active_sessions gauge\n\
+             veil_proxy_active_sessions {active_sessions}\n\
+             # HELP veil_proxy_redaction_duration_microseconds Redaction latency histogram in microseconds.\n\
+             # TYPE veil_proxy_redaction_duration_microseconds histogram\n\
+             veil_proxy_redaction_duration_microseconds_bucket{{le=\"100\"}} {b100}\n\
+             veil_proxy_redaction_duration_microseconds_bucket{{le=\"500\"}} {b500}\n\
+             veil_proxy_redaction_duration_microseconds_bucket{{le=\"1000\"}} {b1000}\n\
+             veil_proxy_redaction_duration_microseconds_bucket{{le=\"5000\"}} {b5000}\n\
+             veil_proxy_redaction_duration_microseconds_bucket{{le=\"10000\"}} {b10000}\n\
+             veil_proxy_redaction_duration_microseconds_bucket{{le=\"+Inf\"}} {us_cnt}\n\
+             veil_proxy_redaction_duration_microseconds_sum {us_sum}\n\
+             veil_proxy_redaction_duration_microseconds_count {us_cnt}\n"
+        )
+    }
+}
+
+struct SessionEntry {
+    vault: Vault,
+    expires_at: Instant,
+}
+
+/// Bounded in-memory session store with automatic TTL eviction for `X-Veil-Session-Id`.
+pub struct SessionStore {
+    ttl: Duration,
+    entries: Mutex<HashMap<String, SessionEntry>>,
+}
+
+impl SessionStore {
+    pub fn new(ttl: Duration) -> Self {
+        Self {
+            ttl,
+            entries: Mutex::new(HashMap::new()),
+        }
+    }
+
+    pub fn take_or_create(&self, session_id: &str) -> Vault {
+        let Ok(mut map) = self.entries.lock() else {
+            return Vault::new();
+        };
+        let now = Instant::now();
+        map.retain(|_, v| v.expires_at > now);
+        if let Some(entry) = map.get(session_id) {
+            entry.vault.clone()
+        } else {
+            Vault::new()
+        }
+    }
+
+    pub fn save(&self, session_id: String, vault: Vault) {
+        let Ok(mut map) = self.entries.lock() else {
+            return;
+        };
+        let now = Instant::now();
+        map.retain(|_, v| v.expires_at > now);
+        if map.len() >= MAX_ACTIVE_SESSIONS && !map.contains_key(&session_id) {
+            if let Some(oldest_key) = map
+                .iter()
+                .min_by_key(|(_, v)| v.expires_at)
+                .map(|(k, _)| k.clone())
+            {
+                map.remove(&oldest_key);
+            }
+        }
+        map.insert(
+            session_id,
+            SessionEntry {
+                vault,
+                expires_at: now + self.ttl,
+            },
+        );
+    }
+
+    pub fn active_count(&self) -> usize {
+        let Ok(mut map) = self.entries.lock() else {
+            return 0;
+        };
+        let now = Instant::now();
+        map.retain(|_, v| v.expires_at > now);
+        map.len()
+    }
+}
+
+/// Shared runtime state across proxy worker threads.
+pub struct ProxyState {
+    pub metrics: ProxyMetrics,
+    pub sessions: SessionStore,
+}
+
+impl ProxyState {
+    pub fn new(session_ttl_secs: u64) -> Self {
+        Self {
+            metrics: ProxyMetrics::default(),
+            sessions: SessionStore::new(Duration::from_secs(session_ttl_secs)),
+        }
+    }
 }
 
 /// Runs the local HTTP/SSE reverse proxy that redacts outgoing LLM JSON prompts
 /// and restores incoming JSON or `text/event-stream` SSE responses in real time.
+///
+/// Uses per-request ephemeral vaults by default, or isolated TTL-expiring vaults
+/// when clients supply `X-Veil-Session-Id`.
 pub fn run_http_proxy(engine: VeilEngine, config: ProxyConfig) -> io::Result<()> {
     let listener = TcpListener::bind(&config.listen_addr)?;
     let shared_engine = Arc::new(engine);
-    let shared_vault = Arc::new(Mutex::new(Vault::new()));
+    let shared_state = Arc::new(ProxyState::new(config.session_ttl_secs));
     let shared_config = Arc::new(config);
 
     eprintln!("================================================================================");
     eprintln!(
-        "🛡️  pii-veil HTTP/SSE DLP Proxy listening on http://{}",
+        "pii-veil HTTP/SSE DLP Proxy listening on http://{}",
         shared_config.listen_addr
     );
     if let Some(up) = &shared_config.upstream_addr {
@@ -32,17 +205,24 @@ pub fn run_http_proxy(engine: VeilEngine, config: ProxyConfig) -> io::Result<()>
     if shared_config.echo_mode {
         eprintln!("   • Mode            : Local LLM Echo / SSE Simulator (--echo)");
     }
-    eprintln!("   • Endpoints       : GET /health | POST /v1/chat/completions | POST /*");
+    eprintln!(
+        "   • Isolation       : Per-request Vault (or TTL={}s via X-Veil-Session-Id)",
+        shared_config.session_ttl_secs
+    );
+    eprintln!("   • Max body size   : {} bytes", MAX_BODY_SIZE);
+    eprintln!(
+        "   • Endpoints       : GET /health | GET /metrics | POST /v1/chat/completions | POST /*"
+    );
     eprintln!("================================================================================");
 
     for stream in listener.incoming() {
         match stream {
             Ok(client) => {
                 let eng = Arc::clone(&shared_engine);
-                let vlt = Arc::clone(&shared_vault);
+                let st = Arc::clone(&shared_state);
                 let cfg = Arc::clone(&shared_config);
                 thread::spawn(move || {
-                    let _ = handle_client(client, &eng, &vlt, &cfg);
+                    let _ = handle_client(client, &eng, &st, &cfg);
                 });
             }
             Err(e) => eprintln!("Proxy connection error: {}", e),
@@ -52,13 +232,14 @@ pub fn run_http_proxy(engine: VeilEngine, config: ProxyConfig) -> io::Result<()>
     Ok(())
 }
 
-/// Processes a single HTTP request/response cycle on `client`.
+/// Processes a single HTTP request/response cycle on `client` with isolated vaults and metrics.
 pub fn handle_client(
     mut client: TcpStream,
     engine: &VeilEngine,
-    vault_mutex: &Arc<Mutex<Vault>>,
+    state: &Arc<ProxyState>,
     config: &ProxyConfig,
 ) -> io::Result<()> {
+    state.metrics.requests_total.fetch_add(1, Ordering::Relaxed);
     let mut reader = BufReader::new(client.try_clone()?);
 
     // 1. Read request line
@@ -77,6 +258,7 @@ pub fn handle_client(
     let mut headers: Vec<(String, String)> = Vec::new();
     let mut content_length: usize = 0;
     let mut force_echo = config.echo_mode || path == "/v1/echo";
+    let mut session_id: Option<String> = None;
 
     loop {
         let mut line = String::new();
@@ -94,9 +276,32 @@ pub fn handle_client(
                 content_length = val.parse::<usize>().unwrap_or(0);
             } else if key.eq_ignore_ascii_case("x-veil-echo") && val.eq_ignore_ascii_case("true") {
                 force_echo = true;
+            } else if key.eq_ignore_ascii_case("x-veil-session-id") && !val.is_empty() {
+                session_id = Some(val.clone());
             }
             headers.push((key, val));
         }
+    }
+
+    // Reject oversized bodies before allocating memory (DoS protection)
+    if content_length > MAX_BODY_SIZE {
+        state
+            .metrics
+            .rejected_413_total
+            .fetch_add(1, Ordering::Relaxed);
+        let payload = json!({
+            "error": "payload_too_large",
+            "max_body_size": MAX_BODY_SIZE
+        })
+        .to_string();
+        let resp = format!(
+            "HTTP/1.1 413 Payload Too Large\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+            payload.len(),
+            payload
+        );
+        client.write_all(resp.as_bytes())?;
+        client.flush()?;
+        return Ok(());
     }
 
     // 3. Read request body if present
@@ -173,13 +378,35 @@ pub fn handle_client(
         return Ok(());
     }
 
+    // Handle GET /metrics (Zero-PII Prometheus exposition format 0.0.4)
+    if method.eq_ignore_ascii_case("GET") && clean_path == "/metrics" {
+        let body = state
+            .metrics
+            .render_prometheus(state.sessions.active_count());
+        let resp = format!(
+            "HTTP/1.1 200 OK\r\nContent-Type: text/plain; version=0.0.4; charset=utf-8\r\nCache-Control: no-cache\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+            body.len(),
+            body
+        );
+        client.write_all(resp.as_bytes())?;
+        client.flush()?;
+        return Ok(());
+    }
+
     // Handle GET /health
     if method.eq_ignore_ascii_case("GET") && path == "/health" {
-        let entries_count = vault_mutex.lock().map(|v| v.len()).unwrap_or(0);
+        let total_redacted = state
+            .metrics
+            .entities_redacted_total
+            .load(Ordering::Relaxed);
+        let active_sessions = state.sessions.active_count();
         let payload = json!({
             "status": "ok",
             "service": "pii-veil-proxy",
-            "vault_entries": entries_count
+            "isolation": "per-request-or-session-ttl",
+            "active_sessions": active_sessions,
+            "entities_redacted_total": total_redacted,
+            "vault_entries": total_redacted
         })
         .to_string();
         let resp = format!(
@@ -192,37 +419,38 @@ pub fn handle_client(
         return Ok(());
     }
 
-    // 4. Redact outgoing request body using VeilEngine & shared Vault
+    // 4. Redact outgoing request body using an isolated request-scoped or TTL session Vault
     let body_str = String::from_utf8_lossy(&body_bytes);
-    let (sanitized_body, is_streaming_req) = {
-        let mut vault = vault_mutex
-            .lock()
-            .map_err(|_| io::Error::other("vault lock poisoned"))?;
+    let mut req_vault = match session_id.as_deref() {
+        Some(sid) => state.sessions.take_or_create(sid),
+        None => Vault::new(),
+    };
+    let redact_start = Instant::now();
+    let (sanitized_body, is_streaming_req, spans_redacted) =
         if let Ok(mut parsed_json) = serde_json::from_str::<Value>(&body_str) {
             let stream_flag = parsed_json
                 .get("stream")
                 .and_then(|v| v.as_bool())
                 .unwrap_or(false);
-            engine.redact_json_value(&mut parsed_json, &mut vault);
+            let spans = engine.redact_json_value_counted(&mut parsed_json, &mut req_vault);
             let out = serde_json::to_string(&parsed_json).unwrap_or_else(|_| body_str.to_string());
-            (out, stream_flag)
+            (out, stream_flag, spans)
         } else {
-            let out = engine.redact_with_vault(&body_str, &mut vault);
-            (out, false)
-        }
-    };
+            let (out, spans) = engine.redact_with_vault_counted(&body_str, &mut req_vault);
+            (out, false, spans)
+        };
+    let elapsed_us = redact_start.elapsed().as_micros() as u64;
+    state
+        .metrics
+        .record_redaction(elapsed_us, spans_redacted as u64);
+    if let Some(sid) = session_id {
+        state.sessions.save(sid, req_vault.clone());
+    }
 
     // 5. Either handle in local Echo simulator or forward to upstream TCP server
     if force_echo || config.upstream_addr.is_none() {
-        let vault_snapshot = vault_mutex
-            .lock()
-            .map_err(|_| io::Error::other("vault lock poisoned"))?
-            .clone();
-
         if is_streaming_req {
-            // Simulate chunked SSE response where placeholders are split mid-token
-            // and restored on the fly by StreamingRestorer!
-            let mut restorer = vault_snapshot.streaming_restorer();
+            let mut restorer = req_vault.streaming_restorer();
             let raw_sse_chunks = [
                 "data: {\"object\":\"chat.completion.chunk\",\"choices\":[{\"delta\":{\"content\":\"Processed sanitized payload: \"}}]}\n\n".to_string(),
                 format!(
@@ -261,14 +489,12 @@ pub fn handle_client(
             })
             .to_string();
 
-            // Restore only the assistant message content so the user can inspect both
-            // `veil_sanitized_prompt` (what the LLM saw) and `choices[0].message.content` (restored)!
             let mut resp_val: Value = serde_json::from_str(&simulated_llm_json).unwrap();
             if let Some(content_val) = resp_val
                 .pointer_mut("/choices/0/message/content")
                 .and_then(|v| v.as_str().map(|s| s.to_string()))
             {
-                let restored_msg = vault_snapshot.restore(&content_val);
+                let restored_msg = req_vault.restore(&content_val);
                 resp_val["choices"][0]["message"]["content"] = Value::String(restored_msg);
             }
             let final_body = serde_json::to_string_pretty(&resp_val).unwrap();
@@ -314,7 +540,6 @@ pub fn handle_client(
         }
         let lower = line.to_ascii_lowercase();
         if lower.starts_with("content-length:") {
-            // Omit fixed Content-Length since restored PII may differ in byte length
             continue;
         }
         if lower.starts_with("content-type:") && lower.contains("text/event-stream") {
@@ -327,11 +552,7 @@ pub fn handle_client(
     }
     client.write_all(resp_header_block.as_bytes())?;
 
-    let vault_snapshot = vault_mutex
-        .lock()
-        .map_err(|_| io::Error::other("vault lock poisoned"))?
-        .clone();
-    let mut restorer = vault_snapshot.streaming_restorer();
+    let mut restorer = req_vault.streaming_restorer();
 
     if is_event_stream {
         let mut line = String::new();
@@ -430,11 +651,11 @@ const ANDROID_512: &[u8] = include_bytes!("../assets/favicon/android-chrome-512x
 const WEBMANIFEST: &str = include_str!("../assets/favicon/site.webmanifest");
 
 const DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GLASTOR® pii-veil — Live DLP & SSE Proxy Dashboard</title>
+  <title>GLASTOR pii-veil — Live DLP & SSE Proxy Dashboard</title>
   <link rel="icon" type="image/svg+xml" href="/public/favicon/favicon.svg?v=2" />
   <link rel="icon" type="image/png" sizes="48x48" href="/public/favicon/favicon-48x48.png?v=2" />
   <link rel="icon" type="image/png" sizes="32x32" href="/public/favicon/favicon-32x32.png?v=2" />
@@ -543,29 +764,29 @@ const DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
   <div class="container">
     <header>
       <div class="title-group">
-        <h1><img src="/public/favicon/android-chrome-192x192.png?v=2" width="38" height="38" alt="GLASTOR® icon" style="border-radius:8px;" /> GLASTOR® <code>pii-veil</code> — DLP & SSE Proxy</h1>
-        <p>Sub-millisecond Reversible PII & Secret Anonymizer (Luhn, Mod-97 IBAN, Mod-23 DNI, Mod-11 CUIT/RUT)</p>
+        <h1><img src="/public/favicon/android-chrome-192x192.png?v=2" width="38" height="38" alt="GLASTOR icon" style="border-radius:8px;" /> GLASTOR <code>pii-veil</code> — DLP &amp; SSE Proxy</h1>
+        <p>Sub-millisecond Reversible PII &amp; Secret Anonymizer (Per-request isolated Vaults)</p>
       </div>
-      <div class="badge" id="vaultStatus">🟢 Proxy Online • Vault: 0 entidades</div>
+      <div class="badge" id="vaultStatus">Proxy Online • Redacted: 0 entities</div>
     </header>
 
     <div class="card">
-      <h2>1️⃣ Prompt de Entrada (con PII, Tarjetas, IBAN, Documentos y Credenciales)</h2>
-      <textarea id="promptInput">Hola soporte, soy Martín Gómez (martin.gomez@fintech.io, CUIT 20-12345678-6, DNI 00000000T). Necesito pagar con mi tarjeta 4532-0151-1283-0366 o IBAN DE89 3704 0044 0532 0130 00 desde mi servidor postgres://admin:SuperSecret99@db.fintech.io:5432/prod usando mi clave sk-proj-99a8b7c6d5e4f3g2h1i0jklmnopqrst.</textarea>
+      <h2>1. Input Prompt (PII, Credit Cards, IBAN, National IDs)</h2>
+      <textarea id="promptInput">Hello support, I am Martin Gomez (martin.gomez@fintech.io, CUIT 20-12345678-6, DNI 00000000T). Please bill card 4532-0151-1283-0366 or IBAN DE89 3704 0044 0532 0130 00.</textarea>
       <div class="actions">
-        <button class="btn-primary" onclick="sendRequest(false)">⚡ Probar Roundtrip JSON (/v1/chat/completions)</button>
-        <button class="btn-sse" onclick="sendRequest(true)">🌊 Probar Stream SSE en Tiempo Real (stream: true)</button>
+        <button class="btn-primary" onclick="sendRequest(false)">Test JSON Roundtrip (/v1/chat/completions)</button>
+        <button class="btn-sse" onclick="sendRequest(true)">Test Real-Time SSE Stream (stream: true)</button>
       </div>
     </div>
 
     <div class="grid">
       <div class="card">
-        <h2 class="tag-lock">🔒 2️⃣ Lo que ve el LLM (Prompt Sanitizado por <code>veil proxy</code>)</h2>
-        <pre id="sanitizedOut">Haz clic en uno de los botones superiores para interceptar y sanitizar el prompt...</pre>
+        <h2 class="tag-lock">2. What the LLM Sees (Sanitized by <code>veil proxy</code>)</h2>
+        <pre id="sanitizedOut">Click one of the buttons above to intercept and sanitize the prompt...</pre>
       </div>
       <div class="card">
-        <h2 class="tag-unlock">🔓 3️⃣ Lo que recibe el Usuario (Restaurado por <code>Vault</code> / <code>StreamingRestorer</code>)</h2>
-        <pre id="restoredOut">La respuesta restaurada con los valores reales aparecerá aquí...</pre>
+        <h2 class="tag-unlock">3. What the User Receives (Restored by <code>StreamingRestorer</code>)</h2>
+        <pre id="restoredOut">The restored response with original values will appear here...</pre>
       </div>
     </div>
   </div>
@@ -576,7 +797,7 @@ const DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
         const res = await fetch('/health');
         const data = await res.json();
         document.getElementById('vaultStatus').textContent =
-          `🟢 Proxy Online • Vault: ${data.vault_entries} entidades en sesión`;
+          `Proxy Online • Redacted: ${data.entities_redacted_total} entities (per-request isolated)`;
       } catch (_) {}
     }
 
@@ -584,8 +805,8 @@ const DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
       const prompt = document.getElementById('promptInput').value;
       const sanitizedEl = document.getElementById('sanitizedOut');
       const restoredEl = document.getElementById('restoredOut');
-      sanitizedEl.textContent = 'Sanitizando...';
-      restoredEl.textContent = 'Restaurando...';
+      sanitizedEl.textContent = 'Sanitizing...';
+      restoredEl.textContent = 'Restoring...';
 
       const payload = {
         model: 'gpt-4o',
@@ -600,7 +821,7 @@ const DASHBOARD_HTML: &str = r#"<!DOCTYPE html>
       });
 
       if (streamMode) {
-        const sanitizedHeader = res.headers.get('X-Veil-Sanitized-Request') || '(Ver stream)';
+        const sanitizedHeader = res.headers.get('X-Veil-Sanitized-Request') || '(See stream)';
         try {
           sanitizedEl.textContent = JSON.stringify(JSON.parse(sanitizedHeader), null, 2);
         } catch (_) {
@@ -637,16 +858,17 @@ mod tests {
         let addr = listener.local_addr().unwrap();
 
         let engine = VeilEngine::new(RedactionMode::Placeholder);
-        let vault = Arc::new(Mutex::new(Vault::new()));
+        let state = Arc::new(ProxyState::new(300));
         let config = ProxyConfig {
             listen_addr: addr.to_string(),
             upstream_addr: None,
             echo_mode: true,
+            session_ttl_secs: 300,
         };
 
         let server_handle = thread::spawn(move || {
             if let Ok((stream, _)) = listener.accept() {
-                handle_client(stream, &engine, &vault, &config).unwrap();
+                handle_client(stream, &engine, &state, &config).unwrap();
             }
         });
 
@@ -664,11 +886,9 @@ mod tests {
         client.read_to_string(&mut resp).unwrap();
         server_handle.join().unwrap();
 
-        // Verify the LLM only saw placeholders in `veil_sanitized_prompt`
         assert!(resp.contains("[EMAIL_1]"));
         assert!(resp.contains("[NATIONAL_ID_1]"));
         assert!(resp.contains("[CREDIT_CARD_1]"));
-        // Verify the assistant's message was restored back to real PII
         assert!(resp.contains("laura@fintech.es"));
         assert!(resp.contains("00000000T"));
         assert!(resp.contains("4532-0151-1283-0366"));
@@ -676,8 +896,6 @@ mod tests {
 
     #[test]
     fn test_http_proxy_upstream_sse_stream_roundtrip() {
-        // 1. Start a mock upstream LLM server that verifies it NEVER receives raw PII
-        //    and responds with SSE chunks where `[EMAIL_1]` and `[CREDIT_CARD_1]` are split mid-token!
         let upstream_listener = TcpListener::bind("127.0.0.1:0").unwrap();
         let upstream_addr = upstream_listener.local_addr().unwrap();
 
@@ -701,13 +919,11 @@ mod tests {
                 reader.read_exact(&mut req_body).unwrap();
                 let req_str = String::from_utf8(req_body).unwrap();
 
-                // Upstream LLM must ONLY see placeholders, never raw PII!
                 assert!(!req_str.contains("diego@fintech.ar"));
                 assert!(!req_str.contains("4532-0151-1283-0366"));
                 assert!(req_str.contains("[EMAIL_1]"));
                 assert!(req_str.contains("[CREDIT_CARD_1]"));
 
-                // Stream back SSE chunks with placeholders split mid-token
                 let sse_headers =
                     "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\nConnection: close\r\n\r\n";
                 up_stream.write_all(sse_headers.as_bytes()).unwrap();
@@ -724,25 +940,24 @@ mod tests {
             }
         });
 
-        // 2. Start `veil proxy` pointing to `upstream_addr`
         let proxy_listener = TcpListener::bind("127.0.0.1:0").unwrap();
         let proxy_addr = proxy_listener.local_addr().unwrap();
 
         let engine = VeilEngine::new(RedactionMode::Placeholder);
-        let vault = Arc::new(Mutex::new(Vault::new()));
+        let state = Arc::new(ProxyState::new(300));
         let config = ProxyConfig {
             listen_addr: proxy_addr.to_string(),
             upstream_addr: Some(upstream_addr.to_string()),
             echo_mode: false,
+            session_ttl_secs: 300,
         };
 
         let proxy_handle = thread::spawn(move || {
             if let Ok((stream, _)) = proxy_listener.accept() {
-                handle_client(stream, &engine, &vault, &config).unwrap();
+                handle_client(stream, &engine, &state, &config).unwrap();
             }
         });
 
-        // 3. Client sends raw PII prompt to `veil proxy`
         let mut client = TcpStream::connect(proxy_addr).unwrap();
         let body = r#"{"model":"gpt-4o","stream":true,"messages":[{"role":"user","content":"Cobrar a diego@fintech.ar en 4532-0151-1283-0366"}]}"#;
         let req = format!(
@@ -759,7 +974,6 @@ mod tests {
         proxy_handle.join().unwrap();
         upstream_handle.join().unwrap();
 
-        // 4. Verify client received the restored PII across the split SSE chunks!
         assert!(restored_sse.contains("diego@fintech.ar"));
         assert!(restored_sse.contains("4532-0151-1283-0366"));
         assert!(!restored_sse.contains("[EMAIL_1]"));
@@ -772,16 +986,17 @@ mod tests {
         let addr = listener.local_addr().unwrap();
 
         let engine = VeilEngine::new(RedactionMode::Placeholder);
-        let vault = Arc::new(Mutex::new(Vault::new()));
+        let state = Arc::new(ProxyState::new(300));
         let config = ProxyConfig {
             listen_addr: addr.to_string(),
             upstream_addr: None,
             echo_mode: true,
+            session_ttl_secs: 300,
         };
 
         let server_handle = thread::spawn(move || {
             if let Ok((stream, _)) = listener.accept() {
-                handle_client(stream, &engine, &vault, &config).unwrap();
+                handle_client(stream, &engine, &state, &config).unwrap();
             }
         });
 
@@ -797,5 +1012,224 @@ mod tests {
         assert!(response.starts_with("HTTP/1.1 204 No Content"));
         assert!(response.contains("Access-Control-Allow-Origin: *"));
         assert!(response.contains("Access-Control-Allow-Methods: GET, POST, OPTIONS"));
+    }
+
+    #[test]
+    fn test_http_proxy_rejects_oversized_body_413() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let addr = listener.local_addr().unwrap();
+
+        let engine = VeilEngine::new(RedactionMode::Placeholder);
+        let state = Arc::new(ProxyState::new(300));
+        let config = ProxyConfig {
+            listen_addr: addr.to_string(),
+            upstream_addr: None,
+            echo_mode: true,
+            session_ttl_secs: 300,
+        };
+
+        let server_handle = thread::spawn(move || {
+            if let Ok((stream, _)) = listener.accept() {
+                handle_client(stream, &engine, &state, &config).unwrap();
+            }
+        });
+
+        let mut client = TcpStream::connect(addr).unwrap();
+        let req = format!(
+            "POST /v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nContent-Length: {}\r\n\r\n",
+            MAX_BODY_SIZE + 1
+        );
+        client.write_all(req.as_bytes()).unwrap();
+        client.flush().unwrap();
+
+        let mut response = String::new();
+        client.read_to_string(&mut response).unwrap();
+        server_handle.join().unwrap();
+
+        assert!(response.starts_with("HTTP/1.1 413 Payload Too Large"));
+        assert!(response.contains("payload_too_large"));
+    }
+
+    #[test]
+    fn test_http_proxy_per_request_vault_isolation() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let addr = listener.local_addr().unwrap();
+
+        let engine = VeilEngine::new(RedactionMode::Placeholder);
+        let state = Arc::new(ProxyState::new(300));
+        let config = ProxyConfig {
+            listen_addr: addr.to_string(),
+            upstream_addr: None,
+            echo_mode: true,
+            session_ttl_secs: 300,
+        };
+
+        let server_handle = thread::spawn(move || {
+            for _ in 0..2 {
+                if let Ok((stream, _)) = listener.accept() {
+                    handle_client(stream, &engine, &state, &config).unwrap();
+                }
+            }
+        });
+
+        let mut client_a = TcpStream::connect(addr).unwrap();
+        let body_a = r#"{"messages":[{"role":"user","content":"User A: alice@tenant-a.io"}]}"#;
+        let req_a = format!(
+            "POST /v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}",
+            body_a.len(),
+            body_a
+        );
+        client_a.write_all(req_a.as_bytes()).unwrap();
+        client_a.flush().unwrap();
+        let mut resp_a = String::new();
+        client_a.read_to_string(&mut resp_a).unwrap();
+
+        let mut client_b = TcpStream::connect(addr).unwrap();
+        let body_b = r#"{"messages":[{"role":"user","content":"User B: bob@tenant-b.io"}]}"#;
+        let req_b = format!(
+            "POST /v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}",
+            body_b.len(),
+            body_b
+        );
+        client_b.write_all(req_b.as_bytes()).unwrap();
+        client_b.flush().unwrap();
+        let mut resp_b = String::new();
+        client_b.read_to_string(&mut resp_b).unwrap();
+
+        server_handle.join().unwrap();
+
+        assert!(resp_a.contains("[EMAIL_1]"));
+        assert!(resp_a.contains("alice@tenant-a.io"));
+        assert!(!resp_a.contains("bob@tenant-b.io"));
+
+        assert!(resp_b.contains("[EMAIL_1]"));
+        assert!(!resp_b.contains("[EMAIL_2]"));
+        assert!(resp_b.contains("bob@tenant-b.io"));
+        assert!(!resp_b.contains("alice@tenant-a.io"));
+    }
+
+    #[test]
+    fn test_http_proxy_prometheus_metrics_endpoint_zero_pii() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let addr = listener.local_addr().unwrap();
+
+        let engine = VeilEngine::new(RedactionMode::Placeholder);
+        let state = Arc::new(ProxyState::new(300));
+        let config = ProxyConfig {
+            listen_addr: addr.to_string(),
+            upstream_addr: None,
+            echo_mode: true,
+            session_ttl_secs: 300,
+        };
+
+        let server_handle = thread::spawn(move || {
+            for _ in 0..2 {
+                if let Ok((stream, _)) = listener.accept() {
+                    handle_client(stream, &engine, &state, &config).unwrap();
+                }
+            }
+        });
+
+        // 1. Send a request containing PII
+        let mut post_client = TcpStream::connect(addr).unwrap();
+        let body = r#"{"messages":[{"role":"user","content":"Private: secret.user@corp.io"}]}"#;
+        let req = format!(
+            "POST /v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}",
+            body.len(),
+            body
+        );
+        post_client.write_all(req.as_bytes()).unwrap();
+        post_client.flush().unwrap();
+        let mut post_resp = String::new();
+        post_client.read_to_string(&mut post_resp).unwrap();
+
+        // 2. Scrape GET /metrics
+        let mut metrics_client = TcpStream::connect(addr).unwrap();
+        metrics_client
+            .write_all(b"GET /metrics HTTP/1.1\r\nHost: localhost\r\n\r\n")
+            .unwrap();
+        metrics_client.flush().unwrap();
+        let mut metrics_resp = String::new();
+        metrics_client.read_to_string(&mut metrics_resp).unwrap();
+
+        server_handle.join().unwrap();
+
+        assert!(metrics_resp.starts_with("HTTP/1.1 200 OK"));
+        assert!(metrics_resp.contains("text/plain; version=0.0.4"));
+        assert!(metrics_resp.contains("veil_proxy_requests_total 2"));
+        assert!(metrics_resp.contains("veil_proxy_entities_redacted_total 1"));
+        assert!(metrics_resp
+            .contains("veil_proxy_redaction_duration_microseconds_bucket{le=\"+Inf\"} 1"));
+        // Zero-PII telemetry invariant
+        assert!(!metrics_resp.contains("secret.user@corp.io"));
+    }
+
+    #[test]
+    fn test_http_proxy_session_id_ttl_reuse_and_isolation() {
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let addr = listener.local_addr().unwrap();
+
+        let engine = VeilEngine::new(RedactionMode::Placeholder);
+        let state = Arc::new(ProxyState::new(60));
+        let config = ProxyConfig {
+            listen_addr: addr.to_string(),
+            upstream_addr: None,
+            echo_mode: true,
+            session_ttl_secs: 60,
+        };
+
+        let server_handle = thread::spawn(move || {
+            for _ in 0..3 {
+                if let Ok((stream, _)) = listener.accept() {
+                    handle_client(stream, &engine, &state, &config).unwrap();
+                }
+            }
+        });
+
+        // Turn 1 in session S1
+        let mut c1 = TcpStream::connect(addr).unwrap();
+        let b1 = r#"{"messages":[{"role":"user","content":"Email 1: one@s1.io"}]}"#;
+        let r1 = format!(
+            "POST /v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nX-Veil-Session-Id: sess-1\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}",
+            b1.len(),
+            b1
+        );
+        c1.write_all(r1.as_bytes()).unwrap();
+        c1.flush().unwrap();
+        let mut resp1 = String::new();
+        c1.read_to_string(&mut resp1).unwrap();
+
+        // Turn 2 in session S1 (new email must become [EMAIL_2] because S1 vault persisted!)
+        let mut c2 = TcpStream::connect(addr).unwrap();
+        let b2 = r#"{"messages":[{"role":"user","content":"Email 2: two@s1.io"}]}"#;
+        let r2 = format!(
+            "POST /v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nX-Veil-Session-Id: sess-1\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}",
+            b2.len(),
+            b2
+        );
+        c2.write_all(r2.as_bytes()).unwrap();
+        c2.flush().unwrap();
+        let mut resp2 = String::new();
+        c2.read_to_string(&mut resp2).unwrap();
+
+        // Session S2 (completely isolated from S1 -> must get [EMAIL_1])
+        let mut c3 = TcpStream::connect(addr).unwrap();
+        let b3 = r#"{"messages":[{"role":"user","content":"Email S2: other@s2.io"}]}"#;
+        let r3 = format!(
+            "POST /v1/chat/completions HTTP/1.1\r\nHost: localhost\r\nX-Veil-Session-Id: sess-2\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}",
+            b3.len(),
+            b3
+        );
+        c3.write_all(r3.as_bytes()).unwrap();
+        c3.flush().unwrap();
+        let mut resp3 = String::new();
+        c3.read_to_string(&mut resp3).unwrap();
+
+        server_handle.join().unwrap();
+
+        assert!(resp1.contains("[EMAIL_1]"));
+        assert!(resp2.contains("[EMAIL_2]"));
+        assert!(resp3.contains("[EMAIL_1]"));
+        assert!(!resp3.contains("one@s1.io"));
     }
 }

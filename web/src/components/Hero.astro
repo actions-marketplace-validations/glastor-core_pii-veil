@@ -9,16 +9,16 @@
   <!-- Focused Trust Signals Bar (3 crisp signals) -->
   <div class="flex flex-wrap items-center justify-center gap-2.5 mb-8">
     <span class="px-3 py-1 rounded-full bg-slate-900/90 border border-slate-700/80 text-xs text-cyber-neon font-mono font-semibold inline-flex items-center gap-1.5">
-      <span class="material-symbols-outlined text-base">lock</span>
+      <span translate="no" aria-hidden="true" class="material-symbols-outlined notranslate text-base shrink-0">lock</span>
       Zero Cloud Egress
     </span>
     <span class="px-3 py-1 rounded-full bg-slate-900/90 border border-slate-700/80 text-xs text-slate-200 font-mono inline-flex items-center gap-1.5">
-      <span class="material-symbols-outlined text-base text-cyber-cyan">bolt</span>
+      <span translate="no" aria-hidden="true" class="material-symbols-outlined notranslate text-base text-cyber-cyan shrink-0">bolt</span>
       ~100 µs Rust / WASM
     </span>
     <a href="https://github.com/glastor-core/pii-veil/actions/workflows/audit.yml" target="_blank" rel="noopener noreferrer" class="px-3 py-1 rounded-full bg-slate-900/90 border border-slate-700/80 hover:border-cyber-purple text-xs text-purple-300 font-mono transition inline-flex items-center gap-1.5">
-      <span class="material-symbols-outlined text-base text-cyber-purple">verified_user</span>
-      Specter & Byte-Gauge Audited
+      <span translate="no" aria-hidden="true" class="material-symbols-outlined notranslate text-base text-cyber-purple shrink-0">verified_user</span>
+      Specter &amp; Byte-Gauge Audited
     </a>
   </div>
 
@@ -39,11 +39,11 @@
   <!-- CTA Buttons -->
   <div class="flex flex-wrap items-center justify-center gap-4 mb-12">
     <a href="#demo" class="px-8 py-3.5 rounded-xl bg-cyber-neon hover:bg-cyber-neonHover text-cyber-dark font-extrabold text-sm sm:text-base tracking-wide transition shadow-[0_0_25px_rgba(0,255,157,0.35)] inline-flex items-center gap-2">
-      <span class="material-symbols-outlined text-lg">play_arrow</span>
+      <span translate="no" aria-hidden="true" class="material-symbols-outlined notranslate text-lg shrink-0">play_arrow</span>
       Try Live Demo Below
     </a>
     <a href="#enterprise" class="px-8 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm sm:text-base border border-slate-700 hover:border-slate-500 transition inline-flex items-center gap-2">
-      <span class="material-symbols-outlined text-lg text-cyber-purple">domain</span>
+      <span translate="no" aria-hidden="true" class="material-symbols-outlined notranslate text-lg text-cyber-purple shrink-0">domain</span>
       Enterprise On-Premise
     </a>
   </div>
@@ -52,18 +52,18 @@
   <div class="max-w-4xl mx-auto bg-cyber-card/90 border border-cyber-border rounded-2xl p-4 shadow-xl backdrop-blur-md">
     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-cyber-border pb-2.5 mb-3 text-xs font-mono">
       <span class="text-cyber-muted inline-flex items-center gap-1.5">
-        <span class="material-symbols-outlined text-sm text-cyber-neon">terminal</span>
-        QUICK INSTALL — v0.1.4
+        <span translate="no" aria-hidden="true" class="material-symbols-outlined notranslate text-sm text-cyber-neon shrink-0">terminal</span>
+        QUICK INSTALL — <span translate="no" class="notranslate">v1.0.0 GA</span>
       </span>
       <a href="https://crates.io/crates/pii-veil-core" target="_blank" rel="noopener noreferrer" class="inline-flex items-center hover:opacity-90 transition">
         <img src="https://img.shields.io/crates/d/pii-veil-core?logo=rust&color=dea584&label=crates.io%20downloads" alt="crates.io downloads" class="h-[22px] rounded" />
       </a>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs font-mono">
+    <div translate="no" class="notranslate grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs font-mono">
       <button type="button" data-copy="cargo add pii-veil-core" class="quick-copy-btn group bg-black/50 hover:bg-black/75 p-2.5 rounded-xl border border-cyber-border/50 hover:border-cyber-neon/60 text-left transition flex flex-col justify-between">
         <div class="flex items-center justify-between w-full mb-1">
           <span class="text-cyber-muted text-[10px]">CARGO (RUST)</span>
-          <span class="copy-icon material-symbols-outlined text-sm text-slate-500 group-hover:text-cyber-neon transition">content_copy</span>
+          <span aria-hidden="true" class="copy-icon material-symbols-outlined notranslate text-sm text-slate-500 group-hover:text-cyber-neon transition">content_copy</span>
         </div>
         <code class="text-cyber-neon text-[11px] truncate w-full">cargo add pii-veil-core</code>
       </button>
@@ -71,7 +71,7 @@
       <button type="button" data-copy="pip install glastor-pii-veil" class="quick-copy-btn group bg-black/50 hover:bg-black/75 p-2.5 rounded-xl border border-cyber-border/50 hover:border-cyber-cyan/60 text-left transition flex flex-col justify-between">
         <div class="flex items-center justify-between w-full mb-1">
           <span class="text-cyber-muted text-[10px]">PIP (PYTHON)</span>
-          <span class="copy-icon material-symbols-outlined text-sm text-slate-500 group-hover:text-cyber-cyan transition">content_copy</span>
+          <span aria-hidden="true" class="copy-icon material-symbols-outlined notranslate text-sm text-slate-500 group-hover:text-cyber-cyan transition">content_copy</span>
         </div>
         <code class="text-cyber-cyan text-[11px] truncate w-full">pip install glastor-pii-veil</code>
       </button>
@@ -79,7 +79,7 @@
       <button type="button" data-copy="npm i pii-veil-node" class="quick-copy-btn group bg-black/50 hover:bg-black/75 p-2.5 rounded-xl border border-cyber-border/50 hover:border-cyber-purple/60 text-left transition flex flex-col justify-between">
         <div class="flex items-center justify-between w-full mb-1">
           <span class="text-cyber-muted text-[10px]">NPM (NODE.JS)</span>
-          <span class="copy-icon material-symbols-outlined text-sm text-slate-500 group-hover:text-cyber-purple transition">content_copy</span>
+          <span aria-hidden="true" class="copy-icon material-symbols-outlined notranslate text-sm text-slate-500 group-hover:text-cyber-purple transition">content_copy</span>
         </div>
         <code class="text-purple-300 text-[11px] truncate w-full">npm i pii-veil-node</code>
       </button>
@@ -87,7 +87,7 @@
       <button type="button" data-copy="brew install glastor-core/tap/veil" class="quick-copy-btn group bg-black/50 hover:bg-black/75 p-2.5 rounded-xl border border-cyber-border/50 hover:border-amber-400/60 text-left transition flex flex-col justify-between">
         <div class="flex items-center justify-between w-full mb-1">
           <span class="text-cyber-muted text-[10px]">HOMEBREW (CLI)</span>
-          <span class="copy-icon material-symbols-outlined text-sm text-slate-500 group-hover:text-amber-400 transition">content_copy</span>
+          <span aria-hidden="true" class="copy-icon material-symbols-outlined notranslate text-sm text-slate-500 group-hover:text-amber-400 transition">content_copy</span>
         </div>
         <code class="text-amber-400 text-[11px] truncate w-full">brew install glastor-core/tap/veil</code>
       </button>
