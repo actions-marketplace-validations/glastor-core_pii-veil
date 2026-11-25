@@ -1,6 +1,6 @@
 {
   "name": "pii-veil-node",
-  "version": "0.1.4",
+  "version": "1.0.0",
   "description": "Ultrafast native Rust PII & Secret anonymizer and reversible vault for Node.js, Next.js, and MCP agents.",
   "main": "index.js",
   "types": "index.d.ts",

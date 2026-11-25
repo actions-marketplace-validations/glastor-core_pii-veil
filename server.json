@@ -8,13 +8,13 @@
     "url": "https://github.com/glastor-core/pii-veil",
     "source": "github"
   },
-  "version": "0.1.4",
+  "version": "1.0.0",
   "packages": [
     {
       "registryType": "cargo",
       "registryBaseUrl": "https://crates.io",
       "identifier": "pii-veil-cli",
-      "version": "0.1.4",
+      "version": "1.0.0",
       "transport": {
         "type": "stdio"
       },

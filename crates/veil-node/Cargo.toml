@@ -1,6 +1,6 @@
 [package]
 name = "pii-veil-node"
-version = "0.1.1"
+version = "1.0.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "Node.js / TypeScript bindings (napi-rs) for pii-veil-core"
@@ -9,7 +9,7 @@ description = "Node.js / TypeScript bindings (napi-rs) for pii-veil-core"
 crate-type = ["cdylib"]
 
 [dependencies]
-pii-veil-core = { path = "../veil-core", version = "0.1.1" }
+pii-veil-core = { path = "../veil-core", version = "1.0.0" }
 napi = { version = "2.16", default-features = false, features = ["napi4"] }
 napi-derive = "2.16"
 
