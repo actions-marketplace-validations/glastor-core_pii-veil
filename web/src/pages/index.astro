@@ -54,6 +54,14 @@ import Faq from '../components/Faq.astro';
         vertical-align: middle;
         user-select: none;
       }
+      a:focus-visible,
+      button:focus-visible,
+      summary:focus-visible,
+      textarea:focus-visible {
+        outline: 2px solid #00ff9d;
+        outline-offset: 2px;
+        border-radius: 0.5rem;
+      }
     </style>
   </head>
   <body class="min-h-screen flex flex-col justify-between overflow-x-hidden font-sans">
@@ -75,8 +83,8 @@ import Faq from '../components/Faq.astro';
 
         <!-- Desktop Links (xl+ to prevent overflow when browser-translated to longer languages) -->
         <div class="hidden xl:flex items-center gap-4 2xl:gap-6 text-xs 2xl:text-sm font-medium text-cyber-muted min-w-0">
-          <a href="#architecture" class="hover:text-cyber-cyan transition">LLM Flow</a>
           <a href="#demo" class="hover:text-cyber-neon transition">Live Demo</a>
+          <a href="#architecture" class="hover:text-cyber-cyan transition">LLM Flow</a>
           <a href="#detectors" class="hover:text-amber-400 transition">19 Detectors</a>
           <a href="#sdks" class="hover:text-cyber-purple transition">SDKs</a>
           <a href="#benchmarks" class="hover:text-cyber-cyan transition">Benchmarks</a>
@@ -124,8 +132,31 @@ import Faq from '../components/Faq.astro';
     <!-- Main Content -->
     <main class="flex-grow">
       <Hero />
-      <ArchitectureFlow />
+
+      <!-- Verifiable 4-KPI Strip -->
+      <section aria-label="Key verified metrics" class="px-4 max-w-6xl mx-auto pb-8">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div class="bg-cyber-card/80 border border-cyber-border rounded-2xl p-4 text-center">
+            <div translate="no" class="notranslate font-mono text-2xl sm:text-3xl font-extrabold text-cyber-neon">~100 µs</div>
+            <div class="text-xs text-cyber-muted mt-1">p99 Redaction Latency</div>
+          </div>
+          <div class="bg-cyber-card/80 border border-cyber-border rounded-2xl p-4 text-center">
+            <div translate="no" class="notranslate font-mono text-2xl sm:text-3xl font-extrabold text-white">100.00%</div>
+            <div class="text-xs text-cyber-muted mt-1">Verified Precision (0 FP)</div>
+          </div>
+          <div class="bg-cyber-card/80 border border-cyber-border rounded-2xl p-4 text-center">
+            <div translate="no" class="notranslate font-mono text-2xl sm:text-3xl font-extrabold text-cyber-cyan">19 + 12</div>
+            <div class="text-xs text-cyber-muted mt-1">Detectors &amp; Global IDs</div>
+          </div>
+          <div class="bg-cyber-card/80 border border-cyber-border rounded-2xl p-4 text-center">
+            <div translate="no" class="notranslate font-mono text-2xl sm:text-3xl font-extrabold text-slate-100">&lt; 15 MB</div>
+            <div class="text-xs text-cyber-muted mt-1">Distroless RAM Footprint</div>
+          </div>
+        </div>
+      </section>
+
       <Playground />
+      <ArchitectureFlow />
       <DetectorsBento />
       <CodeTabs />
       <Benchmarks />

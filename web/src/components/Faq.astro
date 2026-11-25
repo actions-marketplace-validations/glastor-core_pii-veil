@@ -26,7 +26,7 @@
           How does the Reversible Roundtrip work without persisting data?
         </span>
         <span class="text-cyber-muted group-open:rotate-180 group-open:text-cyber-neon transition-transform duration-200">
-          ▼
+          <span translate="no" aria-hidden="true" class="material-symbols-outlined notranslate text-xl">expand_more</span>
         </span>
       </summary>
       <div class="mt-4 pt-4 border-t border-cyber-border/60 text-sm text-slate-300 leading-relaxed font-sans space-y-2">
@@ -34,7 +34,7 @@
           When you call <code class="text-cyber-neon font-mono text-xs bg-slate-900 px-1.5 py-0.5 rounded">engine.redact()</code>, the engine performs a linear-time <code class="text-white font-mono font-bold text-xs">O(N)</code> multi-pattern scan powered by Aho-Corasick automata.
         </p>
         <p>
-          Identified sensitive values (such as credit cards, emails, or government IDs) are isolated in an ephemeral, <strong class="text-cyber-cyan">in-memory volatile Vault</strong> inside your application process, replacing them with unique cryptographic placeholders (e.g. <code class="text-cyber-neon font-mono text-xs">&lt;CREDIT_CARD_1&gt;</code>). The external LLM processes only the sanitized text. When receiving the response or token stream from the LLM, calling <code class="text-cyber-cyan font-mono text-xs">vault.restore()</code> deterministically re-injects the original plaintext values. Once the Vault object is dropped or goes out of scope, all sensitive data is immediately cleared from RAM.
+          Identified sensitive values (such as credit cards, emails, or government IDs) are isolated in an ephemeral, <strong class="text-cyber-cyan">in-memory volatile Vault</strong> inside your application process, replacing them with unique cryptographic placeholders (e.g. <code translate="no" class="notranslate text-cyber-neon font-mono text-xs">[CREDIT_CARD_1]</code>). The external LLM processes only the sanitized text. When receiving the response or token stream from the LLM, calling <code class="text-cyber-cyan font-mono text-xs">vault.restore()</code> deterministically re-injects the original plaintext values. Once the Vault object is dropped or goes out of scope, all sensitive data is immediately cleared from RAM.
         </p>
       </div>
     </details>
@@ -47,7 +47,7 @@
           Does any data ever leave my infrastructure or browser (Zero-Egress)?
         </span>
         <span class="text-cyber-muted group-open:rotate-180 group-open:text-cyber-cyan transition-transform duration-200">
-          ▼
+          <span translate="no" aria-hidden="true" class="material-symbols-outlined notranslate text-xl">expand_more</span>
         </span>
       </summary>
       <div class="mt-4 pt-4 border-t border-cyber-border/60 text-sm text-slate-300 leading-relaxed font-sans space-y-2">
@@ -68,7 +68,7 @@
           Why is it up to 200x faster than Microsoft Presidio?
         </span>
         <span class="text-cyber-muted group-open:rotate-180 group-open:text-cyber-neon transition-transform duration-200">
-          ▼
+          <span translate="no" aria-hidden="true" class="material-symbols-outlined notranslate text-xl">expand_more</span>
         </span>
       </summary>
       <div class="mt-4 pt-4 border-t border-cyber-border/60 text-sm text-slate-300 leading-relaxed font-sans space-y-2">
@@ -89,7 +89,7 @@
           Which compliance frameworks and regulatory standards are covered?
         </span>
         <span class="text-cyber-muted group-open:rotate-180 group-open:text-cyber-purple transition-transform duration-200">
-          ▼
+          <span translate="no" aria-hidden="true" class="material-symbols-outlined notranslate text-xl">expand_more</span>
         </span>
       </summary>
       <div class="mt-4 pt-4 border-t border-cyber-border/60 text-sm text-slate-300 leading-relaxed font-sans space-y-2">
@@ -110,7 +110,7 @@
           Can I define custom detectors or proprietary pattern rules?
         </span>
         <span class="text-cyber-muted group-open:rotate-180 group-open:text-amber-400 transition-transform duration-200">
-          ▼
+          <span translate="no" aria-hidden="true" class="material-symbols-outlined notranslate text-xl">expand_more</span>
         </span>
       </summary>
       <div class="mt-4 pt-4 border-t border-cyber-border/60 text-sm text-slate-300 leading-relaxed font-sans space-y-2">
@@ -128,7 +128,7 @@
           Does pii-veil replace Named Entity Recognition (NER) for free-text names?
         </span>
         <span class="text-cyber-muted group-open:rotate-180 group-open:text-cyber-cyan transition-transform duration-200">
-          ▼
+          <span translate="no" aria-hidden="true" class="material-symbols-outlined notranslate text-xl">expand_more</span>
         </span>
       </summary>
       <div class="mt-4 pt-4 border-t border-cyber-border/60 text-sm text-slate-300 leading-relaxed font-sans space-y-2">
@@ -156,7 +156,7 @@
           How are supply-chain integrity and binary security audited?
         </span>
         <span class="text-cyber-muted group-open:rotate-180 group-open:text-cyber-neon transition-transform duration-200">
-          ▼
+          <span translate="no" aria-hidden="true" class="material-symbols-outlined notranslate text-xl">expand_more</span>
         </span>
       </summary>
       <div class="mt-4 pt-4 border-t border-cyber-border/60 text-sm text-slate-300 leading-relaxed font-sans space-y-2">
@@ -178,7 +178,7 @@
           How do I obtain commercial enterprise support, audits, and guaranteed SLAs?
         </span>
         <span class="text-cyber-muted group-open:rotate-180 group-open:text-cyber-neon transition-transform duration-200">
-          ▼
+          <span translate="no" aria-hidden="true" class="material-symbols-outlined notranslate text-xl">expand_more</span>
         </span>
       </summary>
       <div class="mt-4 pt-4 border-t border-cyber-border/60 text-sm text-slate-300 leading-relaxed font-sans space-y-2">
