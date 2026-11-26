@@ -10,6 +10,11 @@ keywords.workspace = true
 categories.workspace = true
 readme = "../../README.md"
 
+[features]
+default = []
+# Opt-in Tier-1 contextual NER detector for unstructured Person Names & Street Addresses.
+ner = []
+
 [dependencies]
 aho-corasick = "1.1"
 chacha20poly1305 = { version = "0.10", default-features = false, features = ["alloc"] }

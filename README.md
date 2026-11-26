@@ -61,18 +61,22 @@ Designed with the **6-in-1 Multi-Market Architecture**:
 ## ✨ Key Capabilities
 
 - **Reversible LLM Roundtrip & Real-Time SSE Streaming (`Placeholder` Mode)**:
-  Replaces sensitive data with semantic tokens (`[EMAIL_1]`, `[CREDIT_CARD_1]`, `[IBAN_1]`), restores full responses in $O(N)$ via `aho-corasick`, or restores live token streams chunk-by-chunk (`[EMA` + `IL_1]`) via `StreamingRestorer`.
-- **Built-in Model Context Protocol (`veil mcp`) & HTTP/SSE Proxy (`veil proxy`)**:
-  - `veil mcp`: Zero-dependency JSON-RPC 2.0 MCP server over `stdio` exposing `veil_redact`, `veil_restore`, `veil_redact_json`, and `veil_scan` directly to Claude Desktop, Cursor, and Windsurf.
+  Replaces sensitive data with semantic tokens (`[EMAIL_1]`, `[CREDIT_CARD_1]`, `[IBAN_1]`), restores full responses in $O(N)$ via `aho-corasick`, or restores live UTF-8 token streams chunk-by-chunk (`[EMA` + `IL_1]`) via `StreamingRestorer` with a pre-compiled automaton cache.
+- **Built-in Model Context Protocol (`veil mcp`) & Enterprise HTTP/SSE Proxy (`veil proxy`)**:
+  - `veil mcp`: Zero-dependency JSON-RPC 2.0 MCP server over `stdio` exposing `veil_redact` (preserving full `VeilPolicy` across mode overrides), `veil_restore`, `veil_redact_json`, and `veil_scan` directly to Claude Desktop, Cursor, and Windsurf.
   - Official MCP Registry Name: `mcp-name: io.github.glastor-core/pii-veil`
-  - `veil proxy`: Local HTTP/SSE reverse proxy (`127.0.0.1:8080`) that redacts outgoing LLM JSON prompts and restores incoming `text/event-stream` SSE or JSON responses in real time.
-- **18 Built-in Detectors with Mathematical Checksum Verification**:
-  - **Financial**: Credit Cards (**Luhn** checksum) and IBANs (**ISO 13616 Mod-97** checksum).
-  - **Regional National IDs**: US SSN, Spain DNI/NIE (**Mod-23** letter table), Argentina CUIT/CUIL (**Mod-11** weights), and Chile RUT (**Mod-11** verifier).
-  - **Cloud, AI & Infra Secrets**: Database Connection URIs (`postgres://`, `mysql://`, `mongodb+srv://`, `redis://`), Slack/Discord Webhooks, OpenAI, Anthropic, AWS, GitHub, Slack, Google API, Stripe keys, JWTs, and PEM Private Keys.
-  - **Network & Contact**: Emails, Phones, IPv4, IPv6, and MAC addresses.
+  - `veil proxy`: Production-ready HTTP/SSE reverse proxy (`127.0.0.1:8080`) with **per-request isolated vaults**, optional multi-turn **TTL sessions** (`X-Veil-Session-Id`, `--session-ttl`), `10 MiB` `413` DoS protection, and **Zero-PII Prometheus `GET /metrics`** (counters, active sessions gauge, microsecond latency histogram).
+- **19 Built-in Detectors & 12 Global National IDs (`100.00%` Precision / `100.00%` Recall on `accuracy_eval`)**:
+  - **Financial**: Credit Cards (**IIN/BIN + Luhn** checksum) and IBANs (**ISO 13616 Mod-97** checksum).
+  - **Global National IDs**: US SSN, Spain DNI/NIE (**Mod-23**), Argentina CUIT/CUIL (**AFIP prefix + Mod-11**), Chile RUT (**Mod-11**), Brazil CPF & CNPJ (**dual Mod-11**), Mexico CURP (**RENAPO Mod-10**), Canada SIN (**Luhn**), UK NINO (**HMRC rules**), India Aadhaar (**Verhoeff dihedral checksum**) & PAN, and Germany Steuer-ID (**ISO/IEC 7064 Mod 11,10**).
+  - **Cloud, AI & Infra Secrets**: Database Connection URIs (`postgres://`, `mysql://`, `mongodb+srv://`, `redis://`), Slack/Discord Webhooks, OpenAI, Anthropic, AWS, GitHub, Slack, Google API, Stripe keys (filtered with **$O(N)$ Shannon entropy** & anti-placeholder checks), JWTs, and PEM Private Keys.
+  - **Network & Contact**: Emails (asset-extension filtered), Phones (date/port/repeat filtered), IPv4 (version & leading-zero filtered), IPv6 (`Ipv6Addr` + context guard), and MAC addresses.
+- **SARIF 2.1.0 Code Scanning (`veil scan --format sarif`)**:
+  Emits GitHub Code Scanning SARIF 2.1.0 reports with **zero raw PII leakage** in alert messages.
+- **Layered Defense NER Opt-in (`NerDetector` trait & `--features ner`)**:
+  Plug in custom ONNX/Candle models via `VeilEngine::with_ner_detector(...)`, or enable `--features ner` for the built-in zero-download `HeuristicNerDetector` (EN/ES `PERSON` names & `ADDRESS` locations) without bloating the default `< 15 MB` binary.
 - **Authenticated Encrypted Vaults (`--vault-pass`)**:
-  Export and restore `.vault` files encrypted and authenticated with a passphrase for safe storage in Redis, S3, or disk.
+  Export and restore `.vault` files encrypted and authenticated with **PBKDF2-HMAC-SHA256 + ChaCha20-Poly1305 AEAD (`version: 2`)** for safe storage in Redis, S3, or disk.
 - **Constant-Memory Streaming (`Lines`, `NDJSON`, `SQL`, `CSV`)**:
   Anonymize and restore multi-gigabyte `pg_dump` SQL streams (`COPY ... FROM stdin`), column-aware `.csv` files, and `.jsonl` logs in $O(1)$ memory per line.
 
@@ -169,15 +173,19 @@ Add to your `claude_desktop_config.json`, Cursor (`~/.cursor/mcp.json`), or Wind
 }
 ```
 
-### 8. Fuzz Testing & SemVer Contract Verification
+### 8. Accuracy Evaluation, SARIF 2.1.0, Fuzz Testing & SemVer Verification
 ```bash
+# Run verifiable Precision / Recall / F1 & adversarial false-positive gate (100% / 100%)
+cargo test -p pii-veil-core --test accuracy_eval -- --nocapture
+
+# Scan a repository and emit a zero-PII SARIF 2.1.0 report for GitHub Code Scanning
+veil scan --path . --exclude "examples,tests" --format sarif > pii-veil.sarif
+
 # Run multi-thousand iteration fuzz smoke test across all boundary conditions
 cargo test -p pii-veil-core --test fuzz_smoke
 
-# Run libFuzzer targets locally (requires cargo-fuzz)
-cargo fuzz run fuzz_redact
-cargo fuzz run fuzz_restore
-cargo fuzz run fuzz_checksums
+# Enable optional Tier-1 Layered Defense NER (EN/ES Person Names & Street Addresses)
+cargo test -p pii-veil-core --features ner
 ```
 Every pull request is mathematically audited by **GLASTOR Specter** against Trojan Breaking Changes. Read our **[SemVer Stability & Specter Contract Guarantee](docs/semver-api-stability.md)**.
 
